@@ -1,0 +1,12 @@
+// Esquema de Prisma de SocialPulse AI.
+// Los modelos se añaden en la etapa 2 del MVP; por ahora solo está la configuración.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}

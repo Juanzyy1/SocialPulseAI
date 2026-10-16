@@ -1,0 +1,17 @@
+# dependencias y compilación
+node_modules
+dist
+coverage
+*.tsbuildinfo
+
+# variables de entorno (los secretos nunca se suben)
+.env
+.env.*
+!.env.example
+
+# cliente generado por Prisma (se regenera con `npx prisma generate`)
+/src/generated/prisma
+
+# logs y archivos del sistema
+*.log
+.DS_Store
