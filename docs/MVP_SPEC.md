@@ -123,3 +123,4 @@ Filtros previstos: 7d, 30d, 90d y fechas personalizadas (`from`, `to`).
 | Origen del frontend y CORS | Se decide cuando exista el frontend |
 | Historial al desconectar una cuenta | Se decide en la Fase 5 |
 Pospuesta (camino B): se aplica la regla 4 desde el principio; la regla 5 entra en vigor cuando exista la verificación
+Límite de registro | 10 por hora por IP (aprobado el 17/10/2026)

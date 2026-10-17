@@ -45,6 +45,10 @@ publicarlos. Monolito modular. Primera integración real prevista: YouTube.
 | 3.1 Hash de contraseñas (Argon2id) | COMPLETADA | 5 pruebas de PasswordService; migración add_email_verified_at; build correcto |— |
 | 3.2 Servicio de sesiones | COMPLETADA | 9 pruebas e2e contra PostgreSQL real; solo se guarda el hash del token | Limpieza programada de sesiones caducadas |
 | 3.3a Validación global y registro | COMPLETADA | 7 pruebas e2e: hash Argon2id en BD, correo normalizado, 409, 400 | Límite de solicitudes (3.3c) |
+| 3.3b Login, logout, cookie y guard global | COMPLETADA | 31/31 e2e; guard global con @Public(); misma respuesta para clave errónea y correo inexistente; tipos verificados con tsc | Flag `Secure` en producción sin probar; validación de `Origin` (CSRF) pendiente |
+| 3.3c Límite de intentos | COMPLETADA | 10/10 unitarias y 35/35 e2e; 5 fallos por correo y por IP en 15 min dan 429; 10 registros/hora por IP | Contadores en memoria (una sola instancia); `Retry-After` sin implementar |
+| 3.4 Perfil `/users/me` | COMPLETADA | 47/47 e2e; cada sesión ve y edita solo su usuario; `id`, `email`, `passwordHash` y `emailVerifiedAt` rechazados con 400; `avatarUrl` solo https | Prueba de aislamiento con IDs: Fase 4 |
+
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.
@@ -57,8 +61,9 @@ publicarlos. Monolito modular. Primera integración real prevista: YouTube.
 - **Baja:** 25 vulnerabilidades de npm solo en dependencias de desarrollo;
   `npm audit --omit=dev` da 0.
 - Repositorio **público**: nunca subir `.env` ni credenciales.
-- **Media:** el registro y el login no tienen límite de intentos hasta la 3.3c. No desplegar antes.
-- **Media:** el 409 del registro revela si un correo existe (enumeración de usuarios).
+- **Media:** el bloqueo por correo permite bloquear a propósito el login de otra persona (5 fallos adrede).
+- **Media:** detrás de un proxy `req.ip` sería la IP del proxy y el límite por IP afectaría a todos. No desplegar sin configurar `trust proxy`.
+- **Media:** el 409 del registro revela si un correo existe.
 
 ## Decisiones técnicas confirmadas
 - Monolito modular NestJS + Prisma + PostgreSQL, REST con prefijo `/api/v1`.
@@ -72,6 +77,8 @@ publicarlos. Monolito modular. Primera integración real prevista: YouTube.
 - Un mismo canal de una plataforma solo puede estar conectado por un usuario (unicidad global).
 - Historial de Git reiniciado el 16/10/2026 para eliminar `node_modules`.
 - “Verificación de correo pospuesta; regla 4 activa” y “Argon2id con la librería argon2”.
+- Límite de intentos con contador propio en memoria (no `@nestjs/throttler`): la especificación exige contar fallos por correo y por IP. Se reevalúa con varias instancias (Redis) en la Fase 9.
+- Guard global que niega por defecto; los endpoints públicos se marcan con `@Public()`.
 
 ## Última tarea realizada
 Modelo de datos inicial, migración `init`, `PrismaService` y pruebas de integración.
