@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 
 export const API_PREFIX = 'api/v1';
 
@@ -8,4 +8,11 @@ export const API_PREFIX = 'api/v1';
  */
 export function configureApp(app: INestApplication): void {
   app.setGlobalPrefix(API_PREFIX);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // descarta propiedades que no están en el DTO
+      forbidNonWhitelisted: true, // y responde 400 si llegan
+      transform: true, // convierte el JSON en instancia del DTO
+    }),
+  );
 }
