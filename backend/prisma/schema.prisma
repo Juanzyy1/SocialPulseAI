@@ -35,6 +35,8 @@ model User {
   email        String   @unique
   // Vacío si el usuario solo accede con Google.
   passwordHash String?
+  // Se completa cuando el correo se verifica. Con Google, se marca al vincular.
+  emailVerifiedAt DateTime?
   displayName  String?
   avatarUrl    String?
   createdAt    DateTime @default(now())
