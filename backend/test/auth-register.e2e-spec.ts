@@ -73,8 +73,9 @@ describe('POST /api/v1/auth/register (e2e)', () => {
     await post({ email: email.toUpperCase(), password: PASSWORD }).expect(409);
   });
 
-  it('rechaza una contraseña de menos de 12 caracteres', async () => {
-    await post({ email: uniqueEmail(), password: 'corta-123' }).expect(400);
+  it('rechaza una contraseña de menos de 12 caracteres con un mensaje claro', async () => {
+    const res = await post({ email: uniqueEmail(), password: 'corta-123' }).expect(400);
+    expect(JSON.stringify(res.body.message)).toContain('al menos 12 caracteres');
   });
 
   it('rechaza un correo con formato inválido', async () => {

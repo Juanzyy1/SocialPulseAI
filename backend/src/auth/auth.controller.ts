@@ -65,6 +65,7 @@ export class AuthController {
   @ApiOkResponse({ type: UserResponseDto })
   @ApiUnauthorizedResponse({ description: 'Credenciales inválidas' })
   @ApiBadRequestResponse({ description: 'Datos inválidos' })
+  @ApiTooManyRequestsResponse({ description: 'Demasiados intentos fallidos' })
   async login(
     @Body() dto: LoginDto,
     @Req() req: Request,

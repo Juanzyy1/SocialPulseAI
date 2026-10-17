@@ -79,6 +79,8 @@ describe('Perfil de usuario (e2e)', () => {
 
     const res = await patchMe(a.cookie, { displayName: 'Ana' }).expect(200);
     expect(res.body.displayName).toBe('Ana');
+    expect(res.body).not.toHaveProperty('passwordHash');
+    expect(res.body).not.toHaveProperty('tokenHash');
 
     expect((await getMe(b.cookie).expect(200)).body.displayName).toBeNull();
     const rowB = await prisma.user.findUniqueOrThrow({ where: { id: b.id } });

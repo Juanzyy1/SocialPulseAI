@@ -41,14 +41,21 @@ publicarlos. Monolito modular. Primera integración real prevista: YouTube.
 | Higiene de Git | COMPLETADA | `origin/main` limpio, `.env` nunca en el historial | — |
 | Docker | PENDIENTE | — | Diferido a la Fase 9 |
 
-## Fase 3
-| 3.1 Hash de contraseñas (Argon2id) | COMPLETADA | 5 pruebas de PasswordService; migración add_email_verified_at; build correcto |— |
-| 3.2 Servicio de sesiones | COMPLETADA | 9 pruebas e2e contra PostgreSQL real; solo se guarda el hash del token | Limpieza programada de sesiones caducadas |
-| 3.3a Validación global y registro | COMPLETADA | 7 pruebas e2e: hash Argon2id en BD, correo normalizado, 409, 400 | Límite de solicitudes (3.3c) |
-| 3.3b Login, logout, cookie y guard global | COMPLETADA | 31/31 e2e; guard global con @Public(); misma respuesta para clave errónea y correo inexistente; tipos verificados con tsc | Flag `Secure` en producción sin probar; validación de `Origin` (CSRF) pendiente |
-| 3.3c Límite de intentos | COMPLETADA | 10/10 unitarias y 35/35 e2e; 5 fallos por correo y por IP en 15 min dan 429; 10 registros/hora por IP | Contadores en memoria (una sola instancia); `Retry-After` sin implementar |
-| 3.4 Perfil `/users/me` | COMPLETADA | 47/47 e2e; cada sesión ve y edita solo su usuario; `id`, `email`, `passwordHash` y `emailVerifiedAt` rechazados con 400; `avatarUrl` solo https | Prueba de aislamiento con IDs: Fase 4 |
-| 3.5a Credenciales y configuración de Google | COMPLETADA | Cliente OAuth creado; 17/17 unitarias (7 de validateEnv); las tres variables son todo-o-nada; URI https salvo localhost | Prueba manual de rechazo con la app completa (opcional) |
+## Fase 3 — Autenticación y usuarios
+Estado: COMPLETADA, con una excepción: el criterio de aislamiento con IDs pasa a la Fase 4 (pendiente de tu confirmación).
+
+| Tarea | Estado | Evidencia |
+|---|---|---|
+| 3.1 Hash Argon2id | COMPLETADA | 5 unitarias; migración emailVerifiedAt |
+| 3.2 Sesiones (solo hash en BD) | COMPLETADA | 9 e2e contra PostgreSQL real |
+| 3.3a Validación y registro | COMPLETADA | 7 e2e |
+| 3.3b Login, logout, cookie, guard global | COMPLETADA | 10 e2e |
+| 3.3c Límite de intentos | COMPLETADA | 4 unitarias y 4 e2e |
+| 3.4 Perfil /users/me | COMPLETADA | 12 e2e |
+| 3.5a Credenciales y configuración de Google | COMPLETADA | 7 unitarias de validateEnv |
+| 3.5b Flujo OAuth y vinculación | COMPLETADA | 12 e2e (cliente simulado) + 5 unitarias + prueba manual real con Google |
+
+Pruebas totales: 22 unitarias y 59 e2e.
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.
@@ -64,6 +71,13 @@ publicarlos. Monolito modular. Primera integración real prevista: YouTube.
 - **Media:** el bloqueo por correo permite bloquear a propósito el login de otra persona (5 fallos adrede).
 - **Media:** detrás de un proxy `req.ip` sería la IP del proxy y el límite por IP afectaría a todos. No desplegar sin configurar `trust proxy`.
 - **Media:** el 409 del registro revela si un correo existe.
+- **Media:** flag `Secure` de cookies solo probado por revisión de código, no con NODE_ENV=production.
+- **Media:** CSRF: se apoya en SameSite=Lax; la validación de `Origin` queda pendiente hasta definir el frontend.
+- **Media:** verificación de correo pospuesta; la regla 4 neutraliza la pre-registración.
+- **Media:** no desplegar tras un proxy sin configurar `trust proxy`.
+- **Baja:** el callback de Google no tiene límite de solicitudes.
+- **Baja:** Google en modo Testing: solo cuentas de prueba (hasta 100).
+- **Baja:** contadores de límite en memoria (una sola instancia).
 
 ## Decisiones técnicas confirmadas
 - Monolito modular NestJS + Prisma + PostgreSQL, REST con prefijo `/api/v1`.
