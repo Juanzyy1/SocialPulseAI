@@ -1,5 +1,7 @@
 // Esquema de Prisma de SocialPulse AI.
-// Los modelos se añaden en la etapa 2 del MVP; por ahora solo está la configuración.
+// Nombres de tabla en snake_case plural (@@map); campos en camelCase.
+// Las tablas de métricas e historial se diseñan en la Fase 5, cuando se conozcan
+// las métricas reales que entrega cada API.
 
 generator client {
   provider     = "prisma-client"
@@ -9,4 +11,109 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum OAuthProvider {
+  GOOGLE
+}
+
+enum SocialPlatform {
+  YOUTUBE
+  INSTAGRAM
+  TIKTOK
+}
+
+enum SocialAccountStatus {
+  ACTIVE
+  REVOKED
+  ERROR
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  // Siempre en minúsculas: la normalización se hace en la capa de aplicación (Fase 3).
+  email        String   @unique
+  // Vacío si el usuario solo accede con Google.
+  passwordHash String?
+  displayName  String?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  oauthIdentities OAuthIdentity[]
+  sessions        Session[]
+  socialAccounts  SocialAccount[]
+
+  @@map("users")
+}
+
+model OAuthIdentity {
+  id             String        @id @default(uuid()) @db.Uuid
+  userId         String        @db.Uuid
+  provider       OAuthProvider
+  providerUserId String
+  createdAt      DateTime      @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@map("oauth_identities")
+}
+
+model Session {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  // Solo se guarda el hash (SHA-256) del token; el token real vive en la cookie.
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+  userAgent  String?
+  ipAddress  String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model SocialAccount {
+  id                String              @id @default(uuid()) @db.Uuid
+  userId            String              @db.Uuid
+  platform          SocialPlatform
+  // En YouTube, el ID del canal.
+  platformAccountId String
+  displayName       String?
+  handle            String?
+  avatarUrl         String?
+  status            SocialAccountStatus @default(ACTIVE)
+  connectedAt       DateTime            @default(now())
+  lastSyncedAt      DateTime?
+
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credential SocialCredential?
+
+  // Unicidad GLOBAL: un mismo canal no puede estar conectado por dos usuarios.
+  @@unique([platform, platformAccountId])
+  @@index([userId])
+  @@map("social_accounts")
+}
+
+model SocialCredential {
+  id              String   @id @default(uuid()) @db.Uuid
+  socialAccountId String   @unique @db.Uuid
+  // Cifrados con AES-256-GCM (se implementa en la Fase 4). Nunca se guardan en claro.
+  accessTokenEnc  String
+  refreshTokenEnc String?
+  expiresAt       DateTime?
+  scopes          String[]
+  // Permite rotar la clave de cifrado sin perder los tokens existentes.
+  keyVersion      Int      @default(1)
+  updatedAt       DateTime @updatedAt
+
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@map("social_credentials")
 }

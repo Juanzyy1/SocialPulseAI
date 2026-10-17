@@ -1,6 +1,6 @@
 # SocialPulse AI — Estado del proyecto
 
-Última actualización: 16/10/2026
+Última actualización: 17/10/2026
 
 ## Descripción
 Plataforma para conectar varias cuentas de redes sociales de un usuario, consultar
@@ -13,64 +13,74 @@ publicarlos. Monolito modular. Primera integración real prevista: YouTube.
 - PostgreSQL 18.2 (instalación local en Windows)
 - Prisma 7.10.1 con `@prisma/adapter-pg`
 - Jest 30.5.2 + ts-jest 29.4.15 + supertest
-- Swagger: `@nestjs/swagger` 12, `@nestjs/config`
+- `@nestjs/swagger` 12, `@nestjs/config`
 
 ## Fase actual
-Fase 2 — Preparación del entorno (numeración del prompt maestro). Estado: **EN PROGRESO**.
-Fase 1 (arquitectura y planificación): **EN PROGRESO**. Falta formalizar modelo de
-datos inicial, definición de endpoints y criterios de aceptación.
+- Fase 2 (preparación del entorno): **COMPLETADA** (Docker diferido a la Fase 9 por decisión).
+- Fase 1 (arquitectura y planificación): **EN PROGRESO**. Hecho: arquitectura, estructura
+  del repositorio y modelo inicial de datos. Pendiente: definición formal de endpoints y
+  criterios de aceptación del MVP.
+- Fase 3 (autenticación): **PENDIENTE** (a la espera de confirmación para empezar).
 
 ## Tablero de la Fase 2
 | Tarea | Estado | Evidencia | Pendiente |
 |---|---|---|---|
 | Proyecto NestJS y TypeScript | COMPLETADA | `nest build` sin errores | — |
-| PostgreSQL local, usuario y base | COMPLETADA | Conexión con `socialpulse` a `socialpulse_dev`, PostgreSQL 18.2 | — |
-| Prisma instalado y esquema válido | COMPLETADA | `prisma validate` y `prisma generate` correctos | — |
-| Conexión Prisma ↔ base | COMPLETADA | `migrate status` llegó a la base | Sin migraciones aún |
-| Migraciones | PENDIENTE | — | Requiere modelo de datos inicial |
-| `moduleFormat = "cjs"` en el esquema | COMPLETADA | `Select-String` muestra `moduleFormat = "cjs"` en `prisma/schema.prisma` | — |
-| Validación de variables de entorno | COMPLETADA | Con `DATABASE_URL` inválida la app aborta con "Configuración de entorno inválida" sin exponer valores | — |
-| Ruta `GET /api/v1/health` | COMPLETADA | Respuesta JSON real; e2e: 200 con prefijo, 404 sin prefijo | — |
+| PostgreSQL local, usuario y base | COMPLETADA | Conexión con `socialpulse` a `socialpulse_dev` | — |
+| Prisma 7 y esquema | COMPLETADA | `validate` y `generate` correctos; `moduleFormat = "cjs"` | — |
+| Modelo inicial de datos | COMPLETADA | 5 tablas en PostgreSQL: users, oauth_identities, sessions, social_accounts, social_credentials | Tablas de métricas: Fase 5 |
+| Migración inicial | COMPLETADA | `20261017145825_init` aplicada; `_prisma_migrations` presente | — |
+| `PrismaService` | COMPLETADA | e2e: conexión real a PostgreSQL | — |
+| Unicidad global de cuenta social | COMPLETADA | e2e: el segundo usuario recibe `P2002` | Ver índice en `psql` (opcional) |
+| Cascada usuario → sesiones | COMPLETADA | e2e pasa | — |
+| Validación de variables de entorno | COMPLETADA | Con `DATABASE_URL` inválida la app aborta sin exponer valores | — |
+| `GET /api/v1/health` | COMPLETADA | JSON real; 200 con prefijo, 404 sin prefijo | — |
 | Swagger en `/api/docs` | COMPLETADA | Página renderizada con endpoint `health` | — |
-| Pruebas Jest (unitaria y e2e) | COMPLETADA | `npm test`: 1/1; `npm run test:e2e`: 2/2 | Ver riesgo de bandera experimental |
-| `.env.example` sin secretos | COMPLETADA | Revisado: solo valores de ejemplo | — |
-| Higiene de Git | COMPLETADA | `origin/main`: 1 commit, 0 archivos de `node_modules`; `.env` nunca en el historial | — |
-| `PrismaService` | PENDIENTE | — | Se hace con el modelo de datos |
-| Docker | PENDIENTE | — | Decisión: diferido hasta la Fase 9 |
+| Pruebas Jest | COMPLETADA | Unitarias 1/1; e2e 5/5 | Ver riesgos |
+| `.env.example` sin secretos | COMPLETADA | Revisado | — |
+| Higiene de Git | COMPLETADA | `origin/main` limpio, `.env` nunca en el historial | — |
+| Docker | PENDIENTE | — | Diferido a la Fase 9 |
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.
-- **Media:** Jest requiere `--experimental-vm-modules` porque `@nestjs/testing` 12 es solo
-  ESM. Plan alternativo: bajar a NestJS 11 (CommonJS) si deja de funcionar.
-- **Baja:** avisos `EBADENGINE` (herramientas de la CLI piden Node >= 24.15; hay 24.14.1).
-- **Baja:** 25 vulnerabilidades de npm en dependencias de desarrollo; `npm audit --omit=dev` da 0.
-- **Baja:** la prueba e2e depende de que exista un `.env` local (pendiente para la Fase 9).
+- **Media:** Jest requiere `--experimental-vm-modules` (`@nestjs/testing` 12 es solo ESM).
+  Plan alternativo: bajar a NestJS 11 (CommonJS).
+- **Media:** las pruebas e2e dependen de PostgreSQL encendido y de un `.env` local.
+  Pendiente de resolver para integración continua (Fase 9).
+- **Baja:** Jest mapea imports `.js` a `.ts` por el cliente generado de Prisma 7.
+- **Baja:** avisos `EBADENGINE` (herramientas de la CLI piden Node >= 24.15).
+- **Baja:** 25 vulnerabilidades de npm solo en dependencias de desarrollo;
+  `npm audit --omit=dev` da 0.
 - Repositorio **público**: nunca subir `.env` ni credenciales.
 
 ## Decisiones técnicas confirmadas
 - Monolito modular NestJS + Prisma + PostgreSQL, REST con prefijo `/api/v1`.
-- Prisma fijado en la versión mayor 7 (la 8 está en versión candidata).
+- Prisma fijado en la versión mayor 7 (la 8 está en candidata).
 - PostgreSQL local nativo en Windows; Docker diferido.
 - `tsconfig.json` con `rootDir: "."`; `tsconfig.build.json` con `rootDir: "./src"`.
-- Jest con `--experimental-vm-modules` en los scripts de prueba.
-- Documentación Swagger deshabilitada en producción.
+- Jest con `--experimental-vm-modules` y `moduleNameMapper` para imports `.js`.
+- Swagger deshabilitado en producción.
+- Autenticación por sesiones en base de datos (token opaco en cookie, solo se guarda su hash).
+- Tokens de redes sociales cifrados (AES-256-GCM) en tabla separada `social_credentials`.
+- Un mismo canal de una plataforma solo puede estar conectado por un usuario (unicidad global).
 - Historial de Git reiniciado el 16/10/2026 para eliminar `node_modules`.
 
 ## Última tarea realizada
-Configuración de entorno validada, prefijo `/api/v1`, Swagger y endpoint de salud, con pruebas (verificado el 16/10/2026).
+Modelo de datos inicial, migración `init`, `PrismaService` y pruebas de integración.
 
 ## Próxima tarea concreta
-Diseñar el modelo de datos inicial (usuarios, identidades de acceso, cuentas sociales) y
-aplicar la primera migración con `PrismaService`. Pendiente de tu confirmación.
+Cerrar la Fase 1 definiendo endpoints y criterios de aceptación de autenticación, y,
+con confirmación, comenzar la Fase 3. Verificar antes las librerías de hash de
+contraseñas y de OAuth con Node 24 y Nest 12.
 
 ## Comandos importantes (desde `backend/`)
 ```powershell
-npm run start:dev      # servidor en desarrollo
-npm run build          # compilar
-npm test               # pruebas unitarias
-npm run test:e2e       # pruebas e2e
-npx prisma validate    # validar el esquema
-npx prisma generate    # generar el cliente
-npx prisma migrate status
+npm run start:dev          # servidor en desarrollo
+npm run build              # compilar
+npm test                   # pruebas unitarias
+npm run test:e2e           # pruebas e2e (requiere PostgreSQL encendido)
+npx prisma validate        # validar el esquema
+npx prisma migrate dev     # crear y aplicar migraciones
+npx prisma generate        # regenerar el cliente
 ```
 URLs locales: `http://localhost:3000/api/v1/health` y `http://localhost:3000/api/docs`
