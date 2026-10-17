@@ -48,7 +48,7 @@ publicarlos. Monolito modular. Primera integración real prevista: YouTube.
 | 3.3b Login, logout, cookie y guard global | COMPLETADA | 31/31 e2e; guard global con @Public(); misma respuesta para clave errónea y correo inexistente; tipos verificados con tsc | Flag `Secure` en producción sin probar; validación de `Origin` (CSRF) pendiente |
 | 3.3c Límite de intentos | COMPLETADA | 10/10 unitarias y 35/35 e2e; 5 fallos por correo y por IP en 15 min dan 429; 10 registros/hora por IP | Contadores en memoria (una sola instancia); `Retry-After` sin implementar |
 | 3.4 Perfil `/users/me` | COMPLETADA | 47/47 e2e; cada sesión ve y edita solo su usuario; `id`, `email`, `passwordHash` y `emailVerifiedAt` rechazados con 400; `avatarUrl` solo https | Prueba de aislamiento con IDs: Fase 4 |
-
+| 3.5a Credenciales y configuración de Google | COMPLETADA | Cliente OAuth creado; 17/17 unitarias (7 de validateEnv); las tres variables son todo-o-nada; URI https salvo localhost | Prueba manual de rechazo con la app completa (opcional) |
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.
