@@ -8,7 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-const normalizeEmail = ({ value }: { value: unknown }) =>
+export const normalizeEmail = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim().toLowerCase() : value;
 
 export class RegisterDto {

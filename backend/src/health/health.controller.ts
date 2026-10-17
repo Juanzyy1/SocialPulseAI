@@ -1,10 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { HealthResponseDto } from './health-response.dto';
+import { Public } from '../auth/public.decorator';
 
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
+  @Public()
   @Get()
   @ApiOperation({ summary: 'Comprueba que el servidor responde' })
   @ApiOkResponse({ type: HealthResponseDto })

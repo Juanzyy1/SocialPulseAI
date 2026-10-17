@@ -41,6 +41,11 @@ publicarlos. Monolito modular. Primera integración real prevista: YouTube.
 | Higiene de Git | COMPLETADA | `origin/main` limpio, `.env` nunca en el historial | — |
 | Docker | PENDIENTE | — | Diferido a la Fase 9 |
 
+## Fase 3
+| 3.1 Hash de contraseñas (Argon2id) | COMPLETADA | 5 pruebas de PasswordService; migración add_email_verified_at; build correcto |— |
+| 3.2 Servicio de sesiones | COMPLETADA | 9 pruebas e2e contra PostgreSQL real; solo se guarda el hash del token | Limpieza programada de sesiones caducadas |
+| 3.3a Validación global y registro | COMPLETADA | 7 pruebas e2e: hash Argon2id en BD, correo normalizado, 409, 400 | Límite de solicitudes (3.3c) |
+
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.
 - **Media:** Jest requiere `--experimental-vm-modules` (`@nestjs/testing` 12 es solo ESM).
@@ -52,6 +57,8 @@ publicarlos. Monolito modular. Primera integración real prevista: YouTube.
 - **Baja:** 25 vulnerabilidades de npm solo en dependencias de desarrollo;
   `npm audit --omit=dev` da 0.
 - Repositorio **público**: nunca subir `.env` ni credenciales.
+- **Media:** el registro y el login no tienen límite de intentos hasta la 3.3c. No desplegar antes.
+- **Media:** el 409 del registro revela si un correo existe (enumeración de usuarios).
 
 ## Decisiones técnicas confirmadas
 - Monolito modular NestJS + Prisma + PostgreSQL, REST con prefijo `/api/v1`.

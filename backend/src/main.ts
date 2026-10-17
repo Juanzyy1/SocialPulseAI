@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { configureApp } from './app.setup';
+import {SESSION_COOKIE} from "./auth/session-cookie";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,7 @@ async function bootstrap() {
       .setTitle('SocialPulse AI API')
       .setDescription('API REST de SocialPulse AI')
       .setVersion('0.1.0')
+      .addCookieAuth(SESSION_COOKIE)
       .build();
     SwaggerModule.setup(
       'api/docs',
