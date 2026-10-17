@@ -17,10 +17,10 @@ publicarlos. Monolito modular. Primera integración real prevista: YouTube.
 
 ## Fase actual
 - Fase 2 (preparación del entorno): **COMPLETADA** (Docker diferido a la Fase 9 por decisión).
-- Fase 1 (arquitectura y planificación): **EN PROGRESO**. Hecho: arquitectura, estructura
+- Fase 1 (arquitectura y planificación): **COMPLETADA**. con la evidencia: “docs/MVP_SPEC.md. Hecho: arquitectura, estructura
   del repositorio y modelo inicial de datos. Pendiente: definición formal de endpoints y
   criterios de aceptación del MVP.
-- Fase 3 (autenticación): **PENDIENTE** (a la espera de confirmación para empezar).
+- Fase 3 (autenticación): **EN PROGRESO.** (a la espera de confirmación para empezar).
 
 ## Tablero de la Fase 2
 | Tarea | Estado | Evidencia | Pendiente |
@@ -64,6 +64,7 @@ publicarlos. Monolito modular. Primera integración real prevista: YouTube.
 - Tokens de redes sociales cifrados (AES-256-GCM) en tabla separada `social_credentials`.
 - Un mismo canal de una plataforma solo puede estar conectado por un usuario (unicidad global).
 - Historial de Git reiniciado el 16/10/2026 para eliminar `node_modules`.
+- “Verificación de correo pospuesta; regla 4 activa” y “Argon2id con la librería argon2”.
 
 ## Última tarea realizada
 Modelo de datos inicial, migración `init`, `PrismaService` y pruebas de integración.
