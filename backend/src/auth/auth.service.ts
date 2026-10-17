@@ -1,14 +1,20 @@
 import {
   ConflictException,
+  HttpException,
+  HttpStatus,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { PasswordService } from './password.service';
+import { RATE_LIMIT_CONFIG } from './rate-limit.config';
+import type { RateLimitConfig } from './rate-limit.config';
+import { RateLimiterService } from './rate-limiter.service';
 import { SessionMeta, SessionsService } from './sessions.service';
 
 /** Código de Prisma para "violación de restricción única". */
@@ -21,6 +27,13 @@ function isUniqueViolation(error: unknown): boolean {
   );
 }
 
+function tooManyRequests(): HttpException {
+  return new HttpException(
+    'Demasiados intentos. Inténtalo de nuevo más tarde.',
+    HttpStatus.TOO_MANY_REQUESTS,
+  );
+}
+
 @Injectable()
 export class AuthService {
   private dummyHash: Promise<string> | undefined;
@@ -29,9 +42,18 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly passwords: PasswordService,
     private readonly sessions: SessionsService,
+    private readonly limiter: RateLimiterService,
+    @Inject(RATE_LIMIT_CONFIG) private readonly limits: RateLimitConfig,
   ) {}
 
-  async register(dto: RegisterDto): Promise<UserResponseDto> {
+  async register(dto: RegisterDto, ip?: string): Promise<UserResponseDto> {
+    // Cada intento de registro cuenta, tenga éxito o no.
+    const ipKey = `register:ip:${ip ?? 'unknown'}`;
+    if (this.limiter.isBlocked(ipKey, this.limits.registrationsPerIp)) {
+      throw tooManyRequests();
+    }
+    this.limiter.record(ipKey, this.limits.registrationsPerIp.windowMs);
+
     const passwordHash = await this.passwords.hash(dto.password);
     try {
       // `select` limita lo que sale de la base: el hash nunca llega a la respuesta.
@@ -57,6 +79,19 @@ export class AuthService {
     dto: LoginDto,
     meta: SessionMeta,
   ): Promise<{ user: UserResponseDto; token: string }> {
+    // Las claves guardan un hash del correo, para no acumular correos en memoria.
+    const ipKey = `login:ip:${meta.ipAddress ?? 'unknown'}`;
+    const emailKey = `login:email:${createHash('sha256').update(dto.email).digest('hex')}`;
+    const { loginFailuresPerIp, loginFailuresPerEmail } = this.limits;
+
+    // Se comprueba antes de verificar la clave: un bloqueo vale aunque la clave sea correcta.
+    if (
+      this.limiter.isBlocked(ipKey, loginFailuresPerIp) ||
+      this.limiter.isBlocked(emailKey, loginFailuresPerEmail)
+    ) {
+      throw tooManyRequests();
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
       select: {
@@ -74,9 +109,12 @@ export class AuthService {
     const passwordOk = await this.passwords.verify(hash, dto.password);
 
     if (!user || !user.passwordHash || !passwordOk) {
+      this.limiter.record(ipKey, loginFailuresPerIp.windowMs);
+      this.limiter.record(emailKey, loginFailuresPerEmail.windowMs);
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    this.limiter.reset(emailKey); // el acceso correcto reinicia el contador del correo
     const { token } = await this.sessions.create(user.id, meta);
     return {
       user: {

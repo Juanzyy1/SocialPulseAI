@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  ApiTooManyRequestsResponse,
   ApiBadRequestResponse,
   ApiConflictResponse,
   ApiCookieAuth,
@@ -52,8 +53,9 @@ export class AuthController {
   @ApiCreatedResponse({ type: UserResponseDto })
   @ApiConflictResponse({ description: 'El correo ya está registrado' })
   @ApiBadRequestResponse({ description: 'Datos inválidos' })
-  register(@Body() dto: RegisterDto): Promise<UserResponseDto> {
-    return this.auth.register(dto);
+  @ApiTooManyRequestsResponse({ description: 'Demasiados registros desde esta IP' })
+  register(@Body() dto: RegisterDto, @Req() req: Request): Promise<UserResponseDto> {
+    return this.auth.register(dto, req.ip);
   }
 
   @Public()

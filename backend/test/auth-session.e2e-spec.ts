@@ -6,6 +6,8 @@ import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/app.setup';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { RATE_LIMIT_CONFIG } from '../src/auth/rate-limit.config';
+import { PERMISSIVE_RATE_LIMITS } from './helpers/rate-limits';
 
 // Dominio .invalid: reservado, nunca es un correo real.
 const TEST_DOMAIN = '@session-http-test.invalid';
@@ -50,7 +52,10 @@ describe('Login, logout y guard (e2e)', () => {
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(RATE_LIMIT_CONFIG)
+      .useValue(PERMISSIVE_RATE_LIMITS)
+      .compile();
     app = moduleRef.createNestApplication();
     configureApp(app);
     await app.init();
