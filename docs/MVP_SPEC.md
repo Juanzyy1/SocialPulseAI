@@ -92,9 +92,9 @@ Evidencia global: 22 pruebas unitarias y 59 e2e en verde; `tsc --noEmit` y build
 - [x] Tras 5 intentos fallidos en 15 minutos, el login responde 429.
 - [x] Todo endpoint privado sin sesión responde 401.
 - [x] Una sesión caducada responde 401.
-- [ ] Aislamiento: el usuario A no puede leer ni modificar recursos del usuario B (prueba e2e).
+- [x] Aislamiento: el usuario A no puede leer ni modificar recursos del usuario B (prueba e2e).
       EXCEPCIÓN: todavía no existe ningún recurso con ID. Hoy solo se prueba que cada
-      sesión ve y edita únicamente su propio perfil. Se verifica en la Fase 4.
+      sesión ve y edita únicamente su propio perfil. verificado en la 4.3
 - [x] Ninguna respuesta contiene `passwordHash` ni `tokenHash` (prueba e2e).
       (probado en registro, login y GET /users/me; aserción del PATCH añadida;
       marcar tras `npm run test:e2e` en verde)
@@ -103,7 +103,7 @@ Evidencia global: 22 pruebas unitarias y 59 e2e en verde; `tsc --noEmit` y build
 - [x] La BD solo guarda el hash del token de sesión (verificado con una consulta).
 
 ### Fase 4 — YouTube
-- [ ] Aislamiento (trasladado de la Fase 3): el usuario A no puede leer, modificar ni
+- [x] Aislamiento (trasladado de la Fase 3): el usuario A no puede leer, modificar ni
       desconectar cuentas sociales del usuario B; responde 404 (prueba e2e).
 - [ ] Solo se piden los permisos mínimos; la lista exacta se documenta y justifica.
 - [ ] Conectar un canal real crea la cuenta social y su credencial cifrada.

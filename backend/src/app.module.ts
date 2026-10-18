@@ -4,7 +4,9 @@ import { AuthModule } from './auth/auth.module';
 import { CryptoModule } from './common/crypto/crypto.module';
 import { validateEnv } from './config/env.validation';
 import { HealthModule } from './health/health.module';
+import { YoutubeModule } from './integrations/youtube/youtube.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { SocialAccountsModule } from './social-accounts/dto/social-accounts.module';
 import { UsersModule } from './users/dto/users.module';
 
 @Module({
@@ -14,6 +16,8 @@ import { UsersModule } from './users/dto/users.module';
     CryptoModule,
     AuthModule,
     UsersModule,
+    YoutubeModule,
+    SocialAccountsModule,
     HealthModule,
   ],
 })
