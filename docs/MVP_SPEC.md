@@ -83,7 +83,7 @@ Evidencia global: 22 pruebas unitarias y 59 e2e en verde; `tsc --noEmit` y build
 
 - [x] Registro válido crea el usuario; la contraseña se guarda con Argon2id, nunca en claro.
 - [x] Registro con correo repetido (en cualquier combinación de mayúsculas) es rechazado.
-- [ ] Contraseña menor de 12 caracteres es rechazada con un mensaje claro.
+- [x] Contraseña menor de 12 caracteres es rechazada con un mensaje claro.
       (aserción del mensaje añadida; marcar tras `npm run test:e2e` en verde)
 - [x] Login correcto fija la cookie y `GET /users/me` responde 200.
 - [x] Login incorrecto responde igual para "usuario inexistente" y "clave errónea".
@@ -95,7 +95,7 @@ Evidencia global: 22 pruebas unitarias y 59 e2e en verde; `tsc --noEmit` y build
 - [ ] Aislamiento: el usuario A no puede leer ni modificar recursos del usuario B (prueba e2e).
       EXCEPCIÓN: todavía no existe ningún recurso con ID. Hoy solo se prueba que cada
       sesión ve y edita únicamente su propio perfil. Se verifica en la Fase 4.
-- [ ] Ninguna respuesta contiene `passwordHash` ni `tokenHash` (prueba e2e).
+- [x] Ninguna respuesta contiene `passwordHash` ni `tokenHash` (prueba e2e).
       (probado en registro, login y GET /users/me; aserción del PATCH añadida;
       marcar tras `npm run test:e2e` en verde)
 - [x] Google: el parámetro `state` se valida y se usa PKCE; un `state` incorrecto se rechaza.
