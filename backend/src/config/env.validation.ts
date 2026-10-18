@@ -2,6 +2,7 @@ export interface Env {
   NODE_ENV: 'development' | 'test' | 'production';
   PORT: number;
   DATABASE_URL: string;
+  TOKEN_ENCRYPTION_KEY: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   GOOGLE_REDIRECT_URI?: string;
@@ -18,6 +19,11 @@ const LOCAL_HOSTS = ['localhost', '127.0.0.1'];
 function optionalString(value: unknown): string | undefined {
   const text = typeof value === 'string' ? value.trim() : '';
   return text === '' ? undefined : text;
+}
+
+/** 32 bytes en base64 son exactamente 44 caracteres (43 + un "="). */
+function isValidEncryptionKey(value: string): boolean {
+  return /^[A-Za-z0-9+/]{43}=$/.test(value) && Buffer.from(value, 'base64').length === 32;
 }
 
 /** Devuelve un mensaje de error si el URI de retorno de Google no es aceptable. */
@@ -40,7 +46,8 @@ function checkRedirectUri(value: string, isProduction: boolean): string | null {
 /**
  * Valida las variables de entorno al arrancar. Si alguna es inválida,
  * lanza un error y la aplicación no inicia. Nunca incluye valores en los
- * mensajes (la URL de la base y el secreto de Google son sensibles).
+ * mensajes (la URL de la base, la clave de cifrado y el secreto de Google
+ * son sensibles).
  */
 export function validateEnv(raw: Record<string, unknown>): Env {
   const errors: string[] = [];
@@ -58,6 +65,13 @@ export function validateEnv(raw: Record<string, unknown>): Env {
   const databaseUrl = String(raw.DATABASE_URL ?? '');
   if (!/^postgres(ql)?:\/\//.test(databaseUrl)) {
     errors.push('DATABASE_URL debe ser una URL que empiece por postgresql://');
+  }
+
+  const encryptionKey = String(raw.TOKEN_ENCRYPTION_KEY ?? '').trim();
+  if (!isValidEncryptionKey(encryptionKey)) {
+    errors.push(
+      'TOKEN_ENCRYPTION_KEY es obligatoria: 32 bytes aleatorios en base64 (44 caracteres)',
+    );
   }
 
   // Google OAuth: las tres variables juntas o ninguna.
@@ -86,6 +100,7 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     NODE_ENV: nodeEnv as Env['NODE_ENV'],
     PORT: port,
     DATABASE_URL: databaseUrl,
+    TOKEN_ENCRYPTION_KEY: encryptionKey,
     GOOGLE_CLIENT_ID: clientId,
     GOOGLE_CLIENT_SECRET: clientSecret,
     GOOGLE_REDIRECT_URI: redirectUri,

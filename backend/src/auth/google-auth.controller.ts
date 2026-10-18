@@ -50,6 +50,7 @@ export class GoogleAuthController {
   @ApiFoundResponse({ description: 'Sesión creada; redirige al perfil' })
   @ApiBadRequestResponse({ description: 'Solicitud inválida (state o cookie)' })
   @ApiUnauthorizedResponse({ description: 'Google rechazó o no se pudo verificar la identidad' })
+  @ApiServiceUnavailableResponse({ description: 'Google no está configurado' })
   async callback(
     @Query('code') code: string | undefined,
     @Query('state') state: string | undefined,
