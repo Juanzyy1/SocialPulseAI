@@ -14,6 +14,7 @@ import {
   unpackOAuthCookie,
 } from './oauth-flow';
 import { SessionMeta, SessionsService } from './sessions.service';
+import { safeErrorMessage } from '../common/logging/redact';
 
 function isUniqueViolation(error: unknown): boolean {
   return (
@@ -86,7 +87,7 @@ export class GoogleAuthService {
     } catch (error) {
       // Se registra solo el mensaje: nunca códigos ni tokens.
       this.logger.warn(
-        `Falló la verificación con Google: ${error instanceof Error ? error.message : 'error desconocido'}`,
+        `Falló la verificación con Google: ${safeErrorMessage(error)}`
       );
       throw new UnauthorizedException('No se pudo verificar la identidad con Google');
     }

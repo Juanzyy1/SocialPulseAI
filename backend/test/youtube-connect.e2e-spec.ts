@@ -20,6 +20,8 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { PERMISSIVE_RATE_LIMITS } from './helpers/rate-limits';
 import { registerAndLogin } from './helpers/session';
 import type { TestUser } from './helpers/session';
+import { AnalyticsCheck } from '../src/integrations/youtube/youtube-oauth.client';
+import { RefreshedToken } from '../src/integrations/youtube/youtube-oauth.client';
 
 // Dominio .invalid: reservado, nunca es un correo real.
 const TEST_DOMAIN = '@youtube-test.invalid';
@@ -49,6 +51,13 @@ class FakeYoutubeClient extends YoutubeOAuthClient {
     return this.channel;
   }
   async revokeToken(): Promise<void> {}
+
+  async refreshAccessToken(): Promise<RefreshedToken> {
+    throw new Error('no se usa en estas pruebas');
+  }
+  async checkAnalyticsAccess(): Promise<AnalyticsCheck> {
+    return { ok: true, statusCode: 200 };
+  }
 }
 
 async function buildApp(fake: FakeYoutubeClient): Promise<INestApplication<App>> {
@@ -300,6 +309,31 @@ describe('Conexión de YouTube (e2e, con cliente simulado)', () => {
     const credential = accounts[0].credential;
     if (!credential) throw new Error('No se guardó la credencial');
     expect(cipher.decrypt(credential.accessTokenEnc, credentialAad(accounts[0].id, 'access'))).toBe(
+      renewed.accessToken,
+    );
+  });
+
+  it('reconectar una cuenta revocada la reactiva con credenciales nuevas', async () => {
+    const user = await login();
+    grant();
+    newChannel();
+    const first = await fullFlow(user);
+    expect(first.status).toBe(200);
+
+    // Simula lo que hace el sistema cuando Google revoca el acceso.
+    await prisma.socialCredential.deleteMany({ where: { socialAccountId: first.body.id } });
+    await prisma.socialAccount.update({ where: { id: first.body.id }, data: { status: 'REVOKED' } });
+
+    const renewed = grant();
+    const second = await fullFlow(user);
+    expect(second.status).toBe(200);
+    expect(second.body.id).toBe(first.body.id);
+    expect(second.body.status).toBe('ACTIVE');
+
+    const [account] = await accountsOf(user.id);
+    const credential = account.credential;
+    if (!credential) throw new Error('No se guardó la credencial');
+    expect(cipher.decrypt(credential.accessTokenEnc, credentialAad(account.id, 'access'))).toBe(
       renewed.accessToken,
     );
   });

@@ -103,15 +103,22 @@ Evidencia global: 22 pruebas unitarias y 59 e2e en verde; `tsc --noEmit` y build
 - [x] La BD solo guarda el hash del token de sesión (verificado con una consulta).
 
 ### Fase 4 — YouTube
-- [x] Aislamiento (trasladado de la Fase 3): el usuario A no puede leer, modificar ni
-      desconectar cuentas sociales del usuario B; responde 404 (prueba e2e).
-- [ ] Solo se piden los permisos mínimos; la lista exacta se documenta y justifica.
-- [ ] Conectar un canal real crea la cuenta social y su credencial cifrada.
-- [ ] Ningún token aparece en logs, respuestas ni Swagger (revisión + prueba).
-- [ ] Un canal ya conectado por otro usuario es rechazado con un error claro.
-- [ ] Desconectar borra la credencial y revoca el acceso en Google cuando la API lo permite.
-- [ ] Un permiso revocado en Google marca la cuenta como `REVOKED` sin fallar en silencio.
-- [ ] Probado con un canal real; los errores de la API externa se registran sin secretos.
+Estado: COMPLETADA el 19/10/2026, con una excepción: el criterio de logs.
+
+- [x] Aislamiento: el usuario A no puede leer, modificar ni desconectar cuentas sociales
+      del usuario B; responde 404 (e2e, 9 pruebas en `social-accounts`).
+- [x] Solo se piden los permisos mínimos (`youtube.readonly` y `yt-analytics.readonly`);
+      documentado en `PROJECT_STATUS.md`.
+- [x] Conectar un canal real crea la cuenta social y su credencial cifrada
+      (verificado en la base real el 18/10/2026).
+- [ ] Ningún token aparece en logs, respuestas ni Swagger.
+      Respuestas y Swagger: probado. Logs: helper `redactSecrets` pendiente de ver en verde.
+- [x] Un canal ya conectado por otro usuario es rechazado con un error claro (409, e2e).
+- [x] Desconectar borra la credencial y revoca el acceso en Google (e2e y prueba real).
+- [x] Un permiso revocado en Google marca la cuenta como `REVOKED` sin fallar en silencio
+      (e2e; prueba manual reportada por el usuario).
+- [x] Probado con un canal real; los errores de la API externa se registran sin secretos
+      (conexión, revocación y Analytics reales; el registro sin secretos depende del helper).
 
 ### Fase 5 — Estadísticas
 - [ ] Solo se almacenan métricas que la API entrega realmente.

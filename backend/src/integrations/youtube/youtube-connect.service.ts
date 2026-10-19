@@ -27,6 +27,7 @@ import {
 } from './youtube-oauth.client';
 
 import { SOCIAL_ACCOUNT_SELECT as ACCOUNT_SELECT } from '../../social-accounts/social-account.select';
+import { safeErrorMessage } from '../../common/logging/redact';
 
 function isUniqueViolation(error: unknown): boolean {
   return (
@@ -210,7 +211,7 @@ export class YoutubeConnectService {
   /** Se registra solo el mensaje del error: nunca códigos ni tokens. */
   private logFailure(step: string, error: unknown): void {
     this.logger.warn(
-      `Falló ${step}: ${error instanceof Error ? error.message : 'error desconocido'}`,
+      `Falló ${step}: ${safeErrorMessage(error)}`
     );
   }
 }

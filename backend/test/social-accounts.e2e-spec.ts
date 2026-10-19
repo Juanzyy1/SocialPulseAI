@@ -19,6 +19,8 @@ import {
 import { PrismaService } from '../src/prisma/prisma.service';
 import { PERMISSIVE_RATE_LIMITS } from './helpers/rate-limits';
 import { registerAndLogin } from './helpers/session';
+import { AnalyticsCheck } from '../src/integrations/youtube/youtube-oauth.client';
+import { RefreshedToken } from '../src/integrations/youtube/youtube-oauth.client';
 
 // Dominio .invalid: reservado, nunca es un correo real.
 const TEST_DOMAIN = '@social-accounts-test.invalid';
@@ -41,6 +43,12 @@ class FakeYoutubeClient extends YoutubeOAuthClient {
   async revokeToken(token: string): Promise<void> {
     if (this.failRevoke) throw new Error('fallo simulado de Google');
     this.revoked.push(token);
+  }
+  async refreshAccessToken(): Promise<RefreshedToken> {
+    throw new Error('no se usa en estas pruebas');
+  }
+  async checkAnalyticsAccess(): Promise<AnalyticsCheck> {
+    return { ok: true, statusCode: 200 };
   }
 }
 
