@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { YoutubeAnalyticsClient, YoutubeAnalyticsClientImpl } from './youtube-analytics.client';
 import { YoutubeConnectController } from './youtube-connect.controller';
 import { YoutubeConnectService } from './youtube-connect.service';
 import { YoutubeOAuthClient, YoutubeOAuthClientImpl } from './youtube-oauth.client';
@@ -10,8 +11,9 @@ import { YoutubeTokenService } from './youtube-token.service';
     YoutubeConnectService,
     YoutubeTokenService,
     { provide: YoutubeOAuthClient, useClass: YoutubeOAuthClientImpl },
+    { provide: YoutubeAnalyticsClient, useClass: YoutubeAnalyticsClientImpl },
   ],
-  // Los usa SocialAccountsModule para desconectar y comprobar el acceso.
-  exports: [YoutubeOAuthClient, YoutubeTokenService],
+  // Los usan SocialAccountsModule y AnalyticsModule.
+  exports: [YoutubeOAuthClient, YoutubeTokenService, YoutubeAnalyticsClient],
 })
 export class YoutubeModule {}

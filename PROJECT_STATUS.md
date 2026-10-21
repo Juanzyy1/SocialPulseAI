@@ -45,6 +45,13 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | 4.3 social-accounts y aislamiento | COMPLETADA | 9 e2e; revocación real en Google (`revokedAtGoogle: true`) |
 | 4.4 Renovación, REVOKED y comprobación | COMPLETADA | 7 e2e; acceso real a Analytics verificado; pruebas manuales de renovación y revocación reportadas por el usuario el 19/10/2026 (sin salida adjunta) |
 | Helper `redactSecrets` para logs | POR VERIFICAR | Código y 10 pruebas escritos; falta ver build y pruebas en verde |
+| 4. Integración con YouTube | COMPLETADA | Cerrada el 19/10/2026 |
+| 5. Estadísticas e historial | EN PROGRESO | Verificación documental hecha; 5.1 en curso |
+| F. Frontend (nueva) | PROPUESTA APROBADA | Después de la 5; tecnología por decidir |
+
+## Fase 5
+| 5.1 Sondeo de YouTube Analytics | COMPLETADA | 97/97 e2e; sondeo real el 21/10/2026: 11 métricas aceptadas, ceros explícitos, últimos días sin fila (retraso observado de ~2 días), coincidencia con Studio |
+| 5.2 Modelo de datos del historial | PROPUESTO | Pendiente de aprobación del usuario |a
 
 Excepción abierta: el criterio "ningún token aparece en logs". Se levanta cuando el helper y sus pruebas estén en verde y la búsqueda de `error.message` dé 1.
 
@@ -86,7 +93,7 @@ Excepción abierta: el criterio "ningún token aparece en logs". Se levanta cuan
 - Prisma fijado en la versión mayor 7. Historial de Git reiniciado el 16/10/2026.
 
 ## Última tarea realizada
-4.4 Renovación de tokens, estado REVOKED y comprobación de acceso a YouTube.
+4.4 Renovación de tokens, estado REVOKED y comprobación de acceso a YouTube. COMPLETADA
 
 ## Próxima tarea concreta
 1. Aplicar el helper de logs y levantar la excepción de la Fase 4.

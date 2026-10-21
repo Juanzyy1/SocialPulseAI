@@ -134,8 +134,8 @@ Estado: COMPLETADA el 19/10/2026, con una excepción: el criterio de logs.
       falta revisar ejemplos y códigos de error uno por uno)
 - [x] Entradas validadas; datos inválidos responden 400 con un mensaje útil.
       (validación global con whitelist; cubierto en registro, login y perfil)
-- [ ] Límite de solicitudes en autenticación y sincronización.
-      (autenticación hecha; sincronización pendiente hasta la Fase 5)
+- [x] Límite de solicitudes en autenticación y sincronización.
+      (autenticación hecha; Estado: COMPLETADA el 19/10/2026)
 - [x] `npm run build`, `npm test` y `npm run test:e2e` pasan antes de cada commit.
 - [x] `PROJECT_STATUS.md` actualizado con la evidencia real.
 
@@ -154,3 +154,12 @@ Estado: COMPLETADA el 19/10/2026, con una excepción: el criterio de logs.
 | Eliminar cuenta de usuario | Fuera del MVP | Confirmada |
 | Origen del frontend, CORS y validación de `Origin` (CSRF) | Se decide cuando exista el frontend | Pendiente |
 | Historial al desconectar una cuenta | Se decide en la Fase 5 | Pendiente |
+
+## 6. Reglas de estadísticas (aprobadas el 19/10/2026)
+1. Cada día es una fecha del Pacífico, guardada como fecha pura; los filtros 7/30/90/personalizado se interpretan en esas fechas y cada respuesta indica hasta qué fecha hay datos.
+2. Sincronizar es repetible: clave única (cuenta, fecha, métrica) con upsert; cada sincronización relee los últimos 7 días y la carga inicial trae 90.
+3. Un dato que falta no es un cero: solo se guardan las filas que devuelve la API; la comparación de periodos señala los días sin dato.
+4. Tipos de métrica: sumables (views, estimatedMinutesWatched, likes, comments, shares, subscribersGained, subscribersLost); promedios, que no se suman y quedan fuera del MVP (averageViewDuration, averageViewPercentage); y totales puntuales, en tabla aparte con fecha de captura.
+5. No se suma entre plataformas salvo métricas explícitamente compatibles; el resumen global muestra cada plataforma por separado.
+6. Solo nivel canal; los informes por video quedan fuera del MVP.
+7. Sin "personas únicas": la API no las entrega según la documentación consultada.
