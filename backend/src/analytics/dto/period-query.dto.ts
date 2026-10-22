@@ -1,12 +1,13 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsIn, IsOptional, Matches } from 'class-validator';
+import { IsBoolean, IsIn, IsOptional, IsUUID, Matches } from 'class-validator';
 
 /** Convierte "true"/"false" de la URL en booleanos; cualquier otro texto lo rechaza la validación. */
 const toBoolean = ({ value }: { value: unknown }) =>
   value === 'true' ? true : value === 'false' ? false : value;
 
-export class PeriodQueryDto {
+/** Parámetros de periodo comunes a todas las consultas de estadísticas. */
+export class PeriodParamsDto {
   @ApiPropertyOptional({
     enum: ['7d', '30d', '90d'],
     description:
@@ -31,10 +32,18 @@ export class PeriodQueryDto {
   @IsOptional()
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'to debe tener formato AAAA-MM-DD' })
   to?: string;
+}
 
+export class PeriodQueryDto extends PeriodParamsDto {
   @ApiPropertyOptional({ default: false, description: 'Incluye la serie diaria' })
   @IsOptional()
   @Transform(toBoolean)
   @IsBoolean({ message: 'daily debe ser true o false' })
   daily?: boolean;
+}
+
+export class CompareQueryDto extends PeriodParamsDto {
+  @ApiProperty({ format: 'uuid', description: 'Cuenta social a comparar' })
+  @IsUUID('all', { message: 'accountId debe ser un UUID' })
+  accountId: string;
 }

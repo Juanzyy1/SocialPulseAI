@@ -15,7 +15,7 @@ export class AnalyticsAccountDto {
 }
 
 export class PeriodDto {
-  @ApiProperty({ enum: ['7d', '30d', '90d', 'custom'] })
+  @ApiProperty({ enum: ['7d', '30d', '90d', 'custom', 'previous'] })
   kind: string;
 
   @ApiProperty({ example: '2026-10-13', description: 'Fecha del Pacífico (AAAA-MM-DD)' })

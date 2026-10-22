@@ -1,6 +1,6 @@
 import { addDays } from '../common/dates/pacific-date';
 
-export type PeriodKind = '7d' | '30d' | '90d' | 'custom';
+export type PeriodKind = '7d' | '30d' | '90d' | 'custom' | 'previous';
 
 export type PeriodRequest =
   | { kind: '7d' | '30d' | '90d' }
