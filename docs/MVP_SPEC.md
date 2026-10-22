@@ -158,8 +158,10 @@ Estado: COMPLETADA el 19/10/2026, con una excepción: el criterio de logs.
 ## 6. Reglas de estadísticas (aprobadas el 19/10/2026)
 1. Cada día es una fecha del Pacífico, guardada como fecha pura; los filtros 7/30/90/personalizado se interpretan en esas fechas y cada respuesta indica hasta qué fecha hay datos.
 2. Sincronizar es repetible: clave única (cuenta, fecha, métrica) con upsert; cada sincronización relee los últimos 7 días y la carga inicial trae 90.
-3. Un dato que falta no es un cero: solo se guardan las filas que devuelve la API; la comparación de periodos señala los días sin dato.
-4. Tipos de métrica: sumables (views, estimatedMinutesWatched, likes, comments, shares, subscribersGained, subscribersLost); promedios, que no se suman y quedan fuera del MVP (averageViewDuration, averageViewPercentage); y totales puntuales, en tabla aparte con fecha de captura.
+3. Un día ausente significa "todavía no hay dato"; un 0 presente es un cero real que YouTube informa. Solo se guardan las filas que devuelve la API y nunca se rellenan días con ceros.
+4. Tipos de métrica. Sumables: views, estimatedMinutesWatched, likes, comments, shares, subscribersGained y subscribersLost. Media ponderada por vistas (no se suma): averageViewDuration. Totales puntuales, en tabla aparte con fecha de captura: subscriberCount, viewCount y videoCount. Fuera del MVP: engagedViews y redViews (definición sin verificar), dislikes y averageViewPercentage (superó el 100 %). estimatedMinutesWatched llega en minutos enteros por día, así que sumar muchos días con valores pequeños subestima el tiempo real.
 5. No se suma entre plataformas salvo métricas explícitamente compatibles; el resumen global muestra cada plataforma por separado.
 6. Solo nivel canal; los informes por video quedan fuera del MVP.
 7. Sin "personas únicas": la API no las entrega según la documentación consultada.
+8. Al desconectar una cuenta se borra su historial (cascada). Al reconectar YouTube se recupera con una carga de 90 días. Más adelante se puede ofrecer "conservar mi historial".
+9. Los periodos de 7, 30 y 90 días terminan en el último día con dato de la cuenta, no en hoy. Cada respuesta indica el rango, la fecha hasta la que hay datos y cuántos días del rango faltan. Los rangos personalizados se respetan tal cual. El periodo de comparación tiene la misma longitud y es el inmediatamente anterior; si le faltan días, se dice.

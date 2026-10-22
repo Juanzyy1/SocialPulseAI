@@ -51,7 +51,8 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 
 ## Fase 5
 | 5.1 Sondeo de YouTube Analytics | COMPLETADA | 97/97 e2e; sondeo real el 21/10/2026: 11 métricas aceptadas, ceros explícitos, últimos días sin fila (retraso observado de ~2 días), coincidencia con Studio |
-| 5.2 Modelo de datos del historial | PROPUESTO | Pendiente de aprobación del usuario |a
+| 5.2 Modelo de datos del historial | COMPLETADA | Migración aplicada; 70 unitarias y 103 e2e; fechas del Pacífico sin desfase en PostgreSQL real |
+| 5.3 Sincronización real | COMPLETADA | 14 unitarias + 12 e2e; primera sincronización real el 22/10/2026 (699 filas, totales coinciden con Studio); 429 por repetición inmediata confirmado | Confirmar con datos reales la segunda sincronización (conteos sin cambios), `sync-status` y el 404 del sondeo |
 
 Excepción abierta: el criterio "ningún token aparece en logs". Se levanta cuando el helper y sus pruebas estén en verde y la búsqueda de `error.message` dé 1.
 

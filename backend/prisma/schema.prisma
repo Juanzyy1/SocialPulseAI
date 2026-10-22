@@ -1,7 +1,8 @@
 // Esquema de Prisma de SocialPulse AI.
 // Nombres de tabla en snake_case plural (@@map); campos en camelCase.
-// Las tablas de métricas e historial se diseñan en la Fase 5, cuando se conozcan
-// las métricas reales que entrega cada API.
+// Las métricas se guardan en filas (una por cuenta, día y métrica) para que cada
+// plataforma pueda tener las suyas sin mezclarlas. Su significado vive en el
+// catálogo de métricas del código (src/analytics/metric-catalog.ts).
 
 generator client {
   provider     = "prisma-client"
@@ -27,6 +28,12 @@ enum SocialAccountStatus {
   ACTIVE
   REVOKED
   ERROR
+}
+
+enum SyncStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
 }
 
 model User {
@@ -94,8 +101,11 @@ model SocialAccount {
   connectedAt       DateTime            @default(now())
   lastSyncedAt      DateTime?
 
-  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  credential SocialCredential?
+  user           User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credential     SocialCredential?
+  dailyMetrics   AccountDailyMetric[]
+  totalSnapshots AccountTotalSnapshot[]
+  syncRuns       SyncRun[]
 
   // Unicidad GLOBAL: un mismo canal no puede estar conectado por dos usuarios.
   @@unique([platform, platformAccountId])
@@ -106,7 +116,7 @@ model SocialAccount {
 model SocialCredential {
   id              String   @id @default(uuid()) @db.Uuid
   socialAccountId String   @unique @db.Uuid
-  // Cifrados con AES-256-GCM (se implementa en la Fase 4). Nunca se guardan en claro.
+  // Cifrados con AES-256-GCM. Nunca se guardan en claro.
   accessTokenEnc  String
   refreshTokenEnc String?
   expiresAt       DateTime?
@@ -118,4 +128,59 @@ model SocialCredential {
   socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
 
   @@map("social_credentials")
+}
+
+/// Una métrica de un día para una cuenta. Solo existen filas que la API devolvió:
+/// un día ausente significa "todavía no hay dato", y un 0 presente es un cero real.
+model AccountDailyMetric {
+  id              String   @id @default(uuid()) @db.Uuid
+  socialAccountId String   @db.Uuid
+  // Fecha del Pacífico a la que YouTube asigna el dato (sin hora ni zona).
+  metricDate      DateTime @db.Date
+  // Código del catálogo, p. ej. "views". Texto, para no migrar con cada plataforma.
+  metric          String
+  value           Float
+  // Última vez que se escribió: los datos pueden corregirse días después.
+  updatedAt       DateTime @updatedAt
+
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([socialAccountId, metricDate, metric])
+  @@index([socialAccountId, metricDate])
+  @@map("account_daily_metrics")
+}
+
+/// Totales puntuales (suscriptores, vistas totales, videos). Como máximo uno por día
+/// del Pacífico y métrica, para que repetir una sincronización no duplique.
+model AccountTotalSnapshot {
+  id              String   @id @default(uuid()) @db.Uuid
+  socialAccountId String   @db.Uuid
+  snapshotDate    DateTime @db.Date
+  metric          String
+  value           Float
+  updatedAt       DateTime @updatedAt
+
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([socialAccountId, snapshotDate, metric])
+  @@map("account_total_snapshots")
+}
+
+/// Registro de cada sincronización, para consultar su estado.
+model SyncRun {
+  id              String     @id @default(uuid()) @db.Uuid
+  socialAccountId String     @db.Uuid
+  status          SyncStatus @default(RUNNING)
+  startedAt       DateTime   @default(now())
+  finishedAt      DateTime?
+  rangeStart      DateTime   @db.Date
+  rangeEnd        DateTime   @db.Date
+  rowsWritten     Int        @default(0)
+  // Siempre pasado por redactSecrets antes de guardarse.
+  errorMessage    String?
+
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@index([socialAccountId, startedAt(sort: Desc)])
+  @@map("sync_runs")
 }
