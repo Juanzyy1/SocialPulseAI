@@ -236,6 +236,7 @@ describe('Comparación de periodos (e2e)', () => {
       previous: { value: null },
     });
     expect(res.body.comparable).toBe(false);
+    expect(res.body.message).toContain('averageViewDuration');
   });
 
   it('un rango personalizado se compara con el rango anterior de la misma longitud', async () => {

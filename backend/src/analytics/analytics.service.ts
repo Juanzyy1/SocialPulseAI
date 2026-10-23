@@ -10,8 +10,14 @@ import {
   TotalValueDto,
 } from './dto/account-analytics-response.dto';
 import { ComparisonResponseDto } from './dto/compare-response.dto';
+import {
+  OverviewAccountDto,
+  OverviewResponseDto,
+  PlatformSummaryDto,
+} from './dto/overview-response.dto';
 import { CompareQueryDto, PeriodParamsDto, PeriodQueryDto } from './dto/period-query.dto';
 import { getMetricDefinition, metricsOf } from './metric-catalog';
+import { combineSamePlatform, sumCompatibleAcrossPlatforms } from './overview';
 import { aggregatePeriod, DailyValue, PeriodMetric } from './period-aggregation';
 import {
   countDays,
@@ -29,6 +35,12 @@ const NO_DATA_MESSAGE =
 const NO_DATA_IN_PERIOD_MESSAGE = 'No hay datos guardados en este periodo';
 const NO_PREVIOUS_DATA_MESSAGE =
   'No hay datos guardados en el periodo anterior; no se puede comparar';
+const NO_ACCOUNTS_MESSAGE =
+  'No hay cuentas conectadas; conecta una con GET /integrations/youtube/connect';
+const NO_CROSS_PLATFORM_MESSAGE =
+  'Ninguna métrica está marcada como compatible entre plataformas; cada plataforma se muestra por separado';
+const PARTIAL_OVERVIEW_MESSAGE =
+  'Algunas cuentas no tienen datos en todos los días del rango; los totales de su plataforma son parciales. Revisa la cobertura de cada cuenta';
 
 /** Fecha pura (AAAA-MM-DD) como la guarda y la lee la columna `date`. */
 const toDbDate = (iso: string): Date => new Date(`${iso}T00:00:00Z`);
@@ -112,13 +124,122 @@ export class AnalyticsService {
     ]);
 
     const metrics = compareMetrics(current.metrics, previous.metrics);
+    const notComparable = metrics.filter((metric) => !metric.comparable);
     return {
       ...base,
       current: { period: currentPeriod, coverage: current.coverage },
       previous: { period: previousRange, coverage: previous.coverage },
-      comparable: metrics.length > 0 && metrics.every((metric) => metric.comparable),
-      message: this.comparisonMessage(current.coverage, previous.coverage),
+      comparable: metrics.length > 0 && notComparable.length === 0,
+      // Si no hay un problema de cobertura, el mensaje nombra las métricas no comparables.
+      message:
+        this.comparisonMessage(current.coverage, previous.coverage) ??
+        this.notComparableMessage(
+          notComparable.map((metric) => metric.metric),
+          metrics.length,
+        ),
       metrics,
+    };
+  }
+
+  /**
+   * Resumen de TODAS las cuentas del usuario en un rango común. Los periodos predefinidos
+   * terminan en el último día con dato entre todas las cuentas; la cobertura de cada cuenta
+   * dice qué le falta. Las métricas se combinan dentro de cada plataforma y entre plataformas
+   * solo cuando el catálogo las marca como compatibles.
+   */
+  async getOverview(userId: string, query: PeriodParamsDto): Promise<OverviewResponseDto> {
+    const today = pacificDate(new Date());
+    const request = this.parseRequest(query, today);
+
+    const accounts = await this.prisma.socialAccount.findMany({
+      where: { userId },
+      orderBy: { connectedAt: 'asc' },
+      select: { id: true, platform: true, displayName: true, status: true, lastSyncedAt: true },
+    });
+    if (accounts.length === 0) {
+      return {
+        period: null,
+        dataThrough: null,
+        daysBehind: null,
+        accounts: [],
+        platforms: [],
+        crossPlatform: { groups: [], message: NO_CROSS_PLATFORM_MESSAGE },
+        message: NO_ACCOUNTS_MESSAGE,
+      };
+    }
+
+    const latest = await this.prisma.accountDailyMetric.groupBy({
+      by: ['socialAccountId'],
+      where: { socialAccountId: { in: accounts.map((account) => account.id) } },
+      _max: { metricDate: true },
+    });
+    const dataThroughBy = new Map(
+      latest.map((row): [string, string | null] => [
+        row.socialAccountId,
+        row._max.metricDate ? toIsoDay(row._max.metricDate) : null,
+      ]),
+    );
+    const known = [...dataThroughBy.values()].filter((day): day is string => day !== null);
+    const dataThrough = known.length > 0 ? known.reduce((a, b) => (a > b ? a : b)) : null;
+    const period = resolvePeriod(request, dataThrough);
+
+    const details = await Promise.all(
+      accounts.map(async (account) => ({
+        account,
+        dataThrough: dataThroughBy.get(account.id) ?? null,
+        data: period ? await this.periodData(account.id, account.platform, period) : null,
+        totals: await this.latestTotals(account.id, account.platform),
+      })),
+    );
+
+    const accountDtos: OverviewAccountDto[] = details.map((detail) => ({
+      id: detail.account.id,
+      platform: detail.account.platform,
+      displayName: detail.account.displayName,
+      status: detail.account.status,
+      lastSyncedAt: detail.account.lastSyncedAt,
+      dataThrough: detail.dataThrough,
+      daysBehind: this.daysBehind(detail.dataThrough, today),
+      coverage: detail.data?.coverage ?? null,
+      metrics: detail.data?.metrics ?? [],
+      totals: detail.totals,
+    }));
+
+    const byPlatform = new Map<string, typeof details>();
+    for (const detail of details) {
+      const group = byPlatform.get(detail.account.platform) ?? [];
+      group.push(detail);
+      byPlatform.set(detail.account.platform, group);
+    }
+    const platforms: PlatformSummaryDto[] = [...byPlatform.entries()].map(([platform, group]) => ({
+      platform,
+      accountCount: group.length,
+      accountsWithData: group.filter((d) => (d.data?.coverage.daysWithData ?? 0) > 0).length,
+      complete: group.every((d) => d.data !== null && d.data.coverage.missingDays === 0),
+      metrics: combineSamePlatform(
+        platform,
+        group.map((d) => ({ metrics: d.data?.metrics ?? [] })),
+        getMetricDefinition,
+      ),
+    }));
+
+    const groups = sumCompatibleAcrossPlatforms(
+      platforms.map((p) => ({ platform: p.platform, metrics: p.metrics })),
+      getMetricDefinition,
+    );
+
+    let message: string | null = null;
+    if (!period) message = NO_DATA_MESSAGE;
+    else if (platforms.some((p) => !p.complete)) message = PARTIAL_OVERVIEW_MESSAGE;
+
+    return {
+      period,
+      dataThrough,
+      daysBehind: this.daysBehind(dataThrough, today),
+      accounts: accountDtos,
+      platforms,
+      crossPlatform: { groups, message: groups.length === 0 ? NO_CROSS_PLATFORM_MESSAGE : null },
+      message,
     };
   }
 
@@ -129,6 +250,11 @@ export class AnalyticsService {
       return `Los periodos tienen distinta cobertura (${current.daysWithData} y ${previous.daysWithData} días con dato): solo se comparan las métricas sumables que cubren los mismos días`;
     }
     return null;
+  }
+
+  private notComparableMessage(codes: string[], total: number): string | null {
+    if (codes.length === 0) return null;
+    return `${codes.length} de ${total} métricas no se pueden comparar (${codes.join(', ')}); revisa su campo reason`;
   }
 
   private async loadAccount(userId: string, id: string): Promise<AccountRow> {

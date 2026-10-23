@@ -56,6 +56,7 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | 5.4a Estadísticas de una cuenta | COMPLETADA | 17 unitarias + 11 e2e; JSON real verificado el 22/10/2026 | — |
 | 5.4b Comparación de periodos | COMPLETADA | 10 unitarias + 9 e2e; JSON real verificado el 22/10/2026 (pasos 2 a 4 confirmados por el usuario) | Ajuste del mensaje global incluido en la 5.4c |
 | 5.4c Resumen global | PENDIENTE | | |
+| 5.4c Resumen global | COMPLETADA | Código y 21 pruebas escritas (11 unitarias y 10 e2e) | Salida de las pruebas y prueba manual con el canal real |
 
 Excepción abierta: el criterio "ningún token aparece en logs". Se levanta cuando el helper y sus pruebas estén en verde y la búsqueda de `error.message` dé 1.
 
