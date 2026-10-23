@@ -1,6 +1,6 @@
 # SocialPulse AI — Estado del proyecto
 
-Última actualización: 19/10/2026
+Última actualización: 22/10/2026
 
 ## Descripción
 Plataforma para conectar varias cuentas de redes sociales de un usuario, consultar
@@ -22,87 +22,75 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | 1. Arquitectura y planificación | COMPLETADA | `docs/MVP_SPEC.md` aprobado el 17/10/2026 |
 | 2. Preparación del entorno | COMPLETADA | Docker diferido a la Fase 9 por decisión |
 | 3. Autenticación y usuarios | COMPLETADA | Aislamiento entre usuarios verificado en la 4.3 |
-| 4. Integración con YouTube | COMPLETADA con una excepción | Falta levantar la excepción de logs (ver abajo) |
-| 5. Estadísticas e historial | PENDIENTE | Empieza con verificación de métricas disponibles |
+| 4. Integración con YouTube | COMPLETADA | Cerrada el 19/10/2026 |
+| 5. Estadísticas e historial | COMPLETADA* | *Falta ver en verde `fixed-dates.spec.ts` (21 pruebas) |
+| F. Frontend (nueva) | PROPUESTA APROBADA | Siguiente; tecnología por decidir; faltan las imágenes de referencia |
 | 6 a 9 | PENDIENTES | |
 
 ## Pruebas actuales
-- Unitarias: 35 pruebas en 6 suites (todas pasan). Con el helper de logs: 45 en 7 (pendiente de ver).
-- e2e (contra PostgreSQL real): 89 pruebas en 11 suites (todas pasan).
-- `tsc --noEmit` y `nest build` sin errores. `npm audit --omit=dev`: 0 vulnerabilidades (sin dependencias nuevas desde entonces).
-- Verificado con Google real: login (3.5b), conexión del canal (4.2), revocación (4.3) y acceso a YouTube Analytics (4.4, `analyticsStatusCode: 200` el 19/10/2026).
+- Unitarias: 122 en 16 suites (verificadas). Con `fixed-dates.spec.ts`: 143 en 17 (pendiente de ver).
+- e2e (contra PostgreSQL real): 137 en 16 suites (verificadas).
+- `tsc --noEmit` y `nest build` sin errores.
+- Verificado con Google/YouTube reales: login, conexión del canal, revocación, acceso a Analytics,
+  sincronización de 90 días (699 filas) y las tres consultas de estadísticas.
 
-## Fase 3 — Autenticación y usuarios: COMPLETADA
-3.1 Argon2id · 3.2 Sesiones (solo hash en BD) · 3.3 Registro, login, logout, guard global y límite de intentos · 3.4 Perfil `/users/me` · 3.5 Google OAuth con PKCE y reglas de vinculación.
-
-## Fase 4 — Integración con YouTube
+## Fase 5 — Estadísticas e historial
 | Tarea | Estado | Evidencia |
 |---|---|---|
-| Verificación de permisos y modo Testing | COMPLETADA | Permisos mínimos; caducidad de 7 días confirmada en fuente oficial |
-| Pasos en Google Cloud | COMPLETADA | APIs habilitadas, permisos y URI configurados; usuario de prueba añadido |
-| 4.1 Cifrado AES-256-GCM | COMPLETADA | 12 unitarias; credencial real verificada cifrada en la base |
-| 4.2 Conexión del canal | COMPLETADA | 14 e2e; conexión real con canal propio el 18/10/2026 |
-| 4.3 social-accounts y aislamiento | COMPLETADA | 9 e2e; revocación real en Google (`revokedAtGoogle: true`) |
-| 4.4 Renovación, REVOKED y comprobación | COMPLETADA | 7 e2e; acceso real a Analytics verificado; pruebas manuales de renovación y revocación reportadas por el usuario el 19/10/2026 (sin salida adjunta) |
-| Helper `redactSecrets` para logs | POR VERIFICAR | Código y 10 pruebas escritos; falta ver build y pruebas en verde |
-| 4. Integración con YouTube | COMPLETADA | Cerrada el 19/10/2026 |
-| 5. Estadísticas e historial | EN PROGRESO | Verificación documental hecha; 5.1 en curso |
-| F. Frontend (nueva) | PROPUESTA APROBADA | Después de la 5; tecnología por decidir |
-
-## Fase 5
-| 5.1 Sondeo de YouTube Analytics | COMPLETADA | 97/97 e2e; sondeo real el 21/10/2026: 11 métricas aceptadas, ceros explícitos, últimos días sin fila (retraso observado de ~2 días), coincidencia con Studio |
-| 5.2 Modelo de datos del historial | COMPLETADA | Migración aplicada; 70 unitarias y 103 e2e; fechas del Pacífico sin desfase en PostgreSQL real |
-| 5.3 Sincronización real | COMPLETADA | 14 unitarias + 12 e2e; sincronización real del 22/10/2026 (699 filas, coincide con Studio); 429, segunda sincronización, sync-status y 404 del sondeo confirmados por el usuario | — |
-| 5.4a Estadísticas de una cuenta | COMPLETADA | 17 unitarias + 11 e2e; JSON real verificado el 22/10/2026 | — |
-| 5.4b Comparación de periodos | COMPLETADA | 10 unitarias + 9 e2e; JSON real verificado el 22/10/2026 (pasos 2 a 4 confirmados por el usuario) | Ajuste del mensaje global incluido en la 5.4c |
-| 5.4c Resumen global | PENDIENTE | | |
-| 5.4c Resumen global | COMPLETADA | Código y 21 pruebas escritas (11 unitarias y 10 e2e) | Salida de las pruebas y prueba manual con el canal real |
-
-Excepción abierta: el criterio "ningún token aparece en logs". Se levanta cuando el helper y sus pruebas estén en verde y la búsqueda de `error.message` dé 1.
+| Verificación documental | COMPLETADA | Métricas y reglas de tiempo; las fuentes de terceros quedaron marcadas como sin confirmar |
+| 5.1 Sondeo de YouTube Analytics | COMPLETADA | Sondeo real del 21/10: 11 métricas aceptadas; ceros explícitos; retraso observado de ~2-3 días. Endpoint temporal ya eliminado |
+| 5.2 Modelo del historial | COMPLETADA | 3 tablas por migración; fechas del Pacífico sin desfase en PostgreSQL real; catálogo y agregación con pruebas |
+| 5.3 Sincronización real | COMPLETADA | 14 unitarias + 12 e2e; 699 filas reales (coinciden con Studio); 429, segunda sincronización y `sync-status` confirmados |
+| 5.4a Estadísticas de una cuenta | COMPLETADA | 17 unitarias + 11 e2e; JSON real |
+| 5.4b Comparación de periodos | COMPLETADA | 10 unitarias + 9 e2e; JSON real; mensaje global corregido |
+| 5.4c Resumen global | COMPLETADA | 11 unitarias + 10 e2e; JSON real |
+| Pruebas con fechas fijas | POR VERIFICAR | `fixed-dates.spec.ts`: 21 pruebas con cambios de horario, año bisiesto y cambio de año |
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.
-- **Media:** posible token en logs (sospecha sin confirmar) hasta aplicar el helper.
 - **Media:** Google en modo Testing: la conexión de YouTube caduca a los 7 días; se maneja con REVOKED y reconexión.
 - **Media:** Jest requiere `--experimental-vm-modules` (`@nestjs/testing` 12 es solo ESM). Plan alternativo: bajar a NestJS 11.
+- **Media:** `day` de YouTube Analytics se asume en hora del Pacífico; está documentado para la API de informes masivos y no está probado directamente para Analytics. Los datos observados son coherentes.
 - **Media:** flag `Secure` de cookies solo revisado en el código, no probado con `NODE_ENV=production`.
 - **Media:** CSRF se apoya en `SameSite=Lax`; validar `Origin` queda pendiente hasta definir el frontend.
 - **Media:** verificación de correo pospuesta; la regla 4 neutraliza la pre-registración.
 - **Media:** no desplegar tras un proxy sin configurar `trust proxy`.
 - **Media:** el bloqueo por correo permite bloquear a propósito el login de otra persona.
 - **Media:** el 409 del registro revela si un correo existe.
-- **Baja:** sin límite de solicitudes en `connect`, `callback`, `social-accounts` y `check` (llamadas a Google).
-- **Baja:** renovaciones de token en paralelo sin bloqueo; el estado `ERROR` existe pero no se usa.
-- **Baja:** si faltan permisos al conectar, la autorización parcial queda en la cuenta de Google.
-- **Baja:** rotación de la clave de cifrado sin implementar (solo existe la versión 1).
-- **Baja:** contadores de límite en memoria (una sola instancia).
+- **Media:** no hay sincronización automática periódica; la lanza el usuario. Corre dentro de la petición.
+- **Baja:** cuota de la API de Analytics desconocida; el sondeo hacía 13 llamadas, la sincronización hace 2.
+- **Baja:** solo se releen 7 días: una corrección de YouTube sobre un dato más antiguo no se detecta sin recarga completa.
+- **Baja:** redondeo de suscriptores y umbrales de privacidad con poco tráfico: sin verificar (el canal de prueba tiene un video).
+- **Baja:** las notas de las métricas se repiten en cada respuesta; conviene un endpoint de catálogo para el frontend.
+- **Baja:** sin límite de solicitudes en `connect`, `callback`, `social-accounts`, `check` y consultas de estadísticas.
+- **Baja:** contadores de límite y control de sincronizaciones simultáneas en memoria (una sola instancia).
+- **Baja:** rotación de la clave de cifrado sin implementar; estado `ERROR` sin usar; renovaciones de token en paralelo sin bloqueo.
 - **Baja:** las e2e dependen de PostgreSQL encendido y de un `.env` local (Fase 9).
 - **Baja:** avisos `EBADENGINE` y vulnerabilidades solo en dependencias de desarrollo.
-- Repositorio **público**: nunca subir `.env`, claves ni secretos.
+- Repositorio **público**: nunca subir `.env`, claves ni secretos, ni el JSON de los sondeos.
 
 ## Decisiones técnicas confirmadas
 - Monolito modular NestJS + Prisma 7 + PostgreSQL, REST con prefijo `/api/v1`.
 - Sesiones en base de datos con token opaco en cookie; solo se guarda su hash. Argon2id para contraseñas.
 - Guard global que niega por defecto; `@Public()` marca lo público.
 - Límite de intentos con contador propio en memoria (no `@nestjs/throttler`).
-- Verificación de correo pospuesta; regla 4 aplicada (borra contraseña y cierra sesiones al vincular Google).
 - Google en modo Testing; publicar o verificar la app se aplaza a la Fase 9.
-- YouTube: permisos `youtube.readonly` y `yt-analytics.readonly`; `reports.query` exige además `youtube.readonly` (documentación oficial). No se pide ingresos ni gestión.
-- Tokens de redes cifrados con AES-256-GCM, ligados a su fila con datos asociados; clave obligatoria en variable de entorno.
-- Un canal solo puede estar conectado por un usuario (unicidad global).
-- El URI de retorno de YouTube se deriva de `GOOGLE_REDIRECT_URI` (mismo servidor).
-- La revocación en Google usa `https://oauth2.googleapis.com/revoke` (probada con Google real). Si falla, la cuenta se desconecta igual.
-- Si Google responde `invalid_grant` al renovar, la cuenta pasa a `REVOKED` y se borran sus credenciales; un fallo de red no revoca.
-- `POST /social-accounts/:id/check` solo informa si las APIs responden; no devuelve métricas.
-- PostgreSQL local nativo; Docker diferido a la Fase 9.
-- Prisma fijado en la versión mayor 7. Historial de Git reiniciado el 16/10/2026.
+- YouTube: permisos `youtube.readonly` y `yt-analytics.readonly`. Tokens cifrados con AES-256-GCM.
+- Un canal solo puede estar conectado por un usuario (unicidad global). Al desconectar se borra su historial.
+- Métricas en filas (cuenta, fecha, métrica) con catálogo en código; cada día es una fecha del Pacífico guardada como fecha pura.
+- Tipos de métrica: sumables, media ponderada por vistas y totales puntuales (tabla aparte). Sin "personas únicas".
+- Sincronización: carga inicial de 90 días y ventana de 7; todo o nada en una transacción; una por minuto y una a la vez por cuenta; un fallo responde 200 con `status: FAILED`.
+- Consultas: periodos predefinidos terminan en el último día con dato; cobertura siempre visible; la comparación nunca compara en silencio; el resumen global usa un rango común y no suma totales puntuales ni métricas no compatibles.
+- PostgreSQL local nativo; Docker diferido a la Fase 9. Prisma fijado en la versión mayor 7.
+
+## Pendiente de planificación: frontend
+No está en las 9 fases originales; fase nueva después de la 5. Decisiones que esperan al frontend: tecnología, CORS y validación de `Origin` (CSRF), destino de las redirecciones tras Google y YouTube, cookies en producción, origen de los avatares y endpoint de catálogo de métricas. Los dos diseños de referencia del PDF llegaron solo como título; subir las imágenes al empezar.
 
 ## Última tarea realizada
-4.4 Renovación de tokens, estado REVOKED y comprobación de acceso a YouTube. COMPLETADA
+5.4c Resumen global y cierre del repaso de la Fase 5.
 
 ## Próxima tarea concreta
-1. Aplicar el helper de logs y levantar la excepción de la Fase 4.
-2. Fase 5, con confirmación del usuario: verificar qué métricas entrega realmente YouTube Analytics con los permisos actuales, antes de diseñar tablas e historial.
+Ver en verde `fixed-dates.spec.ts` y cerrar la Fase 5. Después, con confirmación, empezar la fase de frontend con una tarea de decisiones (tecnología, estructura del repositorio y diseños de referencia).
 
 ## Comandos importantes (desde `backend/`)
 ```powershell
@@ -112,6 +100,6 @@ npm test                # pruebas unitarias
 npm run test:e2e        # pruebas e2e (requiere PostgreSQL encendido)
 npx tsc --noEmit -p tsconfig.json   # tipos de src y de las pruebas
 npx prisma migrate dev  # crear y aplicar migraciones
-npx prisma generate     # regenerar el cliente
+npx prisma generate     # regenerar el cliente (necesario tras cambiar el esquema)
 ```
 URLs locales: `http://localhost:3000/api/v1/health` y `http://localhost:3000/api/docs`

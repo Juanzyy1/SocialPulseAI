@@ -139,22 +139,24 @@ Estado: COMPLETADA el 19/10/2026, con una excepción: el criterio de logs.
 - [x] `npm run build`, `npm test` y `npm run test:e2e` pasan antes de cada commit.
 - [x] `PROJECT_STATUS.md` actualizado con la evidencia real.
 
-## 5. Decisiones
-| Tema | Decisión | Estado |
-|---|---|---|
-| Duración de sesión | 7 días de inactividad, máximo 30 días absolutos; se renueva como máximo una vez por hora | Implementada |
-| Longitud de contraseña | Mínimo 12, máximo 128 caracteres | Implementada |
-| Hash de contraseñas | Argon2id (19 MiB, 2 iteraciones, 1 hilo) | Implementada |
-| Límite de login | 5 fallos / 15 min por correo y 5 fallos / 15 min por IP | Implementada |
-| Límite de registro | 10 por hora por IP (aprobado el 17/10/2026) | Implementada |
-| Contadores de límite | En memoria, una sola instancia; Redis si hay varias | Implementada |
-| Verificación de correo | Pospuesta (camino B); la regla 4 se aplica desde el principio | Pospuesta |
-| Retorno tras Google | `/api/v1/users/me` hasta que exista frontend | Implementada |
-| Recuperar contraseña | Fuera del MVP | Confirmada |
-| Eliminar cuenta de usuario | Fuera del MVP | Confirmada |
-| Origen del frontend, CORS y validación de `Origin` (CSRF) | Se decide cuando exista el frontend | Pendiente |
-| Historial al desconectar una cuenta | Se decide en la Fase 5 | Pendiente |
+### Fase 5 — Estadísticas
+Estado: COMPLETADA (pendiente solo de ver en verde las pruebas con fechas fijas).
+Evidencia global: sincronización y las tres consultas verificadas con un canal real el 22/10/2026;
+las 6 tareas (5.1 a 5.4c) con sus pruebas unitarias y e2e en verde.
 
+- [x] Solo se almacenan métricas que la API entrega realmente (sondeo real: 11 métricas
+      aceptadas; el conversor solo guarda las del catálogo).
+- [x] Sincronizar dos veces el mismo periodo no duplica registros (índice único + ON CONFLICT;
+      3 e2e; comprobado con el canal real).
+- [x] No se mezclan ni suman métricas incompatibles (catálogo por tipo; 8 pruebas de agregación
+      y 11 del resumen global; sin "personas únicas").
+- [ ] Los filtros 7d, 30d, 90d y personalizado devuelven rangos correctos (pruebas con fechas fijas).
+      `src/analytics/fixed-dates.spec.ts` (21 pruebas) pendiente de verse en verde.
+- [x] La comparación de periodos indica cuando falta información en alguno de los dos
+      (10 unitarias, 4 e2e y JSON real).
+- [x] Un usuario solo ve las métricas de sus propias cuentas (e2e de aislamiento en sincronización,
+      estadísticas, comparación y resumen).
+      
 ## 6. Reglas de estadísticas (aprobadas el 19/10/2026)
 1. Cada día es una fecha del Pacífico, guardada como fecha pura; los filtros 7/30/90/personalizado se interpretan en esas fechas y cada respuesta indica hasta qué fecha hay datos.
 2. Sincronizar es repetible: clave única (cuenta, fecha, métrica) con upsert; cada sincronización relee los últimos 7 días y la carga inicial trae 90.
