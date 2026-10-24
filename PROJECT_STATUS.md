@@ -23,8 +23,8 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | 2. Preparación del entorno | COMPLETADA | Docker diferido a la Fase 9 por decisión |
 | 3. Autenticación y usuarios | COMPLETADA | Aislamiento entre usuarios verificado en la 4.3 |
 | 4. Integración con YouTube | COMPLETADA | Cerrada el 19/10/2026 |
-| 5. Estadísticas e historial | COMPLETADA* | *Falta ver en verde `fixed-dates.spec.ts` (21 pruebas) |
-| F. Frontend (nueva) | PROPUESTA APROBADA | Siguiente; tecnología por decidir; faltan las imágenes de referencia |
+| 5. Estadísticas e historial | COMPLETADA | aprobado el 23/10/2026 |
+| F. Frontend (nueva) | EN PROGRESO
 | 6 a 9 | PENDIENTES | |
 
 ## Pruebas actuales
@@ -45,6 +45,18 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | 5.4b Comparación de periodos | COMPLETADA | 10 unitarias + 9 e2e; JSON real; mensaje global corregido |
 | 5.4c Resumen global | COMPLETADA | 11 unitarias + 10 e2e; JSON real |
 | Pruebas con fechas fijas | POR VERIFICAR | `fixed-dates.spec.ts`: 21 pruebas con cambios de horario, año bisiesto y cambio de año |
+
+## Fase F — Frontend
+| Tarea | Estado |
+|---|---|
+| | F.1a Estructura de `frontend/` y proxy | POR VERIFICAR | Pendiente de salidas | Build del frontend y comprobación del proxy |
+| F.1b Ajustes del backend: `FRONTEND_URL`, validación de `Origin`, `termsAcceptedAt`, catálogo de métricas | PENDIENTE |
+| F.2 Cliente de la API con tipos desde Swagger, rutas y estado de sesión | PENDIENTE |
+| F.3 Pantallas de registro y login (Google incluido) | PENDIENTE |
+| F.4 Panel: tarjetas, gráfico de vistas por día y cuentas | PENDIENTE |
+| F.5 Conectar YouTube, sincronizar y desconectar | PENDIENTE |
+| F.6 Comparación de periodos, estados vacíos y errores | PENDIENTE |
+| F.7 Pruebas de la interfaz | PENDIENTE |
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.

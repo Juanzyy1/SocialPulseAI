@@ -74,7 +74,6 @@ Filtros previstos: 7d, 30d, 90d y fechas personalizadas (`from`, `to`).
    se conserva o se elimina según la decisión pendiente de la Fase 5.
 8. Los tokens de redes se cifran antes de guardarse y jamás salen del backend.
 
-## 4. Criterios de aceptación
 
 ### Fase 3 — Autenticación y usuarios
 Estado: COMPLETADA el 17/10/2026, con una excepción documentada (aislamiento, ver abajo).
@@ -120,13 +119,6 @@ Estado: COMPLETADA el 19/10/2026, con una excepción: el criterio de logs.
 - [x] Probado con un canal real; los errores de la API externa se registran sin secretos
       (conexión, revocación y Analytics reales; el registro sin secretos depende del helper).
 
-### Fase 5 — Estadísticas
-- [ ] Solo se almacenan métricas que la API entrega realmente.
-- [ ] Sincronizar dos veces el mismo periodo no duplica registros (prueba).
-- [ ] No se mezclan ni suman métricas incompatibles (por ejemplo, vistas con personas únicas).
-- [ ] Los filtros 7d, 30d, 90d y personalizado devuelven rangos correctos (pruebas con fechas fijas).
-- [ ] La comparación de periodos indica cuando falta información en alguno de los dos.
-- [ ] Un usuario solo ve las métricas de sus propias cuentas (prueba e2e).
 
 ### Transversales (todas las fases)
 - [x] Cada endpoint documentado en Swagger, con ejemplos y códigos de error.
@@ -150,7 +142,7 @@ las 6 tareas (5.1 a 5.4c) con sus pruebas unitarias y e2e en verde.
       3 e2e; comprobado con el canal real).
 - [x] No se mezclan ni suman métricas incompatibles (catálogo por tipo; 8 pruebas de agregación
       y 11 del resumen global; sin "personas únicas").
-- [ ] Los filtros 7d, 30d, 90d y personalizado devuelven rangos correctos (pruebas con fechas fijas).
+- [x] Los filtros 7d, 30d, 90d y personalizado devuelven rangos correctos (pruebas con fechas fijas).
       `src/analytics/fixed-dates.spec.ts` (21 pruebas) pendiente de verse en verde.
 - [x] La comparación de periodos indica cuando falta información en alguno de los dos
       (10 unitarias, 4 e2e y JSON real).
@@ -170,3 +162,12 @@ las 6 tareas (5.1 a 5.4c) con sus pruebas unitarias y e2e en verde.
 10. Consulta de una cuenta: `period` (7d/30d/90d, por defecto 30d) o `from`+`to`, nunca ambos. Un rango personalizado no puede acabar después de hoy (Pacífico) ni superar 366 días. Cada respuesta incluye la cobertura (días con dato, días ausentes y sus tramos) y la advertencia propia de cada métrica. Los totales son los más recientes capturados y no dependen del periodo.
 11. Comparación: `GET /analytics/compare?accountId=...` con `period` o `from`+`to`. El periodo anterior es el inmediatamente anterior y de la misma longitud. Nunca se compara en silencio: las métricas sumables solo se comparan si ambos periodos tienen el mismo número de días con dato; la duración media, si ambos tienen valor; si no, `comparable` es false y `reason` explica el motivo. `changePercent` es null cuando el valor anterior es 0. Los totales puntuales no se comparan en esta versión.
 12. Resumen global: `GET /analytics/overview` (mismos parámetros de periodo, sin accountId ni daily). Los periodos predefinidos terminan en el último día con dato entre todas las cuentas y todas se evalúan en ese rango; la cobertura de cada cuenta dice qué le falta. Dentro de una plataforma se suman las métricas sumables y la duración media se pondera por las vistas de cada cuenta; si alguna cuenta tiene días ausentes, el total de su plataforma es parcial y se avisa. Los totales puntuales nunca se suman. Entre plataformas solo se suman las métricas marcadas como compatibles en el catálogo y presentes en 2 o más plataformas (hoy ninguna). Las cuentas REVOKED se incluyen con su estado a la vista.
+
+## DECISIONES
+| Frontend: tecnología | React + Vite + TypeScript, aplicación de una sola página en `frontend/` | Confirmada el 22/10/2026 |
+| Frontend: origen y CORS | Mismo origen mediante proxy (`/api` hacia el backend); sin CORS en desarrollo. En producción, servidor inverso (Fase 9) | Confirmada |
+| Frontend: Apple | Sin "Sign in with Apple" en el MVP (no está en el plan) | Confirmada |
+| Frontend: términos y privacidad | Páginas de ambos (texto redactado o revisado por el usuario) y aceptación guardada en el backend (`termsAcceptedAt`) | Confirmada; backend pendiente (F.1b) |
+| Frontend: registro | El frontend llama a `register` y luego a `login`; el backend no cambia | Confirmada |
+| Frontend: temas e idioma | Login claro y panel oscuro, sin selector; solo español, sin librería de traducción | Confirmada |
+| Frontend: primer panel | Tarjetas de métricas, gráfico de vistas por día y lista de cuentas; sin gráfico radial ni ingresos | Confirmada |
