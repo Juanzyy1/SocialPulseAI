@@ -6,6 +6,7 @@ export interface Env {
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   GOOGLE_REDIRECT_URI?: string;
+  FRONTEND_URL?: string;
 }
 
 const NODE_ENVS = ['development', 'test', 'production'] as const;
@@ -41,6 +42,32 @@ function checkRedirectUri(value: string, isProduction: boolean): string | null {
   return isProduction
     ? 'GOOGLE_REDIRECT_URI debe usar https en producción'
     : 'GOOGLE_REDIRECT_URI debe ser https (o http solo en localhost)';
+}
+
+/** Devuelve un mensaje de error si FRONTEND_URL no es solo un origen válido. */
+function checkFrontendUrl(value: string, isProduction: boolean): string | null {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return 'FRONTEND_URL no es una URL válida';
+  }
+  if (
+    url.pathname !== '/' ||
+    url.search !== '' ||
+    url.hash !== '' ||
+    url.username !== '' ||
+    url.password !== ''
+  ) {
+    return 'FRONTEND_URL debe ser solo el origen (por ejemplo, https://app.ejemplo.com), sin ruta, parámetros ni credenciales';
+  }
+  if (url.protocol === 'https:') return null;
+  if (!isProduction && url.protocol === 'http:' && LOCAL_HOSTS.includes(url.hostname)) {
+    return null;
+  }
+  return isProduction
+    ? 'FRONTEND_URL debe usar https en producción'
+    : 'FRONTEND_URL debe ser https (o http solo en localhost)';
 }
 
 /**
@@ -90,6 +117,13 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     if (problem) errors.push(problem);
   }
 
+  // Frontend: opcional. Sin ella, los callbacks responden como API.
+  const frontendUrl = optionalString(raw.FRONTEND_URL);
+  if (frontendUrl) {
+    const problem = checkFrontendUrl(frontendUrl, nodeEnv === 'production');
+    if (problem) errors.push(problem);
+  }
+
   if (errors.length > 0) {
     throw new Error(
       `Configuración de entorno inválida:\n- ${errors.join('\n- ')}`,
@@ -104,5 +138,6 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     GOOGLE_CLIENT_ID: clientId,
     GOOGLE_CLIENT_SECRET: clientSecret,
     GOOGLE_REDIRECT_URI: redirectUri,
+    FRONTEND_URL: frontendUrl,
   };
 }

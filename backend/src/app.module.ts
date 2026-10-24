@@ -4,6 +4,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { AuthModule } from './auth/auth.module';
 import { CryptoModule } from './common/crypto/crypto.module';
 import { validateEnv } from './config/env.validation';
+import { FrontendModule } from './frontend/frontend.module';
 import { HealthModule } from './health/health.module';
 import { YoutubeModule } from './integrations/youtube/youtube.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -16,6 +17,7 @@ import { UsersModule } from './users/dto/users.module';
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     PrismaModule,
     CryptoModule,
+    FrontendModule,
     AuthModule,
     UsersModule,
     YoutubeModule,

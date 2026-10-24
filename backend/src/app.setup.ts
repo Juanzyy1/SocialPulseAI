@@ -1,5 +1,7 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import { originCheckMiddleware } from './common/security/origin-check';
+import { FRONTEND_ORIGIN } from './frontend/frontend-origin';
 
 export const API_PREFIX = 'api/v1';
 
@@ -10,6 +12,8 @@ export const API_PREFIX = 'api/v1';
 export function configureApp(app: INestApplication): void {
   app.setGlobalPrefix(API_PREFIX);
   app.use(cookieParser());
+  // CSRF: defensa en profundidad además de SameSite=Lax.
+  app.use(originCheckMiddleware(app.get<string | null>(FRONTEND_ORIGIN)));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // descarta propiedades que no están en el DTO
