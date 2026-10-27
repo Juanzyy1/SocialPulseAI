@@ -172,3 +172,9 @@ las 6 tareas (5.1 a 5.4c) con sus pruebas unitarias y e2e en verde.
 | Frontend: registro | El frontend llama a `register` y luego a `login`; el backend no cambia | Confirmada |
 | Frontend: temas e idioma | Login claro y panel oscuro, sin selector; solo español, sin librería de traducción | Confirmada |
 | Frontend: primer panel | Tarjetas de métricas, gráfico de vistas por día y lista de cuentas; sin gráfico radial ni ingresos | Confirmada |
+| Frontend: estilo | Tailwind CSS (compatibilidad con Vite 8 por verificar al instalar) | Confirmada el 24/10/2026 |
+| Términos y privacidad | Páginas con texto borrador versionado (versión `2026-10-24`), a revisar por el usuario o un profesional antes de publicar | Confirmada |
+| Aceptación de términos | Se guarda en el backend (`termsAcceptedAt`, `termsVersion`); el registro con correo exige `acceptTerms: true` y la versión vigente | Confirmada |
+| Puerta de aceptación | Quien no haya aceptado la versión vigente (p. ej. cuentas nuevas de Google) ve una pantalla de aceptación antes del panel | Confirmada |
+| Pantallas de entrada | Login diseñado por nosotros con el mismo estilo que el registro; requisito de contraseña visible, sin medidor; tras registrarse se inicia sesión automáticamente | Confirmada |
+| Imagen lateral | La aporta el usuario; pendiente de confirmar derechos, nombre de marca y peso | Pendiente |

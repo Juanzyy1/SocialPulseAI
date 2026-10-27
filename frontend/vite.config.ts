@@ -1,5 +1,6 @@
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -12,5 +13,9 @@ export default defineConfig({
     // la app y la API comparten origen: no hace falta CORS.
     '/api': { target: 'http://localhost:3000' },
     },
+  },
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.ts'],
   },
 })

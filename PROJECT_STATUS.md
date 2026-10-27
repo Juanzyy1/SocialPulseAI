@@ -50,9 +50,9 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | Tarea | Estado |
 |---|---|
 | F.1a Estructura de `frontend/` y proxy | COMPLETADA | Build, proxy y 401 a través del proxy verificados el 24/10/2026 |
-| F.1b Origin, FRONTEND_URL y redirecciones | POR VERIFICAR | Código y 38 pruebas escritas (28 unitarias y 10 e2e) | Pruebas automáticas y verificación manual |
+| F.1b Origin, FRONTEND_URL y redirecciones | COMPLETADA | Código y 38 pruebas escritas (28 unitarias y 10 e2e) | Pruebas automáticas y verificación manual |
 | F.1c Catálogo de métricas y `termsAcceptedAt` | PENDIENTE | Se hará con el panel (F.4) y el registro (F.3) |
-| F.2 Cliente de la API con tipos desde Swagger, rutas y estado de sesión | PENDIENTE |
+| F.2 Cliente de la API con tipos desde Swagger, rutas y estado de sesión | COMPLETADA |
 | F.3 Pantallas de registro y login (Google incluido) | PENDIENTE |
 | F.4 Panel: tarjetas, gráfico de vistas por día y cuentas | PENDIENTE |
 | F.5 Conectar YouTube, sincronizar y desconectar | PENDIENTE |
