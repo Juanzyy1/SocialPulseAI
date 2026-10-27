@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { clearSessionData, fetchSession, SESSION_KEY } from './session-core';
+import { clearSessionData, fetchSession, refreshSession, SESSION_KEY } from './session-core';
 
 const profile = {
   id: '77c69fe0-cfa1-44f6-a43d-cf33ae48cc89',
@@ -9,6 +9,10 @@ const profile = {
   createdAt: '2026-10-24T00:00:00.000Z',
   avatarUrl: null,
   emailVerifiedAt: null,
+  termsAcceptedAt: '2026-10-24T00:00:00.000Z',
+  termsVersion: '2026-10-24',
+  termsUpToDate: true,
+  currentTermsVersion: '2026-10-24',
 };
 
 const jsonResponse = (body: unknown, status = 200) =>
@@ -17,17 +21,17 @@ const jsonResponse = (body: unknown, status = 200) =>
     headers: { 'Content-Type': 'application/json' },
   });
 
+const fetchMock = vi.fn();
+
+beforeEach(() => {
+  fetchMock.mockReset();
+  vi.stubGlobal('fetch', fetchMock);
+});
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe('fetchSession', () => {
-  const fetchMock = vi.fn();
-
-  beforeEach(() => {
-    fetchMock.mockReset();
-    vi.stubGlobal('fetch', fetchMock);
-  });
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   it('devuelve el perfil cuando hay sesión', async () => {
     fetchMock.mockResolvedValue(jsonResponse(profile));
 
@@ -54,6 +58,25 @@ describe('fetchSession', () => {
     fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
 
     await expect(fetchSession()).rejects.toMatchObject({ name: 'ApiError', status: 0 });
+  });
+});
+
+describe('refreshSession', () => {
+  it('consulta de nuevo aunque haya un valor en caché y deja el perfil guardado', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(profile));
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(SESSION_KEY, null);
+
+    await expect(refreshSession(queryClient)).resolves.toEqual(profile);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(queryClient.getQueryData(SESSION_KEY)).toEqual(profile);
+  });
+
+  it('si la consulta falla, el error se propaga', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ message: 'Error' }, 500));
+
+    await expect(refreshSession(new QueryClient())).rejects.toMatchObject({ status: 500 });
   });
 });
 

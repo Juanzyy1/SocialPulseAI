@@ -18,6 +18,11 @@ export async function fetchSession(): Promise<Profile | null> {
   }
 }
 
+/** Vuelve a consultar la sesión (por ejemplo, tras iniciar sesión) y espera el resultado antes de navegar. */
+export function refreshSession(queryClient: QueryClient): Promise<Profile | null> {
+  return queryClient.fetchQuery({ queryKey: SESSION_KEY, queryFn: fetchSession, staleTime: 0 });
+}
+
 /** Deja la sesión en null y borra los datos del resto de consultas: nada de un usuario debe sobrevivirle. */
 export function clearSessionData(queryClient: QueryClient): void {
   queryClient.setQueryData(SESSION_KEY, null);

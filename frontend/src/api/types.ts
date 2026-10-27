@@ -16,6 +16,11 @@ export interface AuthUser {
 export interface Profile extends AuthUser {
   avatarUrl: string | null;
   emailVerifiedAt: string | null;
+  termsAcceptedAt: string | null;
+  termsVersion: string | null;
+  /** false: hay que pedir la aceptación de los términos antes de mostrar el panel (F.3c). */
+  termsUpToDate: boolean;
+  currentTermsVersion: string;
 }
 
 export interface RegisterInput {
@@ -24,6 +29,8 @@ export interface RegisterInput {
   password: string;
   /** Hasta 80 caracteres. */
   displayName?: string;
+  acceptTerms: true;
+  termsVersion: string;
 }
 
 export interface LoginInput {

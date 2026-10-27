@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router';
 import { AccountsPage } from './pages/AccountsPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { LegalStubPage } from './pages/LegalStubPage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -18,6 +19,9 @@ export default function App() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/cuentas" element={<AccountsPage />} />
       </Route>
+      {/* Públicas: se abren desde el registro, con o sin sesión. */}
+      <Route path="/terminos" element={<LegalStubPage title="Términos de uso" />} />
+      <Route path="/privacidad" element={<LegalStubPage title="Política de privacidad" />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
