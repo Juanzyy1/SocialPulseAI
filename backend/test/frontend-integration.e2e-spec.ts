@@ -20,6 +20,7 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { PERMISSIVE_RATE_LIMITS } from './helpers/rate-limits';
 import { registerAndLogin } from './helpers/session';
 import type { TestUser } from './helpers/session';
+import { TERMS } from './helpers/terms';
 
 // Dominio .invalid: reservado, nunca es un correo real.
 const TEST_DOMAIN = '@frontend-integration-test.invalid';
@@ -135,7 +136,7 @@ describe('Validación de Origin (e2e)', () => {
     await api()
       .post('/api/v1/auth/login')
       .set('Origin', 'null')
-      .send({ email: newEmail(), password: PASSWORD })
+      .send({ email: newEmail(), password: PASSWORD, ...TERMS })
       .expect(403);
   });
 
@@ -143,7 +144,7 @@ describe('Validación de Origin (e2e)', () => {
     await api()
       .post('/api/v1/auth/register')
       .set('Origin', FRONTEND)
-      .send({ email: newEmail(), password: PASSWORD })
+      .send({ email: newEmail(), password: PASSWORD, ...TERMS })
       .expect(201);
   });
 

@@ -152,7 +152,14 @@ export class GoogleAuthService {
         if (existing.emailVerifiedAt === null) {
           await tx.user.update({
             where: { id: existing.id },
-            data: { passwordHash: null, emailVerifiedAt: new Date() },
+            // La aceptación de términos también se borra: pudo registrarla quien creó la cuenta,
+            // y el dueño real del correo no ha aceptado nada.
+            data: {
+              passwordHash: null,
+              emailVerifiedAt: new Date(),
+              termsAcceptedAt: null,
+              termsVersion: null,
+            },
           });
           await tx.session.deleteMany({ where: { userId: existing.id } });
         }

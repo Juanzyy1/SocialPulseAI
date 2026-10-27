@@ -12,6 +12,7 @@ import {
 import { RATE_LIMIT_CONFIG } from '../src/auth/rate-limit.config';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { PERMISSIVE_RATE_LIMITS } from './helpers/rate-limits';
+import { TERMS } from './helpers/terms';
 
 // Dominio .invalid: reservado, nunca es un correo real.
 const TEST_DOMAIN = '@google-test.invalid';
@@ -196,7 +197,7 @@ describe('Google OAuth (e2e, con cliente de Google simulado)', () => {
 
   it('el correo de Google se normaliza a minúsculas', async () => {
     const email = newEmail();
-    await api().post('/api/v1/auth/register').send({ email, password: PASSWORD }).expect(201);
+    await api().post('/api/v1/auth/register').send({ email, password: PASSWORD, ...TERMS }).expect(201);
 
     const res = await loginWithGoogle({
       sub: newSub(),
@@ -214,7 +215,7 @@ describe('Google OAuth (e2e, con cliente de Google simulado)', () => {
 
   it('regla 4: una cuenta local sin verificar pierde su contraseña y sus sesiones', async () => {
     const email = newEmail();
-    await api().post('/api/v1/auth/register').send({ email, password: PASSWORD }).expect(201);
+    await api().post('/api/v1/auth/register').send({ email, password: PASSWORD, ...TERMS }).expect(201);
     const attackerLogin = await api()
       .post('/api/v1/auth/login')
       .send({ email, password: PASSWORD })
@@ -241,7 +242,7 @@ describe('Google OAuth (e2e, con cliente de Google simulado)', () => {
 
   it('regla 5: una cuenta local ya verificada conserva su contraseña al vincular Google', async () => {
     const email = newEmail();
-    await api().post('/api/v1/auth/register').send({ email, password: PASSWORD }).expect(201);
+    await api().post('/api/v1/auth/register').send({ email, password: PASSWORD, ...TERMS }).expect(201);
     await prisma.user.update({ where: { email }, data: { emailVerifiedAt: new Date() } });
 
     const res = await loginWithGoogle({ sub: newSub(), email, emailVerified: true });

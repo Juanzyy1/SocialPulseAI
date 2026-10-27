@@ -44,6 +44,10 @@ model User {
   passwordHash String?
   // Se completa cuando el correo se verifica. Con Google, se marca al vincular.
   emailVerifiedAt DateTime?
+  // Aceptación de los términos y la política de privacidad (versión del texto aceptada).
+  termsAcceptedAt DateTime?
+  termsVersion    String?
+  
   displayName  String?
   avatarUrl    String?
   createdAt    DateTime @default(now())

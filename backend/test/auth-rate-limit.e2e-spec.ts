@@ -9,6 +9,7 @@ import { RATE_LIMIT_CONFIG } from '../src/auth/rate-limit.config';
 import type { RateLimitConfig } from '../src/auth/rate-limit.config';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { PERMISSIVE_RATE_LIMITS } from './helpers/rate-limits';
+import { TERMS } from './helpers/terms';
 
 // Dominio .invalid: reservado, nunca es un correo real.
 const TEST_DOMAIN = '@rate-limit-test.invalid';
@@ -31,7 +32,7 @@ function helpers(app: INestApplication<App>) {
   return {
     register: async (): Promise<string> => {
       const email = `${randomUUID()}${TEST_DOMAIN}`;
-      await api().post('/api/v1/auth/register').send({ email, password: PASSWORD }).expect(201);
+      await api().post('/api/v1/auth/register').send({ email, password: PASSWORD, ...TERMS }).expect(201);
       return email;
     },
     login: (email: string, password = PASSWORD) =>
@@ -39,7 +40,7 @@ function helpers(app: INestApplication<App>) {
     registerRaw: () =>
       api()
         .post('/api/v1/auth/register')
-        .send({ email: `${randomUUID()}${TEST_DOMAIN}`, password: PASSWORD }),
+        .send({ email: `${randomUUID()}${TEST_DOMAIN}`, password: PASSWORD, ...TERMS }),
   };
 }
 

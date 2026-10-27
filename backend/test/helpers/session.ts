@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
+import { TERMS } from './terms';
 
 export const TEST_PASSWORD = 'una-clave-larga-1234';
 
@@ -22,7 +23,7 @@ export async function registerAndLogin(
 
   const registered = await request(server)
     .post('/api/v1/auth/register')
-    .send({ email, password: TEST_PASSWORD })
+    .send({ email, password: TEST_PASSWORD, ...TERMS })
     .expect(201);
   const res = await request(server)
     .post('/api/v1/auth/login')

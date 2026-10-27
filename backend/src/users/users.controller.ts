@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Patch, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCookieAuth,
@@ -10,6 +10,7 @@ import {
 import type { AuthContext } from '../auth/auth-context';
 import { CurrentAuth } from '../auth/current-auth.decorator';
 import { SESSION_COOKIE } from '../auth/session-cookie';
+import { TermsAcceptanceDto } from '../legal/dto/terms-acceptance.dto';
 import { ProfileResponseDto } from './dto/profile-response.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UsersService } from './users.service';
@@ -37,5 +38,21 @@ export class UsersController {
     @Body() dto: UpdateProfileDto,
   ): Promise<ProfileResponseDto> {
     return this.users.updateProfile(auth.userId, dto);
+  }
+
+  @Post('me/terms')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Registra la aceptación de los términos y la política de privacidad vigentes',
+    description:
+      'Repetirlo no cambia la fecha original. Sirve también para quien se registró con Google y para cuando cambia la versión de los términos.',
+  })
+  @ApiOkResponse({ type: ProfileResponseDto })
+  @ApiBadRequestResponse({ description: 'No se aceptó o la versión no está vigente' })
+  acceptTerms(
+    @CurrentAuth() auth: AuthContext,
+    @Body() dto: TermsAcceptanceDto,
+  ): Promise<ProfileResponseDto> {
+    return this.users.acceptTerms(auth.userId, dto);
   }
 }

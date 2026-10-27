@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   HttpException,
   HttpStatus,
@@ -16,6 +17,7 @@ import { RATE_LIMIT_CONFIG } from './rate-limit.config';
 import type { RateLimitConfig } from './rate-limit.config';
 import { RateLimiterService } from './rate-limiter.service';
 import { SessionMeta, SessionsService } from './sessions.service';
+import { CURRENT_TERMS_VERSION, TERMS_OUTDATED_MESSAGE } from '../legal/terms';
 
 /** Código de Prisma para "violación de restricción única". */
 function isUniqueViolation(error: unknown): boolean {
@@ -47,9 +49,14 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto, ip?: string): Promise<UserResponseDto> {
+    // El texto que la persona aceptó debe ser el vigente: no se registra la aceptación de otra versión.
+    if (dto.termsVersion !== CURRENT_TERMS_VERSION) {
+      throw new BadRequestException(TERMS_OUTDATED_MESSAGE);
+    }
+
     // Cada intento de registro cuenta, tenga éxito o no.
     const ipKey = `register:ip:${ip ?? 'unknown'}`;
-    if (this.limiter.isBlocked(ipKey, this.limits.registrationsPerIp)) {
+    if (this.limiter.isBlocked(ipKey, this.limits.registrationsPerIp)) { 
       throw tooManyRequests();
     }
     this.limiter.record(ipKey, this.limits.registrationsPerIp.windowMs);
@@ -62,6 +69,8 @@ export class AuthService {
           email: dto.email,
           passwordHash,
           displayName: dto.displayName ?? null,
+          termsAcceptedAt: new Date(),
+          termsVersion: CURRENT_TERMS_VERSION,
         },
         select: { id: true, email: true, displayName: true, createdAt: true },
       });

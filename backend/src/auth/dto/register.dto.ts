@@ -7,11 +7,12 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { TermsAcceptanceDto } from '../../legal/dto/terms-acceptance.dto';
 
 export const normalizeEmail = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim().toLowerCase() : value;
 
-export class RegisterDto {
+export class RegisterDto extends TermsAcceptanceDto {
   @ApiProperty({ example: 'ana@example.com' })
   @Transform(normalizeEmail)
   @IsEmail()

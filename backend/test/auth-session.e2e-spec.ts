@@ -8,6 +8,7 @@ import { configureApp } from '../src/app.setup';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { RATE_LIMIT_CONFIG } from '../src/auth/rate-limit.config';
 import { PERMISSIVE_RATE_LIMITS } from './helpers/rate-limits';
+import { TERMS } from './helpers/terms';
 
 // Dominio .invalid: reservado, nunca es un correo real.
 const TEST_DOMAIN = '@session-http-test.invalid';
@@ -23,7 +24,7 @@ describe('Login, logout y guard (e2e)', () => {
     const email = `${randomUUID()}${TEST_DOMAIN}`;
     await api()
       .post('/api/v1/auth/register')
-      .send({ email, password: PASSWORD })
+      .send({ email, password: PASSWORD, ...TERMS })
       .expect(201);
     return email;
   };
