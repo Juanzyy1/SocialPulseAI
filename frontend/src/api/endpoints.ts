@@ -1,5 +1,11 @@
 import { apiFetch } from './client';
-import type { AuthUser, LoginInput, Profile, RegisterInput } from './types';
+import type {
+  AuthUser,
+  LoginInput,
+  Profile,
+  RegisterInput,
+  TermsAcceptanceInput,
+} from './types';
 
 export const authApi = {
   /** No inicia sesión: después hay que llamar a login. */
@@ -11,4 +17,7 @@ export const authApi = {
 
 export const usersApi = {
   me: () => apiFetch<Profile>('/users/me'),
+  /** Registra la aceptación de los términos vigentes. Repetirlo no cambia la fecha original. */
+  acceptTerms: (input: TermsAcceptanceInput) =>
+    apiFetch<Profile>('/users/me/terms', { method: 'POST', body: input }),
 };

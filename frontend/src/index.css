@@ -19,12 +19,12 @@
 }
 
 /* Panel lateral de las pantallas de entrada. Capas de arriba abajo: velo oscuro, imagen
-   (public/auth-side.webp, opcional) y degradado de respaldo si la imagen no existe. */
+   (public/auth-side.webp.jpg, opcional) y degradado de respaldo si la imagen no existe. */
 .auth-side {
   background-color: #050b18;
   background-image:
     linear-gradient(180deg, rgb(5 11 24 / 0.15), rgb(5 11 24 / 0.5)),
-    url("/auth-side.webp"),
+    url("/auth-side.webp.jpg"),
     radial-gradient(circle at 70% 20%, #1d4ed8 0%, #050b18 62%);
   background-size: cover;
   background-position: center;

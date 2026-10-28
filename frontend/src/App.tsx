@@ -1,12 +1,14 @@
 import { Route, Routes } from 'react-router';
+import { PrivacyPage } from './legal/PrivacyPage';
+import { TermsPage } from './legal/TermsPage';
 import { AccountsPage } from './pages/AccountsPage';
 import { DashboardPage } from './pages/DashboardPage';
-import { LegalStubPage } from './pages/LegalStubPage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { GuestOnly } from './session/GuestOnly';
 import { RequireAuth } from './session/RequireAuth';
+import { RequireTerms } from './session/RequireTerms';
 
 export default function App() {
   return (
@@ -16,12 +18,14 @@ export default function App() {
         <Route path="/registro" element={<RegisterPage />} />
       </Route>
       <Route element={<RequireAuth />}>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/cuentas" element={<AccountsPage />} />
+        <Route element={<RequireTerms />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/cuentas" element={<AccountsPage />} />
+        </Route>
       </Route>
-      {/* Públicas: se abren desde el registro, con o sin sesión. */}
-      <Route path="/terminos" element={<LegalStubPage title="Términos de uso" />} />
-      <Route path="/privacidad" element={<LegalStubPage title="Política de privacidad" />} />
+      {/* Públicas: se abren desde el registro y desde la puerta de aceptación, con o sin sesión. */}
+      <Route path="/terminos" element={<TermsPage />} />
+      <Route path="/privacidad" element={<PrivacyPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

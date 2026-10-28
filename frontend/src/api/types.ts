@@ -37,3 +37,9 @@ export interface LoginInput {
   email: string;
   password: string;
 }
+
+/** Cuerpo de POST /users/me/terms (y los campos de aceptación del registro). */
+export interface TermsAcceptanceInput {
+  acceptTerms: true;
+  termsVersion: string;
+}
