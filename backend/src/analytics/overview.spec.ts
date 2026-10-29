@@ -11,7 +11,15 @@ const def = (
   code: string,
   kind: MetricDefinition['kind'],
   extra: Partial<MetricDefinition> = {},
-): MetricDefinition => ({ code, kind, unit: 'count', compatibleGroup: null, ...extra });
+): MetricDefinition => ({
+  code,
+  label: code,
+  kind,
+  unit: 'count',
+  polarity: 'neutral',
+  compatibleGroup: null,
+  ...extra,
+});
 
 const metric = (code: string, kind: string, value: number | null): MetricSummary => ({
   metric: code,

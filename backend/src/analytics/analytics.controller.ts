@@ -13,9 +13,11 @@ import { CurrentAuth } from '../auth/current-auth.decorator';
 import { SESSION_COOKIE } from '../auth/session-cookie';
 import { AnalyticsService } from './analytics.service';
 import { AccountAnalyticsResponseDto } from './dto/account-analytics-response.dto';
+import { CatalogResponseDto } from './dto/catalog-response.dto';
 import { ComparisonResponseDto } from './dto/compare-response.dto';
 import { OverviewResponseDto } from './dto/overview-response.dto';
 import { CompareQueryDto, PeriodParamsDto, PeriodQueryDto } from './dto/period-query.dto';
+import { describeCatalog } from './metric-catalog';
 
 @ApiTags('analytics')
 @ApiCookieAuth(SESSION_COOKIE)
@@ -23,6 +25,17 @@ import { CompareQueryDto, PeriodParamsDto, PeriodQueryDto } from './dto/period-q
 @Controller('analytics')
 export class AnalyticsController {
   constructor(private readonly analytics: AnalyticsService) {}
+
+  @Get('metrics')
+  @ApiOperation({
+    summary: 'Catálogo de métricas: nombre, tipo, unidad, polaridad y advertencia de cada una',
+    description:
+      'Es estático: la interfaz puede pedirlo una sola vez. `polarity` indica qué dirección de cambio es buena (por ejemplo, que bajen los suscriptores perdidos) para colorear las variaciones.',
+  })
+  @ApiOkResponse({ type: CatalogResponseDto })
+  catalog(): CatalogResponseDto {
+    return { platforms: describeCatalog() };
+  }
 
   @Get('overview')
   @ApiOperation({

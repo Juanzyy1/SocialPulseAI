@@ -1,5 +1,6 @@
 import {
   dailyMetricCodes,
+  describeCatalog,
   getMetricDefinition,
   isCompatibleForGlobalSum,
   metricsOf,
@@ -56,5 +57,54 @@ describe('catálogo de métricas', () => {
 
   it('estimatedMinutesWatched advierte que son minutos enteros por día', () => {
     expect(getMetricDefinition('YOUTUBE', 'estimatedMinutesWatched')?.note).toContain('enteros');
+  });
+
+  it('cada métrica tiene una etiqueta en español, no vacía, única y distinta de su código', () => {
+    const labels = youtube.map((m) => m.label);
+
+    expect(new Set(labels).size).toBe(labels.length);
+    for (const metric of youtube) {
+      expect(metric.label.trim()).not.toBe('');
+      expect(metric.label).not.toBe(metric.code);
+    }
+  });
+
+  it('solo las bajas de suscriptores son "mejor si bajan"; los totales puntuales son neutrales', () => {
+    const lowerIsBetter = youtube.filter((m) => m.polarity === 'lower_is_better');
+    expect(lowerIsBetter.map((m) => m.code)).toEqual(['subscribersLost']);
+
+    for (const metric of youtube.filter((m) => m.kind === 'snapshot')) {
+      expect(metric.polarity).toBe('neutral');
+    }
+    for (const metric of youtube.filter((m) => m.kind !== 'snapshot' && m.code !== 'subscribersLost')) {
+      expect(metric.polarity).toBe('higher_is_better');
+    }
+  });
+});
+
+describe('describeCatalog', () => {
+  it('lista las plataformas con catálogo y todas sus métricas, en orden', () => {
+    const catalog = describeCatalog();
+
+    expect(catalog.map((p) => p.platform)).toEqual(['YOUTUBE']);
+    expect(catalog[0].metrics.map((m) => m.code)).toEqual(metricsOf('YOUTUBE').map((m) => m.code));
+  });
+
+  it('entrega solo los campos públicos, sin datos internos de agregación', () => {
+    for (const metric of describeCatalog()[0].metrics) {
+      expect(Object.keys(metric).sort()).toEqual(['code', 'kind', 'label', 'note', 'polarity', 'unit']);
+    }
+    const views = describeCatalog()[0].metrics.find((m) => m.code === 'views');
+    expect(views).toMatchObject({ label: 'Vistas', polarity: 'higher_is_better', note: null });
+  });
+
+  it('devuelve copias: modificar el resultado no altera el catálogo', () => {
+    const first = describeCatalog();
+    first[0].metrics[0].label = 'MODIFICADO';
+    first[0].metrics.length = 0;
+
+    const second = describeCatalog();
+    expect(second[0].metrics[0].label).toBe('Vistas');
+    expect(second[0].metrics.length).toBeGreaterThan(0);
   });
 });
