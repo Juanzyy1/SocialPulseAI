@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
-/* Colores de marca en un solo sitio. Contraste calculado a mano (verifícalo con una herramienta):
-   blanco sobre brand-600 ≈ 5,2:1; muted sobre blanco ≈ 5,9:1; danger sobre blanco ≈ 6,6:1. */
+/* Colores en un solo sitio. Los de marca y del acceso son claros; los "panel-*" son del panel oscuro.
+   Contrastes calculados a mano (verifícalos con una herramienta): blanco sobre brand-600 ≈ 5,2:1;
+   muted sobre blanco ≈ 5,9:1; danger sobre blanco ≈ 6,6:1; panel-muted sobre panel-card ≈ 7:1. */
 @theme {
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   --color-brand-600: #1d63ed;
@@ -9,6 +10,16 @@
   --color-ink: #0b1220;
   --color-muted: #5b6577;
   --color-danger: #b42318;
+
+  --color-panel: #070d24;
+  --color-panel-card: #0e1736;
+  --color-panel-line: #1b2750;
+  --color-panel-text: #e6ebff;
+  --color-panel-muted: #9aa6cf;
+  /* Para las series de los gráficos (F.4d). */
+  --color-chart-1: #5b8def;
+  --color-chart-2: #22d3ee;
+  --color-chart-3: #c084fc;
 }
 
 @layer base {
@@ -19,7 +30,7 @@
 }
 
 /* Panel lateral de las pantallas de entrada. Capas de arriba abajo: velo oscuro, imagen
-   (public/auth-side.webp.jpg, opcional) y degradado de respaldo si la imagen no existe. */
+   (public/auth-side.webp, opcional) y degradado de respaldo si la imagen no existe. */
 .auth-side {
   background-color: #050b18;
   background-image:
@@ -30,7 +41,7 @@
   background-position: center;
 }
 
-/* Estilo provisional de las páginas que aún no se rediseñan (el panel llega con la F.4). */
+/* Estilo provisional de las páginas sueltas (error de sesión, página no encontrada). */
 #root > main {
   padding: 1.5rem;
 }

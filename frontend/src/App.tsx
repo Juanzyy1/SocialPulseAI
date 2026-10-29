@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router';
+import { AppShell } from './components/AppShell';
 import { PrivacyPage } from './legal/PrivacyPage';
 import { TermsPage } from './legal/TermsPage';
 import { AccountsPage } from './pages/AccountsPage';
@@ -19,8 +20,11 @@ export default function App() {
       </Route>
       <Route element={<RequireAuth />}>
         <Route element={<RequireTerms />}>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/cuentas" element={<AccountsPage />} />
+          {/* La estructura (menú y barra de usuario) solo envuelve las pantallas de la aplicación. */}
+          <Route element={<AppShell />}>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/cuentas" element={<AccountsPage />} />
+          </Route>
         </Route>
       </Route>
       {/* Públicas: se abren desde el registro y desde la puerta de aceptación, con o sin sesión. */}

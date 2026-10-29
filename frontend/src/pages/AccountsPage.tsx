@@ -1,11 +1,8 @@
-import { Link } from 'react-router';
-
 export function AccountsPage() {
   return (
-    <main>
-      <h1>Cuentas</h1>
-      <p>Pendiente (F.5).</p>
-      <Link to="/">Volver al panel</Link>
-    </main>
+    <div>
+      <h1 className="mb-2 text-2xl font-semibold">Cuentas</h1>
+      <p className="text-panel-muted">Pendiente (F.5).</p>
+    </div>
   );
 }
