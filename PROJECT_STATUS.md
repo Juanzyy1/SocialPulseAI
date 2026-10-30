@@ -53,8 +53,15 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | F.1b Origin, FRONTEND_URL y redirecciones | COMPLETADA | Código y 38 pruebas escritas (28 unitarias y 10 e2e) | Pruebas automáticas y verificación manual |
 | F.1c Catálogo de métricas y `termsAcceptedAt` | PENDIENTE | Se hará con el panel (F.4) y el registro (F.3) |
 | F.2 Cliente de la API con tipos desde Swagger, rutas y estado de sesión | COMPLETADA |
-| F.3 Pantallas de registro y login (Google incluido) | PENDIENTE |
+| F.3 Pantallas de registro y login (Google incluido) | COMPLETADA |
+| F.3a Backend: aceptación de términos | COMPLETADA | Verificada por el usuario (migración, pruebas y comprobación manual); salidas no adjuntas |
+| F.3b Tailwind y pantallas de registro y login | COMPLETADA | Código y 34 pruebas nuevas escritas (57 en total en el frontend) | Build, lint, pruebas y verificación manual |
+| F.3c Términos, privacidad y puerta de aceptación | COMPLETADA | Código y 20 pruebas escritas (18 del frontend y 2 del backend) | Pruebas automáticas y verificación manual |
 | F.4 Panel: tarjetas, gráfico de vistas por día y cuentas | PENDIENTE |
+| F.4a Backend: catálogo de métricas | COMPLETADA | 181 unitarias en verde; endpoint comprobado a mano; falta ver las 3 e2e y `tsc` |
+| F.4b Estructura del panel | COMPLETADA | 87 pruebas del frontend, build y lint limpios; 8 pruebas manuales correctas el 26/10/2026 |
+| F.4c Selector de cuenta y tarjetas de métricas | COMPLETADA | 169 pruebas del frontend, build y lint limpios; pruebas manuales correctas el 29/10/2026 |
+| F.4d Gráfico de vistas por día y lista de cuentas | POR VERIFICAR | Código y unas 50 pruebas escritas; corrige el aviso de retraso (se atribuía a la plataforma lo que era falta de sincronización) | Build, lint, pruebas y 9 pruebas manuales |
 | F.5 Conectar YouTube, sincronizar y desconectar | PENDIENTE |
 | F.6 Comparación de periodos, estados vacíos y errores | PENDIENTE |
 | F.7 Pruebas de la interfaz | PENDIENTE |
@@ -81,6 +88,10 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 - **Baja:** las e2e dependen de PostgreSQL encendido y de un `.env` local (Fase 9).
 - **Baja:** avisos `EBADENGINE` y vulnerabilidades solo en dependencias de desarrollo.
 - Repositorio **público**: nunca subir `.env`, claves ni secretos, ni el JSON de los sondeos.
+- **Media:** textos legales en borrador (unos 16 marcadores `[COMPLETAR]`) sin revisión legal; no publicar la aplicación con ellos. La declaración de uso limitado de Google está sin verificar.
+- **Media:** no existe eliminación de cuenta ni limpieza programada de sesiones caducadas; la política de privacidad no puede prometerlas.
+- **Baja:** la imagen lateral original pesa 1,99 MB; convertir a WebP antes de subirla. El arte promete funciones futuras (crea, automatiza, TikTok, X); revisar antes de abrirla al público.
+- **Baja:** el gráfico es propio (SVG); si hacen falta varias series, zoom o más tipos de gráfico, evaluar una librería con verificación previa de compatibilidad con React 19 y Vite 8.
 
 ## Decisiones técnicas confirmadas
 - Monolito modular NestJS + Prisma 7 + PostgreSQL, REST con prefijo `/api/v1`.

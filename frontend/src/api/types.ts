@@ -43,3 +43,126 @@ export interface TermsAcceptanceInput {
   acceptTerms: true;
   termsVersion: string;
 }
+
+export type MetricUnit = 'count' | 'minutes' | 'seconds';
+export type MetricKind = 'additive' | 'weighted_average' | 'snapshot';
+export type MetricPolarity = 'higher_is_better' | 'lower_is_better' | 'neutral';
+export type AccountStatus = 'ACTIVE' | 'REVOKED' | 'ERROR';
+
+/** Respuesta de GET /social-accounts (nunca incluye credenciales). */
+export interface SocialAccount {
+  id: string;
+  platform: 'YOUTUBE' | 'INSTAGRAM' | 'TIKTOK';
+  platformAccountId: string;
+  displayName: string | null;
+  handle: string | null;
+  avatarUrl: string | null;
+  status: AccountStatus;
+  connectedAt: string;
+  lastSyncedAt: string | null;
+}
+
+/** Respuesta de GET /analytics/metrics. */
+export interface CatalogMetric {
+  code: string;
+  label: string;
+  kind: MetricKind;
+  unit: MetricUnit;
+  polarity: MetricPolarity;
+  note: string | null;
+}
+
+export interface CatalogResponse {
+  platforms: Array<{ platform: string; metrics: CatalogMetric[] }>;
+}
+
+export interface Period {
+  kind: string;
+  /** AAAA-MM-DD (fecha del Pacífico). */
+  start: string;
+  end: string;
+  days: number;
+}
+
+export interface DateRange {
+  from: string;
+  to: string;
+}
+
+export interface Coverage {
+  daysWithData: number;
+  missingDays: number;
+  missingRanges: DateRange[];
+}
+
+export interface ComparedValue {
+  value: number | null;
+  daysWithData: number;
+}
+
+export interface MetricComparison {
+  metric: string;
+  kind: string;
+  unit: MetricUnit;
+  note: string | null;
+  current: ComparedValue;
+  previous: ComparedValue;
+  comparable: boolean;
+  reasonCode: string | null;
+  reason: string | null;
+  change: number | null;
+  changePercent: number | null;
+}
+
+export interface PeriodSummary {
+  period: Period;
+  coverage: Coverage;
+}
+
+export interface AnalyticsAccount {
+  id: string;
+  platform: string;
+  displayName: string | null;
+  status: AccountStatus;
+}
+
+/** Respuesta de GET /analytics/compare. */
+export interface ComparisonResponse {
+  account: AnalyticsAccount;
+  dataThrough: string | null;
+  daysBehind: number | null;
+  current: PeriodSummary | null;
+  previous: PeriodSummary | null;
+  comparable: boolean;
+  message: string | null;
+  metrics: MetricComparison[];
+}
+
+export interface TotalValue {
+  metric: string;
+  unit: MetricUnit;
+  value: number;
+  /** Fecha del Pacífico en que se capturó. */
+  capturedOn: string;
+  note: string | null;
+}
+
+/** Un día de la serie diaria: solo existen los días que tienen dato. */
+export interface DailyPoint {
+  date: string;
+  values: Record<string, number>;
+}
+
+/** Respuesta de GET /analytics/accounts/:id (solo los campos que usa el panel). */
+export interface AccountAnalytics {
+  account: AnalyticsAccount;
+  period: Period | null;
+  dataThrough: string | null;
+  daysBehind: number | null;
+  lastSyncedAt: string | null;
+  coverage: Coverage | null;
+  totals: TotalValue[];
+  /** Solo viene con daily=true; solo incluye los días con dato. */
+  daily?: DailyPoint[];
+  message: string | null;
+}
