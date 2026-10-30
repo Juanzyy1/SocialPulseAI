@@ -168,6 +168,7 @@ las 6 tareas (5.1 a 5.4c) con sus pruebas unitarias y e2e en verde.
 16. Panel: muestra una cuenta a la vez, con selector, porque la comparación es por cuenta. Los días sin dato nunca se dibujan como ceros. Cada métrica declara su polaridad (mejor si sube, mejor si baja, neutra) en el catálogo, que se entrega en `GET /analytics/metrics` con etiquetas en español. El periodo vive en la URL (`?period=7d|30d|90d`; por defecto 30d). Avatares: solo iniciales. El menú solo lista secciones que existen.
 17 (ajuste). El aviso de retraso solo se atribuye a la plataforma si la cuenta se sincronizó hace menos de un día; si no, el aviso dice cuándo fue la última sincronización y que hay que sincronizar.
 18. Gráfico de vistas por día: una barra por día del periodo, sin librería. Un día con dato es una barra; un día en cero es una línea fina (dato real); un día sin dato es un contorno punteado, y nunca se dibuja como cero. Incluye leyenda, resumen para lectores de pantalla y tabla desplegable con todos los días. La lista "Tus cuentas" muestra plataforma, estado en palabras y última sincronización.
+19. Cuentas en la interfaz: conectar YouTube es una navegación completa a `/api/v1/integrations/youtube/connect` precedida de la explicación de los dos permisos de solo lectura. El resultado llega en `?youtube=connected` o `?youtube=error&reason=<código>`; el código solo se traduce por una lista cerrada y se limpia de la URL. Sincronizar muestra filas y rango, o el motivo del fallo; una sincronización fallida también refresca la lista de cuentas (puede haber quedado sin acceso). Una cuenta sin acceso ofrece Reconectar. Desconectar exige una confirmación que indica qué se borra (credenciales y estadísticas) y que al reconectar solo se recuperan los últimos 90 días; el resultado informa si Google confirmó la revocación.
 
 
 ## DECISIONES
@@ -188,3 +189,5 @@ las 6 tareas (5.1 a 5.4c) con sus pruebas unitarias y e2e en verde.
 | Registro: nombre | Obligatorio en la interfaz (el backend lo admite opcional) | Confirmada |
 | Color de marca | Azul, a juego con la imagen lateral; tokens en `index.css` | Propuesta, pendiente de confirmar |
 | Imagen lateral | `public/auth-side.webp` (opcional); pendiente de confirmar derechos, logotipos de terceros, retratos y peso | Pendiente |
+| Desconectar una cuenta | Borra credenciales y estadísticas; al reconectar solo se recuperan 90 días. El usuario lo decide con una confirmación explícita (decisión del 30/10/2026) | Confirmada |
+| Acceso a Google en pruebas | Solo cuentas autorizadas (hasta 100) hasta publicar y verificar la aplicación (Fase 9) | Confirmada |

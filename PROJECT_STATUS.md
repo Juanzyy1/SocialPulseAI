@@ -57,12 +57,12 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | F.3a Backend: aceptación de términos | COMPLETADA | Verificada por el usuario (migración, pruebas y comprobación manual); salidas no adjuntas |
 | F.3b Tailwind y pantallas de registro y login | COMPLETADA | Código y 34 pruebas nuevas escritas (57 en total en el frontend) | Build, lint, pruebas y verificación manual |
 | F.3c Términos, privacidad y puerta de aceptación | COMPLETADA | Código y 20 pruebas escritas (18 del frontend y 2 del backend) | Pruebas automáticas y verificación manual |
-| F.4 Panel: tarjetas, gráfico de vistas por día y cuentas | PENDIENTE |
+| F.4 Panel: tarjetas, gráfico de vistas por día y cuentas | COMPLETADA |
 | F.4a Backend: catálogo de métricas | COMPLETADA | 181 unitarias en verde; endpoint comprobado a mano; falta ver las 3 e2e y `tsc` |
 | F.4b Estructura del panel | COMPLETADA | 87 pruebas del frontend, build y lint limpios; 8 pruebas manuales correctas el 26/10/2026 |
 | F.4c Selector de cuenta y tarjetas de métricas | COMPLETADA | 169 pruebas del frontend, build y lint limpios; pruebas manuales correctas el 29/10/2026 |
-| F.4d Gráfico de vistas por día y lista de cuentas | POR VERIFICAR | Código y unas 50 pruebas escritas; corrige el aviso de retraso (se atribuía a la plataforma lo que era falta de sincronización) | Build, lint, pruebas y 9 pruebas manuales |
-| F.5 Conectar YouTube, sincronizar y desconectar | PENDIENTE |
+| F.4d Gráfico de vistas por día y lista de cuentas | COMPLETADA | 221 pruebas del frontend, build y lint limpios; pruebas manuales correctas (reportadas por el usuario, sin capturas) el 29/10/2026 |
+| F.5 Cuentas: conectar, sincronizar y desconectar | COMPLETADA | 264 pruebas del frontend, build limpio; pruebas manuales aprobadas por el usuario (sin capturas) el 30/10/2026; lint: 1 aviso corregido |
 | F.6 Comparación de periodos, estados vacíos y errores | PENDIENTE |
 | F.7 Pruebas de la interfaz | PENDIENTE |
 

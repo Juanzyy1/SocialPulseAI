@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router';
 import type { Coverage } from '../api/types';
 import { describeFreshness } from '../dashboard/freshness';
 
@@ -10,8 +11,8 @@ interface FreshnessNoticeProps {
 }
 
 export function FreshnessNotice(props: FreshnessNoticeProps) {
+  // La hora se fija al montar el componente: "hace N días" no necesita cambiar en cada dibujo.
   const [now] = useState(() => new Date());
-
   const { headline, lag, sync, gaps } = describeFreshness({ ...props, now });
 
   return (
@@ -20,7 +21,10 @@ export function FreshnessNotice(props: FreshnessNoticeProps) {
       {lag && <p className="text-panel-muted">{lag}</p>}
       {sync && (
         <p role="status" className="text-amber-300">
-          {sync}
+          {sync}{' '}
+          <Link to="/cuentas" className="underline">
+            Ir a Cuentas
+          </Link>
         </p>
       )}
       {gaps && (

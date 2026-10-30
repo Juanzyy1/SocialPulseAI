@@ -166,3 +166,25 @@ export interface AccountAnalytics {
   daily?: DailyPoint[];
   message: string | null;
 }
+
+export type SyncStatus = 'RUNNING' | 'SUCCEEDED' | 'FAILED';
+
+/** Respuesta de POST /social-accounts/:id/sync. Un fallo de la sincronización llega con status FAILED y HTTP 200. */
+export interface SyncRun {
+  id: string;
+  status: SyncStatus;
+  startedAt: string;
+  finishedAt: string | null;
+  /** AAAA-MM-DD (fecha del Pacífico). */
+  rangeStart: string;
+  rangeEnd: string;
+  rowsWritten: number;
+  /** Motivo del fallo, ya sin secretos. */
+  errorMessage: string | null;
+}
+
+/** Respuesta de DELETE /social-accounts/:id. */
+export interface DisconnectResult {
+  /** false: Google no confirmó la revocación; la cuenta se desconectó igualmente. */
+  revokedAtGoogle: boolean;
+}

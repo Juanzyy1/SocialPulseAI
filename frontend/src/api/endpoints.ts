@@ -5,10 +5,12 @@ import type {
   AuthUser,
   CatalogResponse,
   ComparisonResponse,
+  DisconnectResult,
   LoginInput,
   Profile,
   RegisterInput,
   SocialAccount,
+  SyncRun,
   TermsAcceptanceInput,
 } from './types';
 
@@ -29,6 +31,14 @@ export const usersApi = {
 
 export const accountsApi = {
   list: () => apiFetch<SocialAccount[]>('/social-accounts'),
+  /** Responde 200 también cuando la sincronización falla: hay que revisar `status`. */
+  sync: (accountId: string) =>
+    apiFetch<SyncRun>(`/social-accounts/${encodeURIComponent(accountId)}/sync`, { method: 'POST' }),
+  /** Borra la cuenta, sus credenciales y su historial, e intenta revocar el acceso en Google. */
+  disconnect: (accountId: string) =>
+    apiFetch<DisconnectResult>(`/social-accounts/${encodeURIComponent(accountId)}`, {
+      method: 'DELETE',
+    }),
 };
 
 export const analyticsApi = {
@@ -40,5 +50,5 @@ export const analyticsApi = {
   account: (accountId: string, period: PeriodPreset) =>
     apiFetch<AccountAnalytics>(
       `/analytics/accounts/${encodeURIComponent(accountId)}?period=${period}&daily=true`,
-   ),
+    ),
 };

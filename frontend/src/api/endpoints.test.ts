@@ -14,7 +14,7 @@ afterEach(() => {
 
 const lastCall = () => fetchMock.mock.calls.at(-1) as [string, RequestInit];
 
-describe('accountsApi y analyticsApi', () => {
+describe('accountsApi', () => {
   it('list pide GET /social-accounts', async () => {
     await accountsApi.list();
 
@@ -22,6 +22,33 @@ describe('accountsApi y analyticsApi', () => {
     expect(lastCall()[1].method).toBe('GET');
   });
 
+  it('sync pide POST /social-accounts/:id/sync, sin cuerpo', async () => {
+    await accountsApi.sync('cuenta-1');
+
+    const [url, init] = lastCall();
+    expect(url).toBe('/api/v1/social-accounts/cuenta-1/sync');
+    expect(init.method).toBe('POST');
+    expect(init.body).toBeUndefined();
+  });
+
+  it('disconnect pide DELETE /social-accounts/:id', async () => {
+    await accountsApi.disconnect('cuenta-1');
+
+    const [url, init] = lastCall();
+    expect(url).toBe('/api/v1/social-accounts/cuenta-1');
+    expect(init.method).toBe('DELETE');
+  });
+
+  it('codifica el identificador para que no pueda alterar la ruta', async () => {
+    await accountsApi.sync('a b/../c');
+    expect(lastCall()[0]).toBe('/api/v1/social-accounts/a%20b%2F..%2Fc/sync');
+
+    await accountsApi.disconnect('x?y=1');
+    expect(lastCall()[0]).toBe('/api/v1/social-accounts/x%3Fy%3D1');
+  });
+});
+
+describe('analyticsApi', () => {
   it('catalog pide GET /analytics/metrics', async () => {
     await analyticsApi.catalog();
 

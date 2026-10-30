@@ -1,12 +1,7 @@
-import type { AccountStatus, SocialAccount } from '../api/types';
+import type { SocialAccount } from '../api/types';
 import { accountLabel, platformLabel } from '../dashboard/account-params';
-import { describeLastSync, statusLabel } from '../dashboard/account-status';
-
-const BADGE: Record<AccountStatus, string> = {
-  ACTIVE: 'bg-emerald-500/15 text-emerald-300',
-  REVOKED: 'bg-amber-400/15 text-amber-300',
-  ERROR: 'bg-amber-400/15 text-amber-300',
-};
+import { describeLastSync } from '../dashboard/account-status';
+import { StatusBadge } from './StatusBadge';
 
 interface AccountsOverviewProps {
   accounts: readonly SocialAccount[];
@@ -39,9 +34,7 @@ export function AccountsOverview({ accounts, selectedId, onSelect }: AccountsOve
                     {platformLabel(account.platform)} · {describeLastSync(account.lastSyncedAt)}
                   </span>
                 </span>
-                <span className={`rounded-md px-2 py-0.5 text-xs ${BADGE[account.status]}`}>
-                  {statusLabel(account.status)}
-                </span>
+                <StatusBadge status={account.status} />
               </button>
             </li>
           );
