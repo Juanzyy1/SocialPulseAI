@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { accountsApi, analyticsApi } from '../api/endpoints';
-import type { PeriodPreset } from './period-params';
+import { selectionKey } from './period-selection';
+import type { PeriodSelection } from './period-selection';
 
 // La primera parte de cada clave ('accounts', 'analytics') no es 'session': al cerrar sesión o
 // caducar, estos datos se borran y no sobreviven al usuario.
@@ -18,18 +19,26 @@ export function useCatalog() {
   });
 }
 
-export function useComparison(accountId: string, period: PeriodPreset) {
+export function useComparison(accountId: string, selection: PeriodSelection) {
   return useQuery({
-    queryKey: ['analytics', 'compare', accountId, period],
-    queryFn: () => analyticsApi.compare(accountId, period),
+    queryKey: ['analytics', 'compare', accountId, selectionKey(selection)],
+    queryFn: () => analyticsApi.compare(accountId, selection),
     staleTime: 60_000,
   });
 }
 
-export function useAccountAnalytics(accountId: string, period: PeriodPreset) {
+export function useAccountAnalytics(accountId: string, selection: PeriodSelection) {
   return useQuery({
-    queryKey: ['analytics', 'account', accountId, period],
-    queryFn: () => analyticsApi.account(accountId, period),
+    queryKey: ['analytics', 'account', accountId, selectionKey(selection)],
+    queryFn: () => analyticsApi.account(accountId, selection),
+    staleTime: 60_000,
+  });
+}
+
+export function useOverview(selection: PeriodSelection) {
+  return useQuery({
+    queryKey: ['analytics', 'overview', selectionKey(selection)],
+    queryFn: () => analyticsApi.overview(selection),
     staleTime: 60_000,
   });
 }

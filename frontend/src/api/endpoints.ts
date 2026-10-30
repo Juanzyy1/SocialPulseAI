@@ -1,4 +1,5 @@
-import type { PeriodPreset } from '../dashboard/period-params';
+import type { PeriodSelection } from '../dashboard/period-selection';
+import { selectionQuery } from '../dashboard/period-selection';
 import { apiFetch } from './client';
 import type {
   AccountAnalytics,
@@ -7,6 +8,7 @@ import type {
   ComparisonResponse,
   DisconnectResult,
   LoginInput,
+  OverviewResponse,
   Profile,
   RegisterInput,
   SocialAccount,
@@ -43,12 +45,14 @@ export const accountsApi = {
 
 export const analyticsApi = {
   catalog: () => apiFetch<CatalogResponse>('/analytics/metrics'),
-  compare: (accountId: string, period: PeriodPreset) =>
+  compare: (accountId: string, selection: PeriodSelection) =>
     apiFetch<ComparisonResponse>(
-      `/analytics/compare?accountId=${encodeURIComponent(accountId)}&period=${period}`,
+      `/analytics/compare?accountId=${encodeURIComponent(accountId)}&${selectionQuery(selection)}`,
     ),
-  account: (accountId: string, period: PeriodPreset) =>
+  account: (accountId: string, selection: PeriodSelection) =>
     apiFetch<AccountAnalytics>(
-      `/analytics/accounts/${encodeURIComponent(accountId)}?period=${period}&daily=true`,
+      `/analytics/accounts/${encodeURIComponent(accountId)}?${selectionQuery(selection)}&daily=true`,
     ),
+  overview: (selection: PeriodSelection) =>
+    apiFetch<OverviewResponse>(`/analytics/overview?${selectionQuery(selection)}`),
 };

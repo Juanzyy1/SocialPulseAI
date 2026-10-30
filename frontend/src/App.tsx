@@ -10,6 +10,8 @@ import { RegisterPage } from './pages/RegisterPage';
 import { GuestOnly } from './session/GuestOnly';
 import { RequireAuth } from './session/RequireAuth';
 import { RequireTerms } from './session/RequireTerms';
+import { OverviewPage } from './pages/OverviewPage';
+
 
 export default function App() {
   return (
@@ -24,6 +26,7 @@ export default function App() {
           <Route element={<AppShell />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/cuentas" element={<AccountsPage />} />
+            <Route path="/resumen" element={<OverviewPage />} />
           </Route>
         </Route>
       </Route>

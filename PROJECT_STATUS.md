@@ -63,7 +63,7 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | F.4c Selector de cuenta y tarjetas de métricas | COMPLETADA | 169 pruebas del frontend, build y lint limpios; pruebas manuales correctas el 29/10/2026 |
 | F.4d Gráfico de vistas por día y lista de cuentas | COMPLETADA | 221 pruebas del frontend, build y lint limpios; pruebas manuales correctas (reportadas por el usuario, sin capturas) el 29/10/2026 |
 | F.5 Cuentas: conectar, sincronizar y desconectar | COMPLETADA | 264 pruebas del frontend, build limpio; pruebas manuales aprobadas por el usuario (sin capturas) el 30/10/2026; lint: 1 aviso corregido |
-| F.6 Comparación de periodos, estados vacíos y errores | PENDIENTE |
+| F.6 Rango personalizado, resumen global y pulido | POR VERIFICAR | Código y unas 70 pruebas escritas | Build, lint, pruebas y 9 pruebas manuales |
 | F.7 Pruebas de la interfaz | PENDIENTE |
 
 ## Errores, riesgos y bloqueos

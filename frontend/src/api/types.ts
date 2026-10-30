@@ -188,3 +188,60 @@ export interface DisconnectResult {
   /** false: Google no confirmó la revocación; la cuenta se desconectó igualmente. */
   revokedAtGoogle: boolean;
 }
+
+/** Una métrica de una cuenta en el resumen global. */
+export interface MetricValue {
+  metric: string;
+  kind: MetricKind;
+  unit: MetricUnit;
+  value: number | null;
+  daysWithData: number;
+  note: string | null;
+}
+
+export interface OverviewAccount {
+  id: string;
+  platform: string;
+  displayName: string | null;
+  status: AccountStatus;
+  lastSyncedAt: string | null;
+  dataThrough: string | null;
+  daysBehind: number | null;
+  coverage: Coverage | null;
+  metrics: MetricValue[];
+  totals: TotalValue[];
+}
+
+/** Métrica combinada de varias cuentas de una misma plataforma. */
+export interface CombinedMetric {
+  metric: string;
+  kind: MetricKind;
+  unit: MetricUnit;
+  value: number | null;
+  /** Cuentas cuyo valor intervino en el cálculo. */
+  accountsIncluded: number;
+  note: string | null;
+}
+
+export interface PlatformSummary {
+  platform: string;
+  accountCount: number;
+  accountsWithData: number;
+  /** false: alguna cuenta no tiene dato en todos los días del rango y los totales son parciales. */
+  complete: boolean;
+  metrics: CombinedMetric[];
+}
+
+/** Respuesta de GET /analytics/overview. */
+export interface OverviewResponse {
+  period: Period | null;
+  dataThrough: string | null;
+  daysBehind: number | null;
+  accounts: OverviewAccount[];
+  platforms: PlatformSummary[];
+  crossPlatform: {
+    groups: Array<{ group: string; unit: MetricUnit; value: number; platforms: string[] }>;
+    message: string | null;
+  };
+  message: string | null;
+}

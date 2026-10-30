@@ -3,33 +3,24 @@ import type { SocialAccount } from '../api/types';
 import { accountLabel, accountStatusNotice, platformLabel } from '../dashboard/account-params';
 import { buildMetricCards, buildTotals } from '../dashboard/cards';
 import { buildDaySeries } from '../dashboard/chart';
-import { describeLoadError } from '../dashboard/errors';
 import { formatDateRange } from '../dashboard/format';
-import type { PeriodPreset } from '../dashboard/period-params';
+import type { PeriodSelection } from '../dashboard/period-selection';
 import { useAccountAnalytics, useCatalog, useComparison } from '../dashboard/queries';
 import { FreshnessNotice } from './FreshnessNotice';
+import { LoadError } from './LoadError';
 import { MetricCard } from './MetricCard';
 import { ViewsChart } from './ViewsChart';
 
-function LoadError({ error, onRetry }: { error: unknown; onRetry: () => void }) {
-  return (
-    <div role="alert" className="rounded-xl border border-red-400/30 bg-red-500/10 p-5 text-sm">
-      <p className="text-red-200">{describeLoadError(error)}</p>
-      <button
-        type="button"
-        onClick={onRetry}
-        className="mt-3 rounded-lg border border-panel-line px-3 py-1.5 text-panel-text hover:bg-panel-line"
-      >
-        Reintentar
-      </button>
-    </div>
-  );
-}
-
-export function AccountPanel({ account, period }: { account: SocialAccount; period: PeriodPreset }) {
+export function AccountPanel({
+  account,
+  selection,
+}: {
+  account: SocialAccount;
+  selection: PeriodSelection;
+}) {
   const catalog = useCatalog();
-  const comparison = useComparison(account.id, period);
-  const analytics = useAccountAnalytics(account.id, period);
+  const comparison = useComparison(account.id, selection);
+  const analytics = useAccountAnalytics(account.id, selection);
 
   if (comparison.isPending || catalog.isPending) {
     return (
@@ -55,6 +46,7 @@ export function AccountPanel({ account, period }: { account: SocialAccount; peri
   const cards = buildMetricCards(definitions, data);
   const totals = analytics.data ? buildTotals(definitions, analytics.data.totals) : [];
   const notice = accountStatusNotice(account.status);
+  const hasData = data.current !== null && data.current.coverage.daysWithData > 0;
 
   const views = definitions.find((definition) => definition.code === 'views');
   const viewsLabel = views?.label ?? 'Vistas';
@@ -88,10 +80,12 @@ export function AccountPanel({ account, period }: { account: SocialAccount; peri
         lastSyncedAt={account.lastSyncedAt}
       />
 
-      {data.current === null ? (
+      {data.current === null || !hasData ? (
         <div className="rounded-xl border border-panel-line bg-panel-card p-6">
           <p className="text-panel-muted">
-            Todavía no hay métricas guardadas para esta cuenta. Se mostrarán aquí después de sincronizarla.
+            {data.current === null
+              ? 'Todavía no hay métricas guardadas para esta cuenta. Se mostrarán aquí después de sincronizarla.'
+              : `No hay datos guardados para ${formatDateRange(data.current.period.start, data.current.period.end)}. Prueba con otro periodo o sincroniza la cuenta.`}
           </p>
         </div>
       ) : (

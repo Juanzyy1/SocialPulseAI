@@ -5,6 +5,7 @@ import { useLogout, useSession } from '../session/use-session';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Panel', end: true },
+  { to: '/resumen', label: 'Resumen', end: false },
   { to: '/cuentas', label: 'Cuentas', end: false },
 ] as const;
 
