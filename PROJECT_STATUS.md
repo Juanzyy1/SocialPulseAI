@@ -63,8 +63,9 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | F.4c Selector de cuenta y tarjetas de métricas | COMPLETADA | 169 pruebas del frontend, build y lint limpios; pruebas manuales correctas el 29/10/2026 |
 | F.4d Gráfico de vistas por día y lista de cuentas | COMPLETADA | 221 pruebas del frontend, build y lint limpios; pruebas manuales correctas (reportadas por el usuario, sin capturas) el 29/10/2026 |
 | F.5 Cuentas: conectar, sincronizar y desconectar | COMPLETADA | 264 pruebas del frontend, build limpio; pruebas manuales aprobadas por el usuario (sin capturas) el 30/10/2026; lint: 1 aviso corregido |
-| F.6 Rango personalizado, resumen global y pulido | COMPLETADA | 303 pruebas del frontend, build y lint limpios; pruebas manuales aprobadas por el usuario el 31/10/2026; pendiente confirmar que el build genera el CSS |
-| F.7 Pruebas de componentes y contrato (versión mínima) | POR VERIFICAR | Código y unas 55 pruebas escritas (2 de contrato y ~32 de componentes en el frontend; 11 del comparador y 10 de contrato en el backend) | Build, lint, pruebas y las tres roturas deliberadas |
+| F.6 Rango personalizado, resumen global y pulido | COMPLETADA | 303 pruebas del frontend; build (CSS incluido), lint y pruebas manuales correctas el 31/10/2026 |
+| F.7 Pruebas de componentes y contrato (versión mínima) | COMPLETADA | Frontend: 337 pruebas; backend: 192 unitarias y 172 e2e; las tres roturas deliberadas del contrato fallaron como debían (confirmado por el usuario) |
+| Etapa 7: arquitectura del laboratorio de IA | POR VERIFICAR | Código y unas 85 pruebas escritas | lint, build, pruebas y e2e |
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.
@@ -93,6 +94,9 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 - **Baja:** la imagen lateral original pesa 1,99 MB; convertir a WebP antes de subirla. El arte promete funciones futuras (crea, automatiza, TikTok, X); revisar antes de abrirla al público.
 - **Baja:** el gráfico es propio (SVG); si hacen falta varias series, zoom o más tipos de gráfico, evaluar una librería con verificación previa de compatibilidad con React 19 y Vite 8.
 - **Baja:** los tipos del frontend se escriben a mano, pero están protegidos por un contrato (9 JSON comprobados al compilar y contra el backend en las pruebas e2e); un endpoint nuevo exige un JSON nuevo. Y agrega: Media: los componentes del panel (tarjetas, gráfico, selector, resumen) no tienen pruebas de componentes; solo su lógica.
+- **Media:** antes del laboratorio de IA hay que actualizar la política de privacidad (nombrar al proveedor de IA y su tratamiento de los videos), subir la versión de los textos y verificar la retención y el entrenamiento de datos del proveedor.
+- **Media:** el filtro de promesas de la IA es por patrones (red de seguridad, no garantía); la subida de videos exigirá decodificación en un proceso aislado.
+- **Baja:** el procesamiento multimedia probablemente exija ffmpeg en el servidor (por verificar su disponibilidad y licencia).
 
 ## Decisiones técnicas confirmadas
 - Monolito modular NestJS + Prisma 7 + PostgreSQL, REST con prefijo `/api/v1`.

@@ -11,6 +11,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SocialAccountsModule } from './social-accounts/dto/social-accounts.module';
 import { SyncModule } from './sync/sync.module';
 import { UsersModule } from './users/dto/users.module';
+import { AiLabModule } from './ai-lab/ai-lab.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { UsersModule } from './users/dto/users.module';
     SyncModule,
     AnalyticsModule,
     HealthModule,
+    AiLabModule,
   ],
 })
 export class AppModule {}
