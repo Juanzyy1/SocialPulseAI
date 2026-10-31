@@ -1,0 +1,24 @@
+{
+  "account": {
+    "id": "bcbabb9e-a583-4504-97df-906df44087e6",
+    "platform": "YOUTUBE",
+    "displayName": "Canal de prueba",
+    "status": "ACTIVE"
+  },
+  "period": { "kind": "7d", "start": "2026-10-13", "end": "2026-10-19", "days": 7 },
+  "dataThrough": "2026-10-19",
+  "daysBehind": 3,
+  "lastSyncedAt": "2026-10-22T14:24:44.456Z",
+  "coverage": { "daysWithData": 7, "missingDays": 0, "missingRanges": [] },
+  "totals": [
+    {
+      "metric": "subscriberCount",
+      "unit": "count",
+      "value": 5,
+      "capturedOn": "2026-10-22",
+      "note": null
+    }
+  ],
+  "daily": [{ "date": "2026-10-13", "values": { "views": 2 } }],
+  "message": null
+}

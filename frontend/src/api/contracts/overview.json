@@ -1,0 +1,59 @@
+{
+  "period": { "kind": "7d", "start": "2026-10-13", "end": "2026-10-19", "days": 7 },
+  "dataThrough": "2026-10-19",
+  "daysBehind": 3,
+  "accounts": [
+    {
+      "id": "bcbabb9e-a583-4504-97df-906df44087e6",
+      "platform": "YOUTUBE",
+      "displayName": "Canal de prueba",
+      "status": "ACTIVE",
+      "lastSyncedAt": "2026-10-22T14:24:44.456Z",
+      "dataThrough": "2026-10-19",
+      "daysBehind": 3,
+      "coverage": { "daysWithData": 7, "missingDays": 0, "missingRanges": [] },
+      "metrics": [
+        {
+          "metric": "views",
+          "kind": "additive",
+          "unit": "count",
+          "value": 14,
+          "daysWithData": 7,
+          "note": null
+        }
+      ],
+      "totals": [
+        {
+          "metric": "subscriberCount",
+          "unit": "count",
+          "value": 5,
+          "capturedOn": "2026-10-22",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "platforms": [
+    {
+      "platform": "YOUTUBE",
+      "accountCount": 1,
+      "accountsWithData": 1,
+      "complete": true,
+      "metrics": [
+        {
+          "metric": "views",
+          "kind": "additive",
+          "unit": "count",
+          "value": 14,
+          "accountsIncluded": 1,
+          "note": null
+        }
+      ]
+    }
+  ],
+  "crossPlatform": {
+    "groups": [],
+    "message": "Ninguna métrica está marcada como compatible entre plataformas; cada plataforma se muestra por separado"
+  },
+  "message": null
+}

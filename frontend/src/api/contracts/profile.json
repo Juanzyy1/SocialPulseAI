@@ -1,0 +1,12 @@
+{
+  "id": "77c69fe0-cfa1-44f6-a43d-cf33ae48cc89",
+  "email": "ana@example.com",
+  "displayName": "Ana",
+  "avatarUrl": null,
+  "emailVerifiedAt": null,
+  "createdAt": "2026-10-24T00:00:00.000Z",
+  "termsAcceptedAt": "2026-10-24T00:00:00.000Z",
+  "termsVersion": "2026-10-24",
+  "termsUpToDate": true,
+  "currentTermsVersion": "2026-10-24"
+}

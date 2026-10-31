@@ -1,0 +1,35 @@
+{
+  "account": {
+    "id": "bcbabb9e-a583-4504-97df-906df44087e6",
+    "platform": "YOUTUBE",
+    "displayName": "Canal de prueba",
+    "status": "ACTIVE"
+  },
+  "dataThrough": "2026-10-19",
+  "daysBehind": 3,
+  "current": {
+    "period": { "kind": "7d", "start": "2026-10-13", "end": "2026-10-19", "days": 7 },
+    "coverage": { "daysWithData": 7, "missingDays": 0, "missingRanges": [] }
+  },
+  "previous": {
+    "period": { "kind": "previous", "start": "2026-10-06", "end": "2026-10-12", "days": 7 },
+    "coverage": { "daysWithData": 7, "missingDays": 0, "missingRanges": [] }
+  },
+  "comparable": true,
+  "message": null,
+  "metrics": [
+    {
+      "metric": "views",
+      "kind": "additive",
+      "unit": "count",
+      "note": null,
+      "current": { "value": 14, "daysWithData": 7 },
+      "previous": { "value": 7, "daysWithData": 7 },
+      "comparable": true,
+      "reasonCode": null,
+      "reason": null,
+      "change": 7,
+      "changePercent": 100
+    }
+  ]
+}

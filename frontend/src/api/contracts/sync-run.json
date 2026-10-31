@@ -1,0 +1,10 @@
+{
+  "id": "aaf173bd-947b-4465-85eb-58af4d5e9317",
+  "status": "SUCCEEDED",
+  "startedAt": "2026-10-22T14:20:33.687Z",
+  "finishedAt": "2026-10-22T14:20:34.620Z",
+  "rangeStart": "2026-07-25",
+  "rangeEnd": "2026-10-22",
+  "rowsWritten": 699,
+  "errorMessage": null
+}

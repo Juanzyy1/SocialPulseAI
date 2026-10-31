@@ -63,8 +63,8 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | F.4c Selector de cuenta y tarjetas de métricas | COMPLETADA | 169 pruebas del frontend, build y lint limpios; pruebas manuales correctas el 29/10/2026 |
 | F.4d Gráfico de vistas por día y lista de cuentas | COMPLETADA | 221 pruebas del frontend, build y lint limpios; pruebas manuales correctas (reportadas por el usuario, sin capturas) el 29/10/2026 |
 | F.5 Cuentas: conectar, sincronizar y desconectar | COMPLETADA | 264 pruebas del frontend, build limpio; pruebas manuales aprobadas por el usuario (sin capturas) el 30/10/2026; lint: 1 aviso corregido |
-| F.6 Rango personalizado, resumen global y pulido | POR VERIFICAR | Código y unas 70 pruebas escritas | Build, lint, pruebas y 9 pruebas manuales |
-| F.7 Pruebas de la interfaz | PENDIENTE |
+| F.6 Rango personalizado, resumen global y pulido | COMPLETADA | 303 pruebas del frontend, build y lint limpios; pruebas manuales aprobadas por el usuario el 31/10/2026; pendiente confirmar que el build genera el CSS |
+| F.7 Pruebas de componentes y contrato (versión mínima) | POR VERIFICAR | Código y unas 55 pruebas escritas (2 de contrato y ~32 de componentes en el frontend; 11 del comparador y 10 de contrato en el backend) | Build, lint, pruebas y las tres roturas deliberadas |
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.
@@ -92,6 +92,7 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 - **Media:** no existe eliminación de cuenta ni limpieza programada de sesiones caducadas; la política de privacidad no puede prometerlas.
 - **Baja:** la imagen lateral original pesa 1,99 MB; convertir a WebP antes de subirla. El arte promete funciones futuras (crea, automatiza, TikTok, X); revisar antes de abrirla al público.
 - **Baja:** el gráfico es propio (SVG); si hacen falta varias series, zoom o más tipos de gráfico, evaluar una librería con verificación previa de compatibilidad con React 19 y Vite 8.
+- **Baja:** los tipos del frontend se escriben a mano, pero están protegidos por un contrato (9 JSON comprobados al compilar y contra el backend en las pruebas e2e); un endpoint nuevo exige un JSON nuevo. Y agrega: Media: los componentes del panel (tarjetas, gráfico, selector, resumen) no tienen pruebas de componentes; solo su lógica.
 
 ## Decisiones técnicas confirmadas
 - Monolito modular NestJS + Prisma 7 + PostgreSQL, REST con prefijo `/api/v1`.

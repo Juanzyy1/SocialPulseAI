@@ -1,0 +1,17 @@
+{
+  "platforms": [
+    {
+      "platform": "YOUTUBE",
+      "metrics": [
+        {
+          "code": "views",
+          "label": "Vistas",
+          "kind": "additive",
+          "unit": "count",
+          "polarity": "higher_is_better",
+          "note": null
+        }
+      ]
+    }
+  ]
+}
