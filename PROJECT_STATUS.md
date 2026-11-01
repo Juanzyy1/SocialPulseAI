@@ -65,7 +65,11 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | F.5 Cuentas: conectar, sincronizar y desconectar | COMPLETADA | 264 pruebas del frontend, build limpio; pruebas manuales aprobadas por el usuario (sin capturas) el 30/10/2026; lint: 1 aviso corregido |
 | F.6 Rango personalizado, resumen global y pulido | COMPLETADA | 303 pruebas del frontend; build (CSS incluido), lint y pruebas manuales correctas el 31/10/2026 |
 | F.7 Pruebas de componentes y contrato (versión mínima) | COMPLETADA | Frontend: 337 pruebas; backend: 192 unitarias y 172 e2e; las tres roturas deliberadas del contrato fallaron como debían (confirmado por el usuario) |
-| Etapa 7: arquitectura del laboratorio de IA | POR VERIFICAR | Código y unas 85 pruebas escritas | lint, build, pruebas y e2e |
+
+
+| Etapa 7: arquitectura del laboratorio de IA | COMPLETADA | 279 unitarias y 172 e2e en verde el 31/10/2026; lint, build y tsc limpios |
+| Fase 9 (versión mínima) | EN PROGRESO | Plan: 9.1 endurecimiento, 9.2 eliminar cuenta y limpiar sesiones, 9.3 empaquetado, 9.4 despliegue y copias de seguridad, 9.5 Google de producción y textos legales, 9.6 verificación de Google, 9.7 pruebas con navegador y revisión final |
+| 9.1 Endurecimiento del backend | POR VERIFICAR | Código y unas 30 pruebas escritas | lint, build, pruebas, e2e, audit y las 3 verificaciones manuales |
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.
@@ -75,7 +79,7 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 - **Media:** flag `Secure` de cookies solo revisado en el código, no probado con `NODE_ENV=production`.
 - **Media:** CSRF se apoya en `SameSite=Lax`; validar `Origin` queda pendiente hasta definir el frontend.
 - **Media:** verificación de correo pospuesta; la regla 4 neutraliza la pre-registración.
-- **Media:** no desplegar tras un proxy sin configurar `trust proxy`.
+- **Media:** TRUST_PROXY_HOPS y la bandera Secure están implementadas y probadas a nivel de código; falta verificarlas en el despliegue real (9.4), y el proxy debe reenviar el Host original.
 - **Media:** el bloqueo por correo permite bloquear a propósito el login de otra persona.
 - **Media:** el 409 del registro revela si un correo existe.
 - **Media:** no hay sincronización automática periódica; la lanza el usuario. Corre dentro de la petición.
