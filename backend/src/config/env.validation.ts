@@ -7,6 +7,8 @@ export interface Env {
   GOOGLE_CLIENT_SECRET?: string;
   GOOGLE_REDIRECT_URI?: string;
   FRONTEND_URL?: string;
+  /** Proxies de confianza delante de la app (0 = ninguno). undefined = sin indicar. */
+  TRUST_PROXY_HOPS?: number;
 }
 
 const NODE_ENVS = ['development', 'test', 'production'] as const;
@@ -16,6 +18,7 @@ const GOOGLE_KEYS = [
   'GOOGLE_REDIRECT_URI',
 ] as const;
 const LOCAL_HOSTS = ['localhost', '127.0.0.1'];
+const MAX_PROXY_HOPS = 10;
 
 function optionalString(value: unknown): string | undefined {
   const text = typeof value === 'string' ? value.trim() : '';
@@ -117,11 +120,24 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     if (problem) errors.push(problem);
   }
 
-  // Frontend: opcional. Sin ella, los callbacks responden como API.
+  // Frontend: opcional aquí. En producción la exige configureApp (ver production-checks).
   const frontendUrl = optionalString(raw.FRONTEND_URL);
   if (frontendUrl) {
     const problem = checkFrontendUrl(frontendUrl, nodeEnv === 'production');
     if (problem) errors.push(problem);
+  }
+
+  // Proxies de confianza: de ellos depende qué IP y qué protocolo se atribuyen a cada petición.
+  const hopsText = optionalString(
+    typeof raw.TRUST_PROXY_HOPS === 'number' ? String(raw.TRUST_PROXY_HOPS) : raw.TRUST_PROXY_HOPS,
+  );
+  let trustProxyHops: number | undefined;
+  if (hopsText !== undefined) {
+    if (/^\d+$/.test(hopsText) && Number(hopsText) <= MAX_PROXY_HOPS) {
+      trustProxyHops = Number(hopsText);
+    } else {
+      errors.push(`TRUST_PROXY_HOPS debe ser un entero entre 0 y ${MAX_PROXY_HOPS}`);
+    }
   }
 
   if (errors.length > 0) {
@@ -139,5 +155,6 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     GOOGLE_CLIENT_SECRET: clientSecret,
     GOOGLE_REDIRECT_URI: redirectUri,
     FRONTEND_URL: frontendUrl,
+    TRUST_PROXY_HOPS: trustProxyHops,
   };
 }
