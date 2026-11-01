@@ -33,4 +33,10 @@ export class ProfileResponseDto {
 
   @ApiProperty({ example: '2026-10-24', description: 'Versión vigente de los términos' })
   currentTermsVersion: string;
+
+    @ApiProperty({
+    description:
+      'true si la cuenta tiene contraseña (registro con correo); false si solo entra con Google',
+  })
+  hasPassword: boolean;
 }

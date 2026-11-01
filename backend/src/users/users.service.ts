@@ -32,9 +32,10 @@ interface ProfileRow {
   termsVersion: string | null;
 }
 
-function toProfile(user: ProfileRow): ProfileResponseDto {
+function toProfile(user: ProfileRow, hasPassword: boolean): ProfileResponseDto {
   return {
     ...user,
+    hasPassword,
     termsUpToDate: isTermsUpToDate(user.termsVersion),
     currentTermsVersion: CURRENT_TERMS_VERSION,
   };
@@ -44,13 +45,21 @@ function toProfile(user: ProfileRow): ProfileResponseDto {
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Solo se pregunta SI hay contraseña; el hash nunca se carga. */
+  private async hasPassword(userId: string): Promise<boolean> {
+    const count = await this.prisma.user.count({
+      where: { id: userId, passwordHash: { not: null } },
+    });
+    return count > 0;
+  }
+
   async getProfile(userId: string): Promise<ProfileResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: PROFILE_SELECT,
     });
     if (!user) throw new NotFoundException();
-    return toProfile(user);
+    return toProfile(user, await this.hasPassword(userId));
   }
 
   /** El `userId` sale siempre de la sesión, nunca de la petición. */
@@ -61,7 +70,7 @@ export class UsersService {
       data: { displayName: dto.displayName, avatarUrl: dto.avatarUrl },
       select: PROFILE_SELECT,
     });
-    return toProfile(user);
+    return toProfile(user, await this.hasPassword(userId));
   }
 
   /**

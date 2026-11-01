@@ -8,10 +8,12 @@ import { FrontendModule } from './frontend/frontend.module';
 import { HealthModule } from './health/health.module';
 import { YoutubeModule } from './integrations/youtube/youtube.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { SocialAccountsModule } from './social-accounts/dto/social-accounts.module';
+import { SocialAccountsModule } from './social-accounts/social-accounts.module';
 import { SyncModule } from './sync/sync.module';
 import { UsersModule } from './users/dto/users.module';
 import { AiLabModule } from './ai-lab/ai-lab.module';
+import { AccountModule } from './account/account.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { AiLabModule } from './ai-lab/ai-lab.module';
     AnalyticsModule,
     HealthModule,
     AiLabModule,
+    AccountModule,
+    MaintenanceModule
   ],
 })
 export class AppModule {}

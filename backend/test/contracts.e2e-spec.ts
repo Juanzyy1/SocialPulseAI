@@ -14,6 +14,7 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { PERMISSIVE_RATE_LIMITS } from './helpers/rate-limits';
 import { shapeProblems } from './helpers/shape';
 import { TERMS } from './helpers/terms';
+import { registerAndLogin, TEST_PASSWORD } from './helpers/session';
 
 // Dominio .invalid: reservado, nunca es un correo real.
 const TEST_DOMAIN = '@contracts-test.invalid';
@@ -29,6 +30,7 @@ const COVERED = [
   'auth-user',
   'catalog',
   'compare',
+  'delete-account',
   'disconnect',
   'overview',
   'profile',
@@ -199,4 +201,20 @@ describe('Contrato con el frontend (e2e)', () => {
 
     expect(shapeProblems(res.body, fixture('overview'))).toEqual([]);
   });
+
+    it('POST /users/me/delete', async () => {
+    const victim = await registerAndLogin(app, TEST_DOMAIN);
+    await prisma.socialAccount.create({
+      data: { userId: victim.id, platform: 'YOUTUBE', platformAccountId: `canal-${randomUUID()}` },
+    });
+
+    const res = await api()
+      .post('/api/v1/users/me/delete')
+      .set('Cookie', victim.cookie)
+      .send({ confirmEmail: victim.email, password: TEST_PASSWORD })
+      .expect(200);
+
+    expect(shapeProblems(res.body, fixture('delete-account'))).toEqual([]);
+  });
+
 });
