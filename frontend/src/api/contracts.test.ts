@@ -9,6 +9,7 @@ import profile from './contracts/profile.json';
 import socialAccount from './contracts/social-account.json';
 import syncRun from './contracts/sync-run.json';
 import type { Widen } from './contracts/widen';
+import deleteAccount from './contracts/delete-account.json';
 import type {
   AccountAnalytics,
   AuthUser,
@@ -19,6 +20,7 @@ import type {
   Profile,
   SocialAccount,
   SyncRun,
+  DeleteAccountResult
 } from './types';
 
 /**
@@ -41,9 +43,10 @@ describe('contrato entre el backend y los tipos del frontend', () => {
       conforms<ComparisonResponse>(compare),
       conforms<AccountAnalytics>(accountAnalytics),
       conforms<OverviewResponse>(overview),
+      conforms<DeleteAccountResult>(deleteAccount),
     ];
 
-    expect(results).toHaveLength(9);
+    expect(results).toHaveLength(10);
     expect(results.every(Boolean)).toBe(true);
   });
 

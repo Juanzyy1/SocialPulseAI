@@ -8,6 +8,7 @@ export const profile = (overrides: Partial<Profile> = {}): Profile => ({
   createdAt: '2026-10-24T00:00:00.000Z',
   avatarUrl: null,
   emailVerifiedAt: null,
+  hasPassword: true,
   termsAcceptedAt: '2026-10-24T00:00:00.000Z',
   termsVersion: TERMS_VERSION,
   termsUpToDate: true,

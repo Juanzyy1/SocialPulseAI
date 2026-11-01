@@ -22,7 +22,7 @@ describe('buildRegisterInput', () => {
       password: ' una clave con espacios ',
       displayName: 'Ana',
       acceptTerms: true,
-      termsVersion: '2026-10-24',
+      termsVersion: '2026-11-01',
     });
   });
 

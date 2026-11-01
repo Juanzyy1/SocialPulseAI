@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { to: '/', label: 'Panel', end: true },
   { to: '/resumen', label: 'Resumen', end: false },
   { to: '/cuentas', label: 'Cuentas', end: false },
+  { to: '/ajustes', label: 'Ajustes', end: false },
 ] as const;
 
 const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600';

@@ -125,7 +125,7 @@ export const TERMS_DOCUMENT: LegalDocument = {
           'Puedes dejar de usar el servicio cuando quieras. Podemos suspender o cerrar cuentas que incumplan estos términos.',
         ),
         p(
-          'Por ahora la aplicación no incluye un botón para eliminar tu cuenta. [COMPLETAR: cómo solicitar la eliminación de la cuenta y en cuánto tiempo se atiende].',
+          'Puedes eliminar tu cuenta en cualquier momento desde Ajustes. Al hacerlo se borran de inmediato tu cuenta, tus sesiones, tus canales conectados y todas sus estadísticas, y se intenta revocar el acceso que diste a Google. La eliminación no se puede deshacer.',
         ),
       ],
     },
@@ -233,9 +233,9 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
       heading: '7. Cuánto tiempo los conservamos',
       blocks: [
         ul(
-          'Tu sesión caduca tras 7 días sin uso y, como máximo, a los 30 días. [COMPLETAR: confirmar que las sesiones caducadas se eliminan periódicamente].',
+          'Tu sesión caduca tras 7 días sin uso y, como máximo, a los 30 días. Las sesiones caducadas se eliminan automáticamente de forma periódica.',
           'Las credenciales y las estadísticas de un canal se conservan hasta que lo desconectes; al desconectarlo se borran.',
-          'Los datos de tu cuenta se conservan mientras la tengas. Por ahora no hay un botón para eliminarla: [COMPLETAR: cómo solicitarlo y en cuánto tiempo se atiende].',
+          'Los datos de tu cuenta se conservan mientras la tengas. Puedes eliminarla desde Ajustes: se borran de inmediato tu cuenta, tus sesiones, tus canales conectados y sus estadísticas. [COMPLETAR: si se conservan copias de seguridad, durante cuánto tiempo y cómo se eliminan].',
         ),
       ],
     },

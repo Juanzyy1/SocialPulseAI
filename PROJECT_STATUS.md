@@ -69,7 +69,10 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 
 | Etapa 7: arquitectura del laboratorio de IA | COMPLETADA | 279 unitarias y 172 e2e en verde el 31/10/2026; lint, build y tsc limpios |
 | Fase 9 (versión mínima) | EN PROGRESO | Plan: 9.1 endurecimiento, 9.2 eliminar cuenta y limpiar sesiones, 9.3 empaquetado, 9.4 despliegue y copias de seguridad, 9.5 Google de producción y textos legales, 9.6 verificación de Google, 9.7 pruebas con navegador y revisión final |
-| 9.1 Endurecimiento del backend | POR VERIFICAR | Código y unas 30 pruebas escritas | lint, build, pruebas, e2e, audit y las 3 verificaciones manuales |
+| 9.1 Endurecimiento del backend | COMPLETADA | 319 unitarias, 172 e2e, lint, build, tsc y audit en verde; verificación manual en producción confirmada por el usuario el 01/11/2026 |
+| 9.2 Limpieza de sesiones y eliminación de cuenta | POR VERIFICAR | Código y pruebas escritas (backend y frontend) | Build, lint, pruebas, e2e y verificación manual |
+| 9.3 a 9.5, 9.7 | PENDIENTES | Despliegue previsto en Render, una sola URL (opción A, por confirmar) | |
+| 9.6 Verificación de Google | APLAZADA | Requiere dominio propio verificado | |
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.
@@ -101,6 +104,12 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 - **Media:** antes del laboratorio de IA hay que actualizar la política de privacidad (nombrar al proveedor de IA y su tratamiento de los videos), subir la versión de los textos y verificar la retención y el entrenamiento de datos del proveedor.
 - **Media:** el filtro de promesas de la IA es por patrones (red de seguridad, no garantía); la subida de videos exigirá decodificación en un proceso aislado.
 - **Baja:** el procesamiento multimedia probablemente exija ffmpeg en el servidor (por verificar su disponibilidad y licencia).
+- **Media:** sin dominio propio, Google queda en modo de pruebas (hasta 100 usuarios, conexión de YouTube caduca a los 7 días) y no se puede verificar la aplicación.
+- **Media:** en el plan gratuito de Render la base de datos caduca a los 30 días (con 14 de gracia) y el servicio se duerme por inactividad; sirve para probar, no para conservar datos. Los contadores de intentos viven en memoria y se reinician al dormirse.
+- **Baja:** el aviso de `TRUST_PROXY_HOPS` depende del número real de proxies; se mide en el despliegue.
+- **Media:** una cuenta solo de Google se elimina escribiendo el correo, sin reautenticación; una sesión robada podría borrarla.
+- **Baja:** sin exportación de datos del usuario; las copias de seguridad del proveedor pueden conservar datos eliminados un tiempo (por aclarar en la política).
+- **Baja:** el contador de intentos fallidos de eliminación vive en memoria.
 
 ## Decisiones técnicas confirmadas
 - Monolito modular NestJS + Prisma 7 + PostgreSQL, REST con prefijo `/api/v1`.

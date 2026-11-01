@@ -12,6 +12,7 @@ const profile = (overrides: Partial<Profile> = {}): Profile => ({
   createdAt: '2026-10-24T00:00:00.000Z',
   avatarUrl: null,
   emailVerifiedAt: null,
+  hasPassword: true,
   termsAcceptedAt: null,
   termsVersion: null,
   termsUpToDate: false,

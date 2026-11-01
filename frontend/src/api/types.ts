@@ -21,6 +21,7 @@ export interface Profile extends AuthUser {
   /** false: hay que pedir la aceptación de los términos antes de mostrar el panel (F.3c). */
   termsUpToDate: boolean;
   currentTermsVersion: string;
+  hasPassword: boolean;
 }
 
 export interface RegisterInput {
@@ -244,4 +245,18 @@ export interface OverviewResponse {
     message: string | null;
   };
   message: string | null;
+}
+
+/** Cuerpo de POST /users/me/delete. */
+export interface DeleteAccountInput {
+  confirmEmail: string;
+  /** Obligatoria si la cuenta tiene contraseña. */
+  password?: string;
+}
+
+/** Respuesta de POST /users/me/delete. */
+export interface DeleteAccountResult {
+  accountsDisconnected: number;
+  /** De ellas, cuántas no se pudo confirmar la revocación en Google. */
+  revocationsNotConfirmed: number;
 }

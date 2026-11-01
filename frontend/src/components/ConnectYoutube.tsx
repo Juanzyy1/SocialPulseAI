@@ -1,4 +1,4 @@
-import { YOUTUBE_CONNECT_URL } from '../accounts/connect-result';
+import { YOUTUBE_CONNECT_URL } from '../account/connect-result';
 import { GOOGLE_IN_TESTING, GOOGLE_TESTING_NOTE } from '../config/app';
 
 /** Enlace normal (navegación completa): el backend redirige a Google y vuelve a /cuentas. */

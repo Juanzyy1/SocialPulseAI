@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { YOUTUBE_CONNECT_URL } from '../accounts/connect-result';
-import type { Notice } from '../accounts/connect-result';
+import { YOUTUBE_CONNECT_URL } from '../account/connect-result';
+import type { Notice } from '../account/connect-result';
 import {
   describeDisconnectError,
   describeDisconnectResult,
   describeSyncError,
   describeSyncResult,
-} from '../accounts/messages';
-import { useDisconnectAccount, useSyncAccount } from '../accounts/mutations';
+} from '../account/messages';
+import { useDisconnectAccount, useSyncAccount } from '../account/mutations';
 import type { SocialAccount } from '../api/types';
 import { accountLabel, platformLabel } from '../dashboard/account-params';
 import { describeLastSync } from '../dashboard/account-status';

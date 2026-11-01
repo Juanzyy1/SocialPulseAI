@@ -14,6 +14,8 @@ import type {
   SocialAccount,
   SyncRun,
   TermsAcceptanceInput,
+  DeleteAccountInput,
+  DeleteAccountResult
 } from './types';
 
 export const authApi = {
@@ -29,6 +31,10 @@ export const usersApi = {
   /** Registra la aceptación de los términos vigentes. Repetirlo no cambia la fecha original. */
   acceptTerms: (input: TermsAcceptanceInput) =>
     apiFetch<Profile>('/users/me/terms', { method: 'POST', body: input }),
+
+    /** Elimina la cuenta y todos sus datos. Se usa POST para llevar el cuerpo de confirmación sin problemas con proxies. */
+  deleteAccount: (input: DeleteAccountInput) =>
+    apiFetch<DeleteAccountResult>('/users/me/delete', { method: 'POST', body: input }),
 };
 
 export const accountsApi = {

@@ -11,6 +11,8 @@ import { GuestOnly } from './session/GuestOnly';
 import { RequireAuth } from './session/RequireAuth';
 import { RequireTerms } from './session/RequireTerms';
 import { OverviewPage } from './pages/OverviewPage';
+import { AccountDeletedPage } from './pages/AccountDeletedPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 
 export default function App() {
@@ -27,6 +29,7 @@ export default function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/cuentas" element={<AccountsPage />} />
             <Route path="/resumen" element={<OverviewPage />} />
+            <Route path="/ajustes" element={<SettingsPage />} />
           </Route>
         </Route>
       </Route>
@@ -34,6 +37,7 @@ export default function App() {
       <Route path="/terminos" element={<TermsPage />} />
       <Route path="/privacidad" element={<PrivacyPage />} />
       <Route path="*" element={<NotFoundPage />} />
+      <Route path="/cuenta-eliminada" element={<AccountDeletedPage />} />
     </Routes>
   );
 }

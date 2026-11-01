@@ -4,8 +4,8 @@ import {
   describeConnectResult,
   parseConnectResult,
   withoutConnectResult,
-} from '../accounts/connect-result';
-import type { Notice } from '../accounts/connect-result';
+} from '../account/connect-result';
+import type { Notice } from '../account/connect-result';
 import { AccountCard } from '../components/AccountCard';
 import { ConnectYoutube } from '../components/ConnectYoutube';
 import { describeLoadError } from '../dashboard/errors';
