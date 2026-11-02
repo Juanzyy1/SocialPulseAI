@@ -6,6 +6,7 @@ services:
     name: socialpulse-ai
     runtime: node
     plan: free
+    region: oregon   # la base de datos debe crearse en la MISMA región (no se puede cambiar después)
     # Compila el frontend y después el backend. --include=dev porque con NODE_ENV=production npm omitiría
     # las herramientas de compilación.
     buildCommand: cd frontend && npm ci --include=dev && npm run build && cd ../backend && npm ci --include=dev && npx prisma generate && npm run build
@@ -21,12 +22,12 @@ services:
         value: ../frontend/dist
       # Provisional: se mide con GET /api/v1/diagnostics/network y se corrige (tarea 9.4).
       - key: TRUST_PROXY_HOPS
-        value: "1"
+        value: "2"
       - key: EXPOSE_NETWORK_DIAGNOSTICS
-        value: "true"
+        value: "false"
       # Si Render te asigna otra dirección (por ejemplo, con un sufijo), corrígela en el panel.
       - key: FRONTEND_URL
-        value: https://socialpulse-ai.onrender.com
+        value: https://socialpulse-ai-xweo.onrender.com
       # Secretos: Render los pide en el panel; no están en el repositorio.
       - key: DATABASE_URL
         sync: false
