@@ -14,6 +14,7 @@ import { UsersModule } from './users/dto/users.module';
 import { AiLabModule } from './ai-lab/ai-lab.module';
 import { AccountModule } from './account/account.module';
 import { MaintenanceModule } from './maintenance/maintenance.module';
+import { DiagnosticsModule } from './diagnostics/diagnostics.module';
 
 @Module({
   imports: [
@@ -30,7 +31,8 @@ import { MaintenanceModule } from './maintenance/maintenance.module';
     HealthModule,
     AiLabModule,
     AccountModule,
-    MaintenanceModule
+    MaintenanceModule,
+    DiagnosticsModule,
   ],
 })
 export class AppModule {}

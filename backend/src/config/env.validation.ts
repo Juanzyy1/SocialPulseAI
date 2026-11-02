@@ -9,6 +9,10 @@ export interface Env {
   FRONTEND_URL?: string;
   /** Proxies de confianza delante de la app (0 = ninguno). undefined = sin indicar. */
   TRUST_PROXY_HOPS?: number;
+    /** Carpeta del frontend compilado (con index.html). Si se indica, el backend la sirve. */
+  FRONTEND_DIST_DIR?: string;
+  /** Activa GET /api/v1/diagnostics/network (solo para medir los proxies del despliegue). */
+  EXPOSE_NETWORK_DIAGNOSTICS?: boolean;
 }
 
 const NODE_ENVS = ['development', 'test', 'production'] as const;
@@ -140,6 +144,12 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     }
   }
 
+  const frontendDistDir = optionalString(raw.FRONTEND_DIST_DIR);
+  const diagnosticsText = optionalString(raw.EXPOSE_NETWORK_DIAGNOSTICS)?.toLowerCase();
+  if (diagnosticsText !== undefined && diagnosticsText !== 'true' && diagnosticsText !== 'false') {
+    errors.push('EXPOSE_NETWORK_DIAGNOSTICS debe ser true o false');
+  }
+
   if (errors.length > 0) {
     throw new Error(
       `Configuración de entorno inválida:\n- ${errors.join('\n- ')}`,
@@ -156,5 +166,7 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     GOOGLE_REDIRECT_URI: redirectUri,
     FRONTEND_URL: frontendUrl,
     TRUST_PROXY_HOPS: trustProxyHops,
+    FRONTEND_DIST_DIR: frontendDistDir,
+    EXPOSE_NETWORK_DIAGNOSTICS: diagnosticsText === 'true',
   };
 }

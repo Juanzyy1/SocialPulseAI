@@ -176,6 +176,7 @@ las 6 tareas (5.1 a 5.4c) con sus pruebas unitarias y e2e en verde.
 24. Eliminación de cuenta: `POST /users/me/delete` exige el correo de la cuenta y, si tiene contraseña, también la contraseña (mismo error 403 si algo falla; 5 fallos en 15 minutos dan 429). Desconecta los canales y revoca el acceso en Google (si no se confirma, se elimina igualmente y se informa); el resto se borra en cascada y se borra la cookie. El perfil expone `hasPassword`. La interfaz (`/ajustes`) pide la confirmación y lleva a `/cuenta-eliminada`.
 25. Limpieza de sesiones: las sesiones caducadas se eliminan al arrancar y cada 6 horas (una instancia; no corre en las pruebas).
 26. Textos legales versión `2026-11-01`: reflejan la eliminación de cuenta y la limpieza de sesiones.
+27. Despliegue en un solo servicio (Render): con `FRONTEND_DIST_DIR`, el backend sirve el frontend compilado (assets con hash en caché de un año, `index.html` sin caché, rutas del cliente con `index.html`, 404 para archivos inexistentes, nunca la página para `/api` ni para métodos que no son de lectura); si la carpeta no tiene `index.html`, no arranca. Dos políticas de contenido: estricta para la API y una de solo-propio-origen para las páginas. `GET /diagnostics/network` (apagado por defecto) sirve para medir los proxies y fijar `TRUST_PROXY_HOPS`.
 
 ## DECISIONES
 | Frontend: tecnología | React + Vite + TypeScript, aplicación de una sola página en `frontend/` | Confirmada el 22/10/2026 |

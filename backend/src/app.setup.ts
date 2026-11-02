@@ -2,7 +2,9 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
+import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
+import { isApiPath, resolveFrontendDist, serveFrontend } from './common/http/spa';
 import { helmetOptions } from './common/security/helmet-options';
 import { originCheckMiddleware } from './common/security/origin-check';
 import { productionProblems } from './config/production-checks';
@@ -18,6 +20,7 @@ export function configureApp(app: INestApplication): void {
   const config = app.get(ConfigService);
   const production = config.get<string>('NODE_ENV') === 'production';
   const trustProxyHops = config.get<number | undefined>('TRUST_PROXY_HOPS');
+  const frontendDist = config.get<string | undefined>('FRONTEND_DIST_DIR');
 
   // En producción, lo que afecta a la seguridad debe estar indicado de forma explícita.
   if (production) {
@@ -29,13 +32,25 @@ export function configureApp(app: INestApplication): void {
       throw new Error(`Configuración de producción incompleta:\n- ${problems.join('\n- ')}`);
     }
   }
+  // Si se pidió servir el frontend, debe existir: mejor fallar al arrancar que servir 404.
+  const distDir = frontendDist ? resolveFrontendDist(frontendDist) : null;
 
+  const express = app as NestExpressApplication;
   // Cuántos proxies de confianza hay delante: de ahí salen req.ip (límite de intentos, sesiones) y
   // req.protocol. Con 0 las cabeceras X-Forwarded-* se ignoran y nadie puede falsificar su IP.
-  (app as NestExpressApplication).set('trust proxy', trustProxyHops ?? 0);
+  express.set('trust proxy', trustProxyHops ?? 0);
 
   app.setGlobalPrefix(API_PREFIX);
-  app.use(helmet(helmetOptions(production)));
+
+  // Dos políticas de contenido: la estricta de la API (JSON) y otra para las páginas de la interfaz.
+  const apiHeaders = helmet(helmetOptions(production, 'api'));
+  const pageHeaders = helmet(helmetOptions(production, 'pages'));
+  app.use((req: Request, res: Response, next: NextFunction) =>
+    (isApiPath(req.path) ? apiHeaders : pageHeaders)(req, res, next),
+  );
+
+  if (distDir) serveFrontend(express, distDir);
+
   app.use(cookieParser());
   // CSRF: defensa en profundidad además de SameSite=Lax.
   app.use(originCheckMiddleware(app.get<string | null>(FRONTEND_ORIGIN)));

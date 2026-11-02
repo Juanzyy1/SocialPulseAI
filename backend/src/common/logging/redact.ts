@@ -2,15 +2,17 @@ const MAX_LENGTH = 300;
 
 // El orden importa: primero los formatos conocidos y, al final, cualquier cadena larga opaca.
 const PATTERNS: Array<[RegExp, string]> = [
+  // Credenciales dentro de una URL (esquema://usuario:clave@host): se ocultan el usuario y la clave.
+  [/\b([a-z][a-z0-9+.-]*:\/\/)[^\s/@:]*(?::[^\s/@]*)?@/gi, '$1[redactado]@'],
   [/eyJ[\w-]+\.[\w-]+\.[\w-]*/g, '[redactado]'], // JWT (id_token)
   [/ya29\.[\w-]+/g, '[redactado]'], // access token de Google
   [/1\/\/[\w-]+/g, '[redactado]'], // refresh token de Google
   [/Bearer\s+[\w.~+/=-]+/gi, 'Bearer [redactado]'],
   [
-    /(client_secret|refresh_token|access_token|id_token|code_verifier|code)=[^&\s"']+/gi,
-    '$1=[redactado]',
+    /((?:^|[\s?&;,])(?:database_password|client_secret|refresh_token|access_token|id_token|code_verifier|code|password|passwd|pwd|secret|token|api_key|apikey)\s*=\s*)[^&\s;,]*/gi,
+    '$1[redactado]',
   ],
-  [/[A-Za-z0-9_\-+/=]{32,}/g, '[redactado]'], // cualquier cadena larga opaca
+  [/\b[A-Za-z0-9_+/=-]{32,}\b/g, '[redactado]'],
 ];
 
 /** Oculta cualquier cosa con forma de token o secreto y limita la longitud. */

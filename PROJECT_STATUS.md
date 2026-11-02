@@ -70,8 +70,8 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | Etapa 7: arquitectura del laboratorio de IA | COMPLETADA | 279 unitarias y 172 e2e en verde el 31/10/2026; lint, build y tsc limpios |
 | Fase 9 (versión mínima) | EN PROGRESO | Plan: 9.1 endurecimiento, 9.2 eliminar cuenta y limpiar sesiones, 9.3 empaquetado, 9.4 despliegue y copias de seguridad, 9.5 Google de producción y textos legales, 9.6 verificación de Google, 9.7 pruebas con navegador y revisión final |
 | 9.1 Endurecimiento del backend | COMPLETADA | 319 unitarias, 172 e2e, lint, build, tsc y audit en verde; verificación manual en producción confirmada por el usuario el 01/11/2026 |
-| 9.2 Limpieza de sesiones y eliminación de cuenta | POR VERIFICAR | Código y pruebas escritas (backend y frontend) | Build, lint, pruebas, e2e y verificación manual |
-| 9.3 a 9.5, 9.7 | PENDIENTES | Despliegue previsto en Render, una sola URL (opción A, por confirmar) | |
+| 9.2 Limpieza de sesiones y eliminación de cuenta | COMPLETADA | Backend: 34 suites unitarias y 182 e2e en verde; frontend: 366 pruebas; verificación manual confirmada por el usuario el 01/11/2026 |
+| 9.3 Empaquetado para Render | POR VERIFICAR | Código, `render.yaml` y pruebas escritas | Pruebas automáticas y la prueba local de producción |
 | 9.6 Verificación de Google | APLAZADA | Requiere dominio propio verificado | |
 
 ## Errores, riesgos y bloqueos
