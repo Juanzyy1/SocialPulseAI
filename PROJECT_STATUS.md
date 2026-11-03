@@ -72,7 +72,9 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | 9.1 Endurecimiento del backend | COMPLETADA | 319 unitarias, 172 e2e, lint, build, tsc y audit en verde; verificación manual en producción confirmada por el usuario el 01/11/2026 |
 | 9.2 Limpieza de sesiones y eliminación de cuenta | COMPLETADA | Backend: 34 suites unitarias y 182 e2e en verde; frontend: 366 pruebas; verificación manual confirmada por el usuario el 01/11/2026 |
 | 9.3 Empaquetado para Render | COMPLETADA | Backend: 40 suites y 374 pruebas unitarias, 182 e2e, lint, tsc y audit en verde; el redactor ya oculta contraseñas en URLs (visto en la salida); prueba local de producción confirmada por el usuario el 01/11/2026 |
-| 9.4 Despliegue en Render | EN PROGRESO | `render.yaml` (región Oregón) y `docs/DEPLOY_RENDER.md` | Crear la base y el servicio; medir `TRUST_PROXY_HOPS`; comprobar cookie y cabeceras |
+| 9.4 Despliegue en Render | COMPLETADA* | Servicio activo en `https://socialpulse-ai-xweo.onrender.com`; registro, inicio de sesión y cookie con las tres marcas confirmados; esquema de la base completo (el registro guarda la aceptación de términos); diagnósticos apagados | *Falta ver el resultado de la prueba de caja negra del límite por IP (partes A y B) y las comprobaciones de cabeceras y 404 |
+| 9.5a Google en producción | EN PROGRESO | Guía en `docs/DEPLOY_RENDER.md` (sección 8) | Crear el cliente, poner las tres variables y probar |
+| 9.5b Textos legales | PENDIENTE | A la espera de los cinco datos | |
 | 9.6 Verificación de Google | APLAZADA | Requiere dominio propio verificado | |
 
 ## Errores, riesgos y bloqueos
@@ -81,9 +83,9 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 - **Media:** Jest requiere `--experimental-vm-modules` (`@nestjs/testing` 12 es solo ESM). Plan alternativo: bajar a NestJS 11.
 - **Media:** `day` de YouTube Analytics se asume en hora del Pacífico; está documentado para la API de informes masivos y no está probado directamente para Analytics. Los datos observados son coherentes.
 - **Media:** flag `Secure` de cookies solo revisado en el código, no probado con `NODE_ENV=production`.
-- **Media:** CSRF se apoya en `SameSite=Lax`; validar `Origin` queda pendiente hasta definir el frontend.
+- **Media:** CSRF se apoya en `SameSite=Lax`; validar `Origin` confirmada en la instancia real el 02/11/2026
 - **Media:** verificación de correo pospuesta; la regla 4 neutraliza la pre-registración.
-- **Media:** TRUST_PROXY_HOPS y la bandera Secure están implementadas y probadas a nivel de código; falta verificarlas en el despliegue real (9.4), y el proxy debe reenviar el Host original.
+- **Media:** TRUST_PROXY_HOPS y la bandera Secure están implementadas y probadas a nivel de código; y el proxy debe reenviar el Host original. confirmada en la instancia real el 02/11/2026
 - **Media:** el bloqueo por correo permite bloquear a propósito el login de otra persona.
 - **Media:** el 409 del registro revela si un correo existe.
 - **Media:** no hay sincronización automática periódica; la lanza el usuario. Corre dentro de la petición.
@@ -107,10 +109,11 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 - **Baja:** el procesamiento multimedia probablemente exija ffmpeg en el servidor (por verificar su disponibilidad y licencia).
 - **Media:** sin dominio propio, Google queda en modo de pruebas (hasta 100 usuarios, conexión de YouTube caduca a los 7 días) y no se puede verificar la aplicación.
 - **Media:** en el plan gratuito de Render la base de datos caduca a los 30 días (con 14 de gracia) y el servicio se duerme por inactividad; sirve para probar, no para conservar datos. Los contadores de intentos viven en memoria y se reinician al dormirse.
-- **Baja:** el aviso de `TRUST_PROXY_HOPS` depende del número real de proxies; se mide en el despliegue.
+- **Media:** TRUST_PROXY_HOPS=2 elegido sin ver la cadena de proxies; pendiente de la prueba de caja negra (esquivar el límite falsificando X-Forwarded-For, y bloqueo cruzado entre redes).
 - **Media:** una cuenta solo de Google se elimina escribiendo el correo, sin reautenticación; una sesión robada podría borrarla.
 - **Baja:** sin exportación de datos del usuario; las copias de seguridad del proveedor pueden conservar datos eliminados un tiempo (por aclarar en la política).
 - **Baja:** el contador de intentos fallidos de eliminación vive en memoria.
+- **Baja:** las condiciones propias de la API de YouTube (frases y enlaces exigidos en términos y política) aún no están verificadas.
 
 ## Decisiones técnicas confirmadas
 - Monolito modular NestJS + Prisma 7 + PostgreSQL, REST con prefijo `/api/v1`.

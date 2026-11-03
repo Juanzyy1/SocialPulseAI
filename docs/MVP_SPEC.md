@@ -200,3 +200,5 @@ las 6 tareas (5.1 a 5.4c) con sus pruebas unitarias y e2e en verde.
 | Acceso a Google en pruebas | Solo cuentas autorizadas (hasta 100) hasta publicar y verificar la aplicación (Fase 9) | Confirmada |
 | Despliegue | Sin dominio propio por ahora. Opción A propuesta: un solo servicio en Render que sirve la API y el frontend (mismo origen), con base de datos de Render; Google en modo de pruebas hasta tener dominio | Propuesta, pendiente de confirmar (01/11/2026) |
 | Región de Render | Oregón para el servicio y la base de datos (no se puede cambiar tras crear) | Confirmada 01/11/2026 |
+| Dirección de producción | `https://socialpulse-ai-xweo.onrender.com` (Render, Oregón); `TRUST_PROXY_HOPS=2` provisional hasta la prueba de caja negra; diagnósticos de red apagados | 02/11/2026 |
+| Google en producción | Segundo cliente OAuth en el mismo proyecto de Google Cloud; modo de pruebas; dos direcciones de retorno (inicio de sesión y YouTube) derivadas de `GOOGLE_REDIRECT_URI` | Propuesta 02/11/2026 |

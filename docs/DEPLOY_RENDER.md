@@ -44,23 +44,31 @@ El primer arranque en el plan gratuito puede tardar varios minutos.
    (F12 → Application → Cookies), `sp_session` debe ser **HttpOnly, Secure y SameSite=Lax**.
 4. `/api/docs` da 404 (Swagger apagado en producción).
 
-## 6. Medir los proxies (TRUST_PROXY_HOPS)
-Desde PowerShell, con la dirección real:
+## 6. Comprobar el límite de intentos por IP (TRUST_PROXY_HOPS)
+No se lee la cadena de proxies: se comprueba la propiedad de seguridad con una prueba de caja negra.
+
+**Parte A (tu PC): ¿se puede esquivar el límite falsificando la cabecera?** Cada intento usa un correo y
+una IP falsificada distintos:
 
     $url = 'https://<servicio>.onrender.com'
-    Invoke-RestMethod "$url/api/v1/diagnostics/network"
-    Invoke-RestMethod "$url/api/v1/diagnostics/network" -Headers @{ 'X-Forwarded-For' = '1.2.3.4' }
-    Invoke-RestMethod 'https://api.ipify.org'     # tu IP pública, para comparar
+    1..7 | ForEach-Object {
+      $headers = @{ 'X-Forwarded-For' = "203.0.113.$_" }
+      $body = @{ email = "prueba$_@no-existe.invalid"; password = 'incorrecta-123456' } | ConvertTo-Json
+      try {
+        Invoke-WebRequest "$url/api/v1/auth/login" -Method Post -ContentType 'application/json' -Headers $headers -Body $body -UseBasicParsing | Out-Null
+        "$_ -> 200"
+      } catch { "$_ -> $($_.Exception.Response.StatusCode.value__)" }
+    }
 
-| Resultado | Qué significa |
-|---|---|
-| 1.ª llamada: `forwardedFor` = tu IP y `ip` = tu IP; 2.ª: `forwardedFor` = `1.2.3.4, tu IP` e `ip` = tu IP | **TRUST_PROXY_HOPS = 1 es correcto** |
-| `forwardedFor` trae dos o más direcciones sin falsificar nada e `ip` no es la tuya | Hay más proxies: prueba 2 (y repite) |
-| `ip` = `1.2.3.4` en la 2.ª llamada | **Falsificable**: no cambies nada y avísame |
-| `forwardedFor` vacío | El proxy no reenvía la IP real: avísame |
+Esperado: `401` los cinco primeros y `429` el sexto y el séptimo. Si nunca sale 429, el valor es
+**demasiado alto** (el cliente puede falsificar su IP).
 
-Al terminar: pon `EXPOSE_NETWORK_DIAGNOSTICS` en `false` (Environment) y, si hizo falta, corrige
-`TRUST_PROXY_HOPS`. Al guardar, Render vuelve a desplegar.
+**Parte B (otra red, por ejemplo el teléfono con datos móviles):** mientras dura el bloqueo, entra con una
+cuenta de prueba. Esperado: entras. Si también te bloquea, el valor es **demasiado bajo** (todos
+comparten la IP de un proxy).
+
+La parte A te bloquea a ti 15 minutos; para desbloquearte antes, **Manual Deploy → Restart** en Render
+(los contadores viven en memoria).  
 
 ## 7. Qué esperar del plan gratuito
 - Tras 15 minutos sin tráfico el servicio se duerme; la primera petición tarda cerca de un minuto.
@@ -73,3 +81,26 @@ Al terminar: pon `EXPOSE_NETWORK_DIAGNOSTICS` en `false` (Environment) y, si hiz
 - **El servicio no pasa la comprobación de salud:** `/api/v1/health` debe responder; revisa el registro de arranque.
 - **Error 403 "Origen no permitido" al iniciar sesión:** el proxy no reenvía el `Host` o el protocolo originales:
   abre `/api/v1/diagnostics/network` y avísame.
+
+## 8. Google en producción
+Se usa el mismo proyecto de Google Cloud, con un **segundo cliente** (no reutilices el de desarrollo).
+
+1. **Google Auth platform → Clients → Create client**, tipo **Web application**,
+   nombre `SocialPulse AI (producción)`.
+2. **Authorized redirect URIs**: exactamente estas dos (con tu dirección real):
+   - `https://<servicio>.onrender.com/api/v1/auth/google/callback`
+   - `https://<servicio>.onrender.com/api/v1/integrations/youtube/callback`
+   No hace falta ningún "JavaScript origin": el flujo es de servidor.
+3. Copia el **ID de cliente** y el **secreto**. El secreto no va en el chat, ni en un archivo, ni en Git.
+4. En Render, **Environment**, pon las **tres variables en un solo guardado** (si solo hay una o dos, la
+   aplicación no arranca):
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
+   - `GOOGLE_REDIRECT_URI` = `https://<servicio>.onrender.com/api/v1/auth/google/callback`
+5. La aplicación de Google sigue en **modo de pruebas**: solo entran las cuentas de la lista de usuarios de
+   prueba (el dueño del proyecto siempre puede). Verás el aviso "Google no ha verificado esta aplicación":
+   es lo esperado.
+6. Comprueba en la instancia real: **Continuar con Google** → llegas al panel; **Cuentas → Conectar
+   YouTube** → vuelves a `/cuentas` con el aviso verde; **Sincronizar**.
+7. La base de datos de producción es **nueva**: hay que reconectar el canal y sincronizar de nuevo
+   (se recuperan los últimos 90 días). En modo de pruebas, la conexión de YouTube caduca a los 7 días.
