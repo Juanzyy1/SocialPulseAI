@@ -1,4 +1,5 @@
-import { APP_NAME, SPONSOR_NAME } from '../config/app';
+import { APP_NAME } from '../config/app';
+import { CONTACT_EMAIL, GOVERNING_COUNTRY, LEGAL_RESPONSIBLE, MIN_AGE } from '../config/legal';
 import { TERMS_VERSION } from './terms';
 
 export type LegalBlock = { type: 'p'; text: string } | { type: 'ul'; items: string[] };
@@ -36,7 +37,7 @@ export const TERMS_DOCUMENT: LegalDocument = {
           `${APP_NAME} es una aplicación que te permite conectar cuentas de redes sociales que administras y consultar sus estadísticas. Por ahora solo se puede conectar YouTube.`,
         ),
         p(
-          `El servicio lo ofrece [COMPLETAR: nombre legal de la persona o empresa responsable], con el patrocinio de ${SPONSOR_NAME}. Puedes escribirnos a [COMPLETAR: correo de contacto].`,
+          `El servicio lo ofrece ${LEGAL_RESPONSIBLE} [COMPLETAR: confirmar el nombre o razón social legal]. Puedes escribirnos a ${CONTACT_EMAIL}.`,
         ),
       ],
     },
@@ -45,7 +46,7 @@ export const TERMS_DOCUMENT: LegalDocument = {
       heading: '2. Tu cuenta',
       blocks: [
         ul(
-          'Debes tener al menos [COMPLETAR: edad mínima] años.',
+          `Debes tener al menos ${MIN_AGE} años.`,
           'Debes dar datos verdaderos y mantenerlos al día.',
           'Eres responsable de guardar tu contraseña y de lo que se haga con tu cuenta.',
           'Puedes entrar con correo y contraseña o con tu cuenta de Google.',
@@ -141,7 +142,11 @@ export const TERMS_DOCUMENT: LegalDocument = {
     {
       id: 'ley',
       heading: '11. Ley aplicable',
-      blocks: [p('[COMPLETAR: ley aplicable y jurisdicción].')],
+      blocks: [
+        p(
+          `Estos términos se rigen por las leyes de ${GOVERNING_COUNTRY}. [COMPLETAR: confirmar con asesoría legal la jurisdicción competente para las controversias].`,
+        ),
+      ],
     },
   ],
 };
@@ -155,13 +160,26 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
       heading: '1. Quién es el responsable',
       blocks: [
         p(
-          `El responsable del tratamiento de tus datos es [COMPLETAR: nombre legal de la persona o empresa responsable]. Contacto: [COMPLETAR: correo de contacto]. El servicio cuenta con el patrocinio de ${SPONSOR_NAME}.`,
+          `El responsable del tratamiento de tus datos es ${LEGAL_RESPONSIBLE} [COMPLETAR: confirmar el nombre o razón social legal]. Correo de contacto: ${CONTACT_EMAIL}. [COMPLETAR: teléfono de contacto del responsable, que la ley exige informar].`,
         ),
       ],
     },
     {
+      id: 'finalidades',
+      heading: '2. Para qué usamos tus datos',
+      blocks: [
+        ul(
+          'Crear y mantener tu cuenta y tu sesión.',
+          'Conectar tus canales de YouTube y mostrarte sus estadísticas.',
+          'Proteger la aplicación y tu cuenta frente a accesos abusivos.',
+          'Cumplir las obligaciones legales que nos apliquen.',
+        ),
+        p('No usamos tus datos para otros fines.'),
+      ],
+    },
+    {
       id: 'datos',
-      heading: '2. Qué datos tratamos y para qué',
+      heading: '3. Qué datos tratamos',
       blocks: [
         p('Tratamos solo los datos necesarios para que la aplicación funcione:'),
         ul(
@@ -177,7 +195,7 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
     },
     {
       id: 'google',
-      heading: '3. Datos de Google y de YouTube',
+      heading: '4. Datos de Google y de YouTube',
       blocks: [
         p(
           'Al acceder con Google pedimos solo tu identificación básica (identificador, correo y perfil). Al conectar YouTube pedimos dos permisos de solo lectura: ver tu cuenta de YouTube y ver las estadísticas de tu canal.',
@@ -186,37 +204,37 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
           'El permiso de lectura de YouTube permite técnicamente ver más información de tu cuenta que la que usamos. Nosotros solo consultamos la identificación de tu canal y las estadísticas descritas arriba.',
         ),
         p(
-          '[COMPLETAR: incluir la declaración de uso limitado de los datos de usuario de Google que exige su política; verificar el texto exacto en la política vigente antes de publicar].',
+          `El uso que ${APP_NAME} hace de la información recibida de las API de Google, y su transferencia a cualquier otra aplicación, cumplirá la Política de datos de usuario de los servicios de las API de Google, incluidos los requisitos de uso limitado. [COMPLETAR: confirmar con la documentación de Google y de la API de YouTube el texto exacto que exigen en la verificación de la aplicación].`,
         ),
       ],
     },
     {
       id: 'nohacemos',
-      heading: '4. Lo que no hacemos',
+      heading: '5. Lo que no hacemos',
       blocks: [
         ul(
           'No publicamos, modificamos ni borramos contenido de tu canal.',
           'No usamos publicidad ni herramientas de analítica de terceros en la aplicación.',
-          'No vendemos tus datos [COMPLETAR: confirmar esta política].',
+          'No vendemos tus datos ni los compartimos con terceros con fines comerciales.',
         ),
       ],
     },
     {
       id: 'compartimos',
-      heading: '5. Con quién los compartimos',
+      heading: '6. Con quién los compartimos',
       blocks: [
         p(
           'Con Google y YouTube, de quienes obtenemos los datos y con quienes interactúas al iniciar sesión o conectar un canal.',
         ),
         p(
-          'Con los proveedores que alojan la aplicación y su base de datos: [COMPLETAR: proveedores de alojamiento y base de datos, y país donde se almacenan los datos].',
+          'Con Render, el proveedor que aloja la aplicación y su base de datos PostgreSQL, en la región de Oregón (Estados Unidos). Tus datos se almacenan, por tanto, fuera de Colombia. [COMPLETAR: confirmar con asesoría legal el tratamiento de la transmisión o transferencia internacional de datos].',
         ),
-        p('Y cuando la ley nos obligue a hacerlo.'),
+        p('Y cuando la ley o una autoridad competente nos obligue a hacerlo.'),
       ],
     },
     {
       id: 'cookies',
-      heading: '6. Cookies',
+      heading: '7. Cookies',
       blocks: [
         p(
           'Usamos solo las cookies necesarias para que la aplicación funcione; no usamos cookies de publicidad ni de analítica:',
@@ -230,7 +248,7 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
     },
     {
       id: 'conservacion',
-      heading: '7. Cuánto tiempo los conservamos',
+      heading: '8. Cuánto tiempo los conservamos',
       blocks: [
         ul(
           'Tu sesión caduca tras 7 días sin uso y, como máximo, a los 30 días. Las sesiones caducadas se eliminan automáticamente de forma periódica.',
@@ -241,40 +259,40 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
     },
     {
       id: 'derechos',
-      heading: '8. Tus derechos',
+      heading: '9. Tus derechos',
       blocks: [
         p(
-          'Puedes retirar el acceso de la aplicación a tu cuenta de Google en cualquier momento, desde la sección de seguridad de tu cuenta de Google, en las aplicaciones con acceso a la cuenta.',
+          'Como titular de tus datos puedes conocer, actualizar y rectificar tus datos personales; revocar tu autorización y pedir que los eliminemos; y presentar una queja ante la Superintendencia de Industria y Comercio (SIC), la autoridad que vigila el cumplimiento de la ley de protección de datos en Colombia.',
         ),
         p(
-          '[COMPLETAR: derechos que reconoce la normativa de protección de datos aplicable (acceso, rectificación, supresión, oposición...) y cómo ejercerlos; verificar al publicar que la aplicación permite corregir el perfil y desconectar canales].',
+          `Para eliminar tu cuenta y todos sus datos, usa Ajustes: es inmediato. Para cualquier otra consulta, actualización o reclamo, escribe a ${CONTACT_EMAIL}. [COMPLETAR: plazos y procedimiento para atender consultas y reclamos, y revisión legal de la lista completa de derechos del titular].`,
+        ),
+        p(
+          'Además, puedes retirar el acceso de la aplicación a tu cuenta de Google en cualquier momento, desde la sección de seguridad de tu cuenta de Google, en las aplicaciones con acceso a la cuenta.',
         ),
       ],
     },
     {
       id: 'seguridad',
-      heading: '9. Seguridad',
+      heading: '10. Seguridad',
       blocks: [
         p(
-          'Protegemos tus datos con medidas como el cifrado de las credenciales de acceso a tus canales, el almacenamiento seguro (hash) de las contraseñas y las sesiones con caducidad. Ningún sistema es completamente seguro.',
-        ),
-        p(
-          '[COMPLETAR: confirmar al publicar que la aplicación se sirve siempre por conexión cifrada (HTTPS)].',
+          'Protegemos tus datos con medidas como el cifrado de las credenciales de acceso a tus canales, el almacenamiento seguro (hash) de las contraseñas, las sesiones con caducidad y la comunicación siempre cifrada (HTTPS). Ningún sistema es completamente seguro.',
         ),
       ],
     },
     {
       id: 'menores',
-      heading: '10. Menores de edad',
+      heading: '11. Menores de edad',
       blocks: [
         p(
-          '[COMPLETAR: política sobre menores de edad, coherente con la edad mínima de los términos de uso].',
+          `El servicio es solo para personas de ${MIN_AGE} años o más. No recopilamos de forma deliberada datos de menores de edad; si crees que un menor se registró, escríbenos a ${CONTACT_EMAIL} y eliminaremos su cuenta.`,
         ),
       ],
     },
     {
       id: 'cambios',
-      heading: '11. Cambios en esta política',
+      heading: '12. Cambios en esta política',
       blocks: [
         p(
           'Si cambiamos este texto cambiará su versión y te pediremos que lo aceptes de nuevo antes de seguir usando la aplicación.',

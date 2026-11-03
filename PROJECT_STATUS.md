@@ -72,9 +72,9 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | 9.1 Endurecimiento del backend | COMPLETADA | 319 unitarias, 172 e2e, lint, build, tsc y audit en verde; verificación manual en producción confirmada por el usuario el 01/11/2026 |
 | 9.2 Limpieza de sesiones y eliminación de cuenta | COMPLETADA | Backend: 34 suites unitarias y 182 e2e en verde; frontend: 366 pruebas; verificación manual confirmada por el usuario el 01/11/2026 |
 | 9.3 Empaquetado para Render | COMPLETADA | Backend: 40 suites y 374 pruebas unitarias, 182 e2e, lint, tsc y audit en verde; el redactor ya oculta contraseñas en URLs (visto en la salida); prueba local de producción confirmada por el usuario el 01/11/2026 |
-| 9.4 Despliegue en Render | COMPLETADA* | Servicio activo en `https://socialpulse-ai-xweo.onrender.com`; registro, inicio de sesión y cookie con las tres marcas confirmados; esquema de la base completo (el registro guarda la aceptación de términos); diagnósticos apagados | *Falta ver el resultado de la prueba de caja negra del límite por IP (partes A y B) y las comprobaciones de cabeceras y 404 |
-| 9.5a Google en producción | EN PROGRESO | Guía en `docs/DEPLOY_RENDER.md` (sección 8) | Crear el cliente, poner las tres variables y probar |
-| 9.5b Textos legales | PENDIENTE | A la espera de los cinco datos | |
+| 9.4 Despliegue en Render | COMPLETADA | Prueba de caja negra del límite por IP superada (A: 401 ×5 y 429 ×2 con la cabecera falsificada; B: el teléfono entró durante el bloqueo); cabeceras, 404 de diagnósticos y migraciones comprobados el 02/11/2026 |
+| 9.5a Google en producción | COMPLETADA | Inicio de sesión con Google, conexión de YouTube y sincronización funcionan en la instancia real (confirmado por el usuario) |
+| 9.5b Textos legales | EN PROGRESO | Borrador completado con los datos del usuario; versión 2026-11-02; quedan marcadores (ver tabla) | Revisión legal y datos pendientes |
 | 9.6 Verificación de Google | APLAZADA | Requiere dominio propio verificado | |
 
 ## Errores, riesgos y bloqueos
