@@ -45,6 +45,11 @@ export function configureApp(app: INestApplication): void {
   // Dos políticas de contenido: la estricta de la API (JSON) y otra para las páginas de la interfaz.
   const apiHeaders = helmet(helmetOptions(production, 'api'));
   const pageHeaders = helmet(helmetOptions(production, 'pages'));
+    // Beta cerrada: que los buscadores no indexen ni la aplicación ni la API. Quitar al lanzar públicamente.
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    next();
+  });
   app.use((req: Request, res: Response, next: NextFunction) =>
     (isApiPath(req.path) ? apiHeaders : pageHeaders)(req, res, next),
   );

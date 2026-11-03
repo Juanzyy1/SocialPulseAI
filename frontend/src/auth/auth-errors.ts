@@ -16,7 +16,9 @@ export function describeAuthError(error: unknown, flow: 'login' | 'register'): s
     case 401:
       return 'El correo o la contraseña no son correctos.';
     case 403:
-      return 'No se pudo completar la solicitud desde este sitio. Recarga la página e inténtalo de nuevo.';
+      return flow === 'register' && error.message.includes('invitación')
+        ? 'El código de invitación no es correcto o falta. Pídeselo a quien te invitó.'
+        : 'No se pudo completar la solicitud desde este sitio. Recarga la página e inténtalo de nuevo.';
     case 409:
       return 'Ya existe una cuenta con ese correo. Prueba a iniciar sesión.';
     case 429:

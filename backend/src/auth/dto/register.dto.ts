@@ -30,4 +30,13 @@ export class RegisterDto extends TermsAcceptanceDto {
   @IsString()
   @MaxLength(80)
   displayName?: string;
+
+  @ApiPropertyOptional({
+    maxLength: 64,
+    description: 'Código de invitación: obligatorio solo si el registro está cerrado (REGISTRATION_INVITE_CODE)',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  inviteCode?: string;
 }

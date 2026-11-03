@@ -7,7 +7,9 @@ import type { RegisterForm } from './validation';
 export function buildRegisterInput(form: RegisterForm): RegisterInput {
   if (!form.acceptTerms) throw new Error('Hay que aceptar los términos antes de registrarse');
   const displayName = form.displayName.trim();
+  const inviteCode = (form.inviteCode ?? '').trim();
   return {
+    ...(inviteCode === '' ? {} : { inviteCode }),
     email: form.email.trim(),
     password: form.password, // las contraseñas no se recortan
     ...(displayName === '' ? {} : { displayName }),

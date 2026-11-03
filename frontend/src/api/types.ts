@@ -32,6 +32,8 @@ export interface RegisterInput {
   displayName?: string;
   acceptTerms: true;
   termsVersion: string;
+  /** Solo si el registro está cerrado por invitación. */ 
+  inviteCode?: string;
 }
 
 export interface LoginInput {

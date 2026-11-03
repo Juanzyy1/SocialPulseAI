@@ -3,12 +3,15 @@ export const EMAIL_MAX = 254;
 export const PASSWORD_MIN = 12;
 export const PASSWORD_MAX = 128;
 export const NAME_MAX = 80;
+export const INVITE_MAX = 64;
 
 export interface RegisterForm {
   displayName: string;
   email: string;
   password: string;
   acceptTerms: boolean;
+  /** Solo si el registro está cerrado por invitación. */ 
+  inviteCode?: string;
 }
 
 export interface LoginForm {
@@ -16,7 +19,7 @@ export interface LoginForm {
   password: string;
 }
 
-export type RegisterErrors = Partial<Record<'displayName' | 'email' | 'password' | 'acceptTerms', string>>;
+export type RegisterErrors = Partial<Record<'displayName' | 'email' | 'password' | 'acceptTerms' | 'inviteCode', string>>;
 export type LoginErrors = Partial<Record<'email' | 'password', string>>;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -52,6 +55,10 @@ export function registerErrors(form: RegisterForm): RegisterErrors {
   if (password) errors.password = password;
 
   if (!form.acceptTerms) errors.acceptTerms = 'Debes aceptar los términos y la política de privacidad';
+
+  if ((form.inviteCode ?? '').trim().length > INVITE_MAX) {
+    errors.inviteCode = `El código no puede superar ${INVITE_MAX} caracteres`;
+  }
   return errors;
 }
 

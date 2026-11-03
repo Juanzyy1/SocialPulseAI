@@ -24,6 +24,7 @@ export function RegisterPage() {
     email: '',
     password: '',
     acceptTerms: false,
+    inviteCode: ''
   });
   const [errors, setErrors] = useState<RegisterErrors>({});
   const [failure, setFailure] = useState<string | null>(null);
@@ -79,6 +80,14 @@ export function RegisterPage() {
           value={form.password}
           onChange={(event) => setForm({ ...form, password: event.target.value })}
           error={errors.password}
+        />
+        <TextField
+          label="Código de invitación (si tienes uno)"
+          name="inviteCode"
+          autoComplete="off"
+          value={form.inviteCode ?? ''}
+          onChange={(event) => setForm({ ...form, inviteCode: event.target.value })}
+          error={errors.inviteCode}
         />
         <div className="mb-6">
           <label className="flex items-start gap-2.5 text-sm">

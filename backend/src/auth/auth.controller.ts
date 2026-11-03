@@ -5,7 +5,9 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
+import { RegistrationGateGuard } from './registration-gate.guard';
 import { ConfigService } from '@nestjs/config';
 import {
   ApiTooManyRequestsResponse,
@@ -48,6 +50,7 @@ export class AuthController {
   }
 
   @Public()
+  @UseGuards(RegistrationGateGuard)
   @Post('register')
   @ApiOperation({ summary: 'Registro con correo y contraseña' })
   @ApiCreatedResponse({ type: UserResponseDto })

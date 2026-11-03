@@ -74,7 +74,8 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | 9.3 Empaquetado para Render | COMPLETADA | Backend: 40 suites y 374 pruebas unitarias, 182 e2e, lint, tsc y audit en verde; el redactor ya oculta contraseñas en URLs (visto en la salida); prueba local de producción confirmada por el usuario el 01/11/2026 |
 | 9.4 Despliegue en Render | COMPLETADA | Prueba de caja negra del límite por IP superada (A: 401 ×5 y 429 ×2 con la cabecera falsificada; B: el teléfono entró durante el bloqueo); cabeceras, 404 de diagnósticos y migraciones comprobados el 02/11/2026 |
 | 9.5a Google en producción | COMPLETADA | Inicio de sesión con Google, conexión de YouTube y sincronización funcionan en la instancia real (confirmado por el usuario) |
-| 9.5b Textos legales | EN PROGRESO | Borrador completado con los datos del usuario; versión 2026-11-02; quedan marcadores (ver tabla) | Revisión legal y datos pendientes |
+| 9.5b Textos legales | COMPLETADA (borrador) | Versión 2026-11-02; 34 archivos y 373 pruebas del frontend, 40 suites y 374 del backend en verde; redespliegue sin problemas (confirmado por el usuario) | Marcadores pendientes de revisión legal |
+| 9.5c Beta cerrada | POR VERIFICAR | Código de invitación para el registro, `noindex`, `docs/BETA.md` | Pruebas automáticas, código en Render y primera invitación real |
 | 9.6 Verificación de Google | APLAZADA | Requiere dominio propio verificado | |
 
 ## Errores, riesgos y bloqueos
