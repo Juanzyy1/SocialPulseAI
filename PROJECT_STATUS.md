@@ -77,6 +77,8 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | 9.5b Textos legales | COMPLETADA (borrador) | Versión 2026-11-02; 34 archivos y 373 pruebas del frontend, 40 suites y 374 del backend en verde; redespliegue sin problemas (confirmado por el usuario) | Marcadores pendientes de revisión legal |
 | 9.5c Beta cerrada | POR VERIFICAR | Código de invitación para el registro, `noindex`, `docs/BETA.md` | Pruebas automáticas, código en Render y primera invitación real |
 | 9.6 Verificación de Google | APLAZADA | Requiere dominio propio verificado | |
+| 9.7 Pruebas con navegador real y revisión final | EN PROGRESO | Playwright contra Render: 11 de 19 pruebas pasaron (rutas, legales, cabeceras, `noindex`, `robots.txt`, 404, 401, 403 por origen ajeno); falló el registro con correo y contraseña (el panel no apareció en 15 s) y 7 no se ejecutaron | Prueba reescrita para diagnosticar; repetir contra Render |
+| Fase 8 Instagram y TikTok | EN PLANIFICACIÓN | Viabilidad verificada con fuentes oficiales (`docs/PHASE8_PLATFORMS.md`) | Confirmar con el usuario qué cuentas tiene; 8.0 refactor del adaptador de sincronización |
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.
