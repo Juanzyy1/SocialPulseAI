@@ -1,10 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { credentialAad, TokenCipherService } from '../../common/crypto/token-cipher.service';
+import { addDays } from '../../common/dates/pacific-date';
 import { PrismaService } from '../../prisma/prisma.service';
-import { SyncAdapter, SyncData, SyncDataError } from '../../sync/sync-adapter';
+import { MetricRow, SyncAdapter, SyncData, SyncDataError } from '../../sync/sync-adapter';
 import { SyncRange } from '../../sync/sync-range';
 import { InstagramInsightsClient } from './instagram-insights.client';
 import { parseDailyReach } from './instagram-insights.mapper';
+
+const MAX_DAYS_PER_INSIGHTS_REQUEST = 29;
+
+function splitRange(range: SyncRange): SyncRange[] {
+  const chunks: SyncRange[] = [];
+  for (let start = range.start; start <= range.end; ) {
+    const chunkEnd = addDays(start, MAX_DAYS_PER_INSIGHTS_REQUEST - 1);
+    const end = chunkEnd < range.end ? chunkEnd : range.end;
+    chunks.push({ ...range, start, end });
+    start = addDays(end, 1);
+  }
+  return chunks;
+}
 
 @Injectable()
 export class InstagramSyncAdapter implements SyncAdapter {
@@ -41,11 +55,15 @@ export class InstagramSyncAdapter implements SyncAdapter {
       throw new SyncDataError('No se pudo leer el acceso de Instagram; vuelve a conectar la cuenta');
     }
 
-    const response = await this.insights.fetchDailyReach(
-      accessToken,
-      account.platformAccountId,
-      range,
-    );
-    return { dailyMetrics: parseDailyReach(response, range), snapshots: [] };
+    const dailyMetrics: MetricRow[] = [];
+    for (const chunk of splitRange(range)) {
+      const response = await this.insights.fetchDailyReach(
+        accessToken,
+        account.platformAccountId,
+        chunk,
+      );
+      dailyMetrics.push(...parseDailyReach(response, chunk));
+    }
+    return { dailyMetrics, snapshots: [] };
   }
 }

@@ -71,9 +71,13 @@ class FakeAnalyticsClient extends YoutubeAnalyticsClient {
 class FakeInstagramInsightsClient extends InstagramInsightsClient {
   calls: Array<{ accessToken: string; accountId: string; range: SyncRange }> = [];
   response: unknown = { data: [] };
+  failAtCall = 0;
 
   async fetchDailyReach(accessToken: string, accountId: string, range: SyncRange): Promise<unknown> {
     this.calls.push({ accessToken, accountId, range });
+    if (this.calls.length === this.failAtCall) {
+      throw new Error('Meta rechazó la consulta de Insights (400)');
+    }
     return this.response;
   }
 }
@@ -141,6 +145,7 @@ describe('Sincronización (e2e)', () => {
     fake.failStatistics = false;
     instagramFake.calls = [];
     instagramFake.response = { data: [] };
+    instagramFake.failAtCall = 0;
   });
 
   beforeAll(async () => {
@@ -411,12 +416,21 @@ describe('Sincronización (e2e)', () => {
 
     expect(response.body.status).toBe('SUCCEEDED');
     expect(response.body.rowsWritten).toBe(2);
-    expect(instagramFake.calls).toHaveLength(1);
-    expect(instagramFake.calls[0]).toMatchObject({
-      accessToken: 'instagram-access-token',
-      range: { start: addDays(today, -89), end: today, kind: 'initial' },
-    });
-    expect(instagramFake.calls[0].accountId).toMatch(/^instagram-/);
+    expect(instagramFake.calls).toHaveLength(4);
+    expect(instagramFake.calls.map(({ range }) => [range.start, range.end])).toEqual([
+      [addDays(today, -89), addDays(today, -61)],
+      [addDays(today, -60), addDays(today, -32)],
+      [addDays(today, -31), addDays(today, -3)],
+      [addDays(today, -2), today],
+    ]);
+    expect(
+      instagramFake.calls.every(
+        ({ accessToken, accountId, range }) =>
+          accessToken === 'instagram-access-token' &&
+          accountId.startsWith('instagram-') &&
+          range.kind === 'initial',
+      ),
+    ).toBe(true);
     expect(
       await prisma.accountDailyMetric.findMany({
         where: { socialAccountId: id },
@@ -439,6 +453,28 @@ describe('Sincronización (e2e)', () => {
 
     expect(response.body.status).toBe('FAILED');
     expect(response.body.errorMessage).toContain('inválido');
+    expect(await metricCount(id)).toBe(0);
+    expect((await prisma.socialAccount.findUniqueOrThrow({ where: { id } })).lastSyncedAt).toBeNull();
+  });
+
+  it('Instagram no persiste los primeros bloques si falla una consulta posterior', async () => {
+    const user = await login();
+    const id = await seedAccount(user.id, { platform: 'INSTAGRAM' });
+    instagramFake.response = {
+      data: [
+        {
+          name: 'reach',
+          period: 'day',
+          values: [{ value: 10, end_time: `${addDays(today, -80)}T12:00:00Z` }],
+        },
+      ],
+    };
+    instagramFake.failAtCall = 2;
+
+    const response = await sync(user.cookie, id).expect(200);
+
+    expect(response.body.status).toBe('FAILED');
+    expect(instagramFake.calls).toHaveLength(2);
     expect(await metricCount(id)).toBe(0);
     expect((await prisma.socialAccount.findUniqueOrThrow({ where: { id } })).lastSyncedAt).toBeNull();
   });

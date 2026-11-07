@@ -47,6 +47,9 @@ Verificado en documentación oficial el 07/11/2026:
   que documenta una serie temporal en la referencia actual. Se expone como promedio diario: sumar alcances diarios
   contaría repetidamente a las mismas personas. `views` es `total_value`, no se trata como serie diaria; `impressions`
   está deprecado en v22 y posteriores.
+- Meta limita el rango de cada consulta Insights a 30 días; el adaptador divide rangos largos en bloques de 29 días
+  para incluir fechas completas, también al cruzar el cambio de horario. Si algún bloque falla, no se persiste ningún
+  dato de esa ejecución.
 - Si una métrica no está disponible, la API devuelve un conjunto vacío, no cero; algunas métricas requieren 100
   seguidores, `online_followers` solo tiene 30 días y los datos pueden retrasarse hasta 48 horas.
 - El ejemplo oficial vigente muestra Graph API v27.0; confirmar la versión activa al crear/configurar la app.
