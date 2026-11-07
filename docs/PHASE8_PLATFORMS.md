@@ -81,7 +81,8 @@ desde la referencia vigente, no a partir de métricas de otras versiones.
 - El callback valida la sesión y `state`, intercambia el código servidor-a-servidor, obtiene las cuentas compartidas,
   y guarda los tokens cifrados. No persiste el token en claro.
 - Configuración necesaria: `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET`, `INSTAGRAM_CONFIG_ID` y
-  `INSTAGRAM_REDIRECT_URI`, todas juntas o ninguna.
+  `INSTAGRAM_REDIRECT_URI`. Como Instagram es opcional, variables ausentes o incompletas no impiden el arranque;
+  el endpoint de conexión queda deshabilitado hasta que se configuren las cuatro.
 - El `INSTAGRAM_CONFIG_ID` de la configuración mostrada por el usuario se fija en `render.yaml`; el ID de app y
   el secreto se agregan en Render (el secreto nunca va a Git). Para pruebas locales, definir las cuatro variables
   en `backend/.env`.

@@ -66,10 +66,13 @@ describe('validateEnv', () => {
     expect(env.INSTAGRAM_REDIRECT_URI).toBe(instagram.INSTAGRAM_REDIRECT_URI);
   });
 
-  it('rechaza Instagram OAuth incompleto o un callback inseguro', () => {
-    expect(errorOf({ ...base, INSTAGRAM_CLIENT_ID: instagram.INSTAGRAM_CLIENT_ID })).toContain(
-      'Instagram OAuth está incompleto',
-    );
+  it('permite Instagram OAuth parcial para que la integración opcional no impida el arranque', () => {
+    expect(
+      errorOf({ ...base, INSTAGRAM_CLIENT_ID: instagram.INSTAGRAM_CLIENT_ID }),
+    ).toBe('');
+  });
+
+  it('rechaza un callback inseguro de Instagram aunque la integración sea opcional', () => {
     expect(
       errorOf({
         ...base,

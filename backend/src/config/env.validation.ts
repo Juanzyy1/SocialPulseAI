@@ -27,12 +27,6 @@ const GOOGLE_KEYS = [
   'GOOGLE_CLIENT_SECRET',
   'GOOGLE_REDIRECT_URI',
 ] as const;
-const INSTAGRAM_KEYS = [
-  'INSTAGRAM_CLIENT_ID',
-  'INSTAGRAM_CLIENT_SECRET',
-  'INSTAGRAM_CONFIG_ID',
-  'INSTAGRAM_REDIRECT_URI',
-] as const;
 const LOCAL_HOSTS = ['localhost', '127.0.0.1'];
 const MAX_PROXY_HOPS = 10;
 
@@ -136,23 +130,12 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     if (problem) errors.push(problem);
   }
 
-  // Instagram OAuth: las tres variables juntas o ninguna.
+  // Instagram es opcional: una configuración parcial deja la conexión deshabilitada,
+  // pero no debe impedir el arranque de la aplicación.
   const instagramClientId = optionalString(raw.INSTAGRAM_CLIENT_ID);
   const instagramClientSecret = optionalString(raw.INSTAGRAM_CLIENT_SECRET);
   const instagramConfigId = optionalString(raw.INSTAGRAM_CONFIG_ID);
   const instagramRedirectUri = optionalString(raw.INSTAGRAM_REDIRECT_URI);
-  const instagramValues = [
-    instagramClientId,
-    instagramClientSecret,
-    instagramConfigId,
-    instagramRedirectUri,
-  ];
-  const instagramSet = instagramValues.filter((v) => v !== undefined).length;
-  if (instagramSet > 0 && instagramSet < INSTAGRAM_KEYS.length) {
-    errors.push(
-      `Instagram OAuth está incompleto: define las tres variables (${INSTAGRAM_KEYS.join(', ')}) o ninguna`,
-    );
-  }
   if (instagramRedirectUri) {
     const problem = checkRedirectUri(instagramRedirectUri, nodeEnv === 'production');
     if (problem) errors.push(problem.replaceAll('GOOGLE_REDIRECT_URI', 'INSTAGRAM_REDIRECT_URI'));
