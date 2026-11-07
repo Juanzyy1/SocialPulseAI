@@ -34,7 +34,7 @@ export class AccountService {
 
   /**
    * Elimina la cuenta del usuario de la sesión y todos sus datos. Antes desconecta cada canal
-   * (revocando el acceso en Google); si eso falla, la cuenta se elimina igualmente y se informa.
+   * (revocando el acceso en cada proveedor); si eso falla, la cuenta se elimina y se informa.
    */
   async deleteAccount(userId: string, dto: DeleteAccountDto): Promise<DeleteAccountResponseDto> {
     if (this.attempts.isBlocked(userId)) {
@@ -57,7 +57,7 @@ export class AccountService {
     for (const account of accounts) {
       try {
         const result = await this.socialAccounts.disconnect(userId, account.id);
-        if (!result.revokedAtGoogle) notConfirmed += 1;
+        if (!result.revokedAtProvider) notConfirmed += 1;
       } catch (error) {
         notConfirmed += 1;
         this.logger.warn(

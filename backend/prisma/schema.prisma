@@ -124,6 +124,7 @@ model SocialCredential {
   accessTokenEnc  String
   refreshTokenEnc String?
   expiresAt       DateTime?
+  refreshExpiresAt DateTime?
   scopes          String[]
   // Permite rotar la clave de cifrado sin perder los tokens existentes.
   keyVersion      Int      @default(1)

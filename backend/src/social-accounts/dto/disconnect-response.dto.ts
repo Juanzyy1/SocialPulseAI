@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class DisconnectResponseDto {
   @ApiProperty({
     description:
-      'false si Google no confirmó la revocación. La cuenta se desconecta igualmente y el usuario puede quitar el acceso desde su cuenta de Google',
+      'Indica si el proveedor confirmó la revocación. La cuenta se desconecta y sus credenciales se borran incluso si la revocación remota falla.',
   })
-  revokedAtGoogle: boolean;
+  revokedAtProvider: boolean;
 }

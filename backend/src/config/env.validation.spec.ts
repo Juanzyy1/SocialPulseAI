@@ -16,6 +16,11 @@ const instagram = {
   INSTAGRAM_CONFIG_ID: 'instagram-config-id',
   INSTAGRAM_REDIRECT_URI: 'http://localhost:3000/api/v1/integrations/instagram/callback',
 };
+const tiktok = {
+  TIKTOK_CLIENT_KEY: 'tiktok-client-key',
+  TIKTOK_CLIENT_SECRET: 'tiktok-client-secret',
+  TIKTOK_REDIRECT_URI: 'https://socialpulse.example/api/v1/integrations/tiktok/callback',
+};
 
 /** Devuelve el mensaje del error lanzado, o '' si no lanzó nada. */
 function errorOf(raw: Record<string, unknown>): string {
@@ -64,6 +69,26 @@ describe('validateEnv', () => {
     expect(env.INSTAGRAM_CLIENT_ID).toBe(instagram.INSTAGRAM_CLIENT_ID);
     expect(env.INSTAGRAM_CONFIG_ID).toBe(instagram.INSTAGRAM_CONFIG_ID);
     expect(env.INSTAGRAM_REDIRECT_URI).toBe(instagram.INSTAGRAM_REDIRECT_URI);
+  });
+
+  it('acepta TikTok OAuth configurado y permite mantener opcional la integración', () => {
+    const env = validateEnv({ ...base, ...tiktok });
+    expect(env.TIKTOK_CLIENT_KEY).toBe(tiktok.TIKTOK_CLIENT_KEY);
+    expect(env.TIKTOK_REDIRECT_URI).toBe(tiktok.TIKTOK_REDIRECT_URI);
+    expect(errorOf({ ...base, TIKTOK_CLIENT_KEY: tiktok.TIKTOK_CLIENT_KEY })).toBe('');
+  });
+
+  it('exige un URI HTTPS estático para TikTok incluso en desarrollo', () => {
+    expect(
+      errorOf({ ...base, ...tiktok, TIKTOK_REDIRECT_URI: `${tiktok.TIKTOK_REDIRECT_URI}?x=1` }),
+    ).toContain('TIKTOK_REDIRECT_URI');
+    expect(
+      errorOf({
+        ...base,
+        ...tiktok,
+        TIKTOK_REDIRECT_URI: 'http://localhost:3000/api/v1/integrations/tiktok/callback',
+      }),
+    ).toContain('TIKTOK_REDIRECT_URI');
   });
 
   it('permite Instagram OAuth parcial para que la integración opcional no impida el arranque', () => {

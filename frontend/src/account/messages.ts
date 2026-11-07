@@ -56,7 +56,18 @@ export function describeDisconnectResult(
       text: 'Cuenta desconectada y datos borrados de SocialPulse AI. Para revocar también el acceso en Meta, quita SocialPulse AI de las integraciones de tu negocio.',
     };
   }
-  return result.revokedAtGoogle
+  if (platform === 'TIKTOK') {
+    return result.revokedAtProvider
+      ? {
+          tone: 'success',
+          text: 'Cuenta desconectada. Sus credenciales y estadísticas se borraron, y revocamos el acceso en TikTok.',
+        }
+      : {
+          tone: 'info',
+          text: 'Cuenta desconectada y sus datos borrados. No pudimos confirmar la revocación en TikTok; puedes quitar el acceso desde los ajustes de seguridad de TikTok.',
+        };
+  }
+  return result.revokedAtProvider
     ? {
         tone: 'success',
         text: 'Cuenta desconectada. Sus credenciales y estadísticas se borraron, y revocamos el acceso en Google.',

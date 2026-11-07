@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { INSTAGRAM_CONNECT_URL, YOUTUBE_CONNECT_URL } from '../account/connect-result';
+import {
+  INSTAGRAM_CONNECT_URL,
+  TIKTOK_CONNECT_URL,
+  YOUTUBE_CONNECT_URL,
+} from '../account/connect-result';
 import type { Notice } from '../account/connect-result';
 import {
   describeDisconnectError,
@@ -41,6 +45,8 @@ export function AccountCard({ account, onDisconnected }: AccountCardProps) {
       ? INSTAGRAM_CONNECT_URL
       : account.platform === 'YOUTUBE'
         ? YOUTUBE_CONNECT_URL
+        : account.platform === 'TIKTOK'
+          ? TIKTOK_CONNECT_URL
         : null;
   const syncNotice = sync.data ? describeSyncResult(sync.data) : null;
 
@@ -70,7 +76,10 @@ export function AccountCard({ account, onDisconnected }: AccountCardProps) {
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        {active && (account.platform === 'YOUTUBE' || account.platform === 'INSTAGRAM') ? (
+        {active &&
+        (account.platform === 'YOUTUBE' ||
+          account.platform === 'INSTAGRAM' ||
+          account.platform === 'TIKTOK') ? (
           <button
             type="button"
             onClick={() => sync.mutate()}
@@ -85,7 +94,7 @@ export function AccountCard({ account, onDisconnected }: AccountCardProps) {
             Reconectar
           </a>
         ) : null}
-        {active && account.platform === 'INSTAGRAM' && connectUrl && (
+        {active && account.platform !== 'YOUTUBE' && connectUrl && (
           <a href={connectUrl} className={`${BUTTON} inline-block`}>
             Volver a conectar
           </a>
@@ -119,7 +128,9 @@ export function AccountCard({ account, onDisconnected }: AccountCardProps) {
             cuenta. Podrás volver a conectarla más adelante.
             {account.platform === 'INSTAGRAM'
               ? ' Para revocar el acceso en Meta, quita SocialPulse AI de las integraciones de tu negocio.'
-              : ' Intentaremos revocar el acceso en Google; al reconectar solo se recuperarán los últimos 90 días.'}
+              : account.platform === 'TIKTOK'
+                ? ' Intentaremos revocar el acceso en TikTok.'
+                : ' Intentaremos revocar el acceso en Google; al reconectar solo se recuperarán los últimos 90 días.'}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button

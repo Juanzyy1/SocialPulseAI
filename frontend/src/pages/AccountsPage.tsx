@@ -8,6 +8,7 @@ import {
 import type { Notice } from '../account/connect-result';
 import { AccountCard } from '../components/AccountCard';
 import { ConnectInstagram } from '../components/ConnectInstagram';
+import { ConnectTikTok } from '../components/ConnectTikTok';
 import { ConnectYoutube } from '../components/ConnectYoutube';
 import { describeLoadError } from '../dashboard/errors';
 import { useAccounts } from '../dashboard/queries';
@@ -37,7 +38,12 @@ export function AccountsPage() {
   const [disconnectNotice, setDisconnectNotice] = useState<Notice | null>(null);
 
   useEffect(() => {
-    if (searchParams.has('youtube') || searchParams.has('instagram') || searchParams.has('reason')) {
+    if (
+      searchParams.has('youtube') ||
+      searchParams.has('instagram') ||
+      searchParams.has('tiktok') ||
+      searchParams.has('reason')
+    ) {
       setSearchParams(withoutConnectResult(searchParams), { replace: true });
     }
   }, [searchParams, setSearchParams]);
@@ -74,7 +80,7 @@ export function AccountsPage() {
         )}
         {accounts.data && accounts.data.length === 0 && (
           <p className="rounded-xl border border-panel-line bg-panel-card p-6 text-panel-muted">
-            Todavía no has conectado ninguna cuenta. Empieza conectando YouTube o Instagram.
+            Todavía no has conectado ninguna cuenta. Empieza conectando YouTube, Instagram o TikTok.
           </p>
         )}
         {accounts.data && accounts.data.length > 0 && (
@@ -89,6 +95,7 @@ export function AccountsPage() {
       <div className="space-y-5">
         <ConnectYoutube />
         <ConnectInstagram />
+        <ConnectTikTok />
       </div>
     </div>
   );

@@ -149,7 +149,88 @@ const INSTAGRAM: readonly MetricDefinition[] = [
   },
 ];
 
-const CATALOG: Record<string, readonly MetricDefinition[]> = { YOUTUBE, INSTAGRAM };
+const TIKTOK: readonly MetricDefinition[] = [
+  {
+    code: 'followers',
+    label: 'Seguidores',
+    kind: 'snapshot',
+    unit: 'count',
+    polarity: 'neutral',
+    compatibleGroup: null,
+  },
+  {
+    code: 'following',
+    label: 'Seguidos',
+    kind: 'snapshot',
+    unit: 'count',
+    polarity: 'neutral',
+    compatibleGroup: null,
+  },
+  {
+    code: 'likes',
+    label: 'Me gusta recibidos',
+    kind: 'snapshot',
+    unit: 'count',
+    polarity: 'neutral',
+    compatibleGroup: null,
+    note: 'Total acumulado del perfil según TikTok.',
+  },
+  {
+    code: 'videoCount',
+    label: 'Videos públicos',
+    kind: 'snapshot',
+    unit: 'count',
+    polarity: 'neutral',
+    compatibleGroup: null,
+  },
+  {
+    code: 'recentVideoCount',
+    label: 'Videos consultados',
+    kind: 'snapshot',
+    unit: 'count',
+    polarity: 'neutral',
+    compatibleGroup: null,
+    note: 'Hasta los 20 videos públicos más recientes.',
+  },
+  {
+    code: 'recentVideoViews',
+    label: 'Vistas de videos recientes',
+    kind: 'snapshot',
+    unit: 'count',
+    polarity: 'neutral',
+    compatibleGroup: null,
+    note: 'Suma acumulada de hasta los 20 videos públicos más recientes; no es una métrica diaria.',
+  },
+  {
+    code: 'recentVideoLikes',
+    label: 'Me gusta en videos recientes',
+    kind: 'snapshot',
+    unit: 'count',
+    polarity: 'neutral',
+    compatibleGroup: null,
+    note: 'Suma acumulada de hasta los 20 videos públicos más recientes; no es una métrica diaria.',
+  },
+  {
+    code: 'recentVideoComments',
+    label: 'Comentarios en videos recientes',
+    kind: 'snapshot',
+    unit: 'count',
+    polarity: 'neutral',
+    compatibleGroup: null,
+    note: 'Suma acumulada de hasta los 20 videos públicos más recientes; no es una métrica diaria.',
+  },
+  {
+    code: 'recentVideoShares',
+    label: 'Compartidos en videos recientes',
+    kind: 'snapshot',
+    unit: 'count',
+    polarity: 'neutral',
+    compatibleGroup: null,
+    note: 'Suma acumulada de hasta los 20 videos públicos más recientes; no es una métrica diaria.',
+  },
+];
+
+const CATALOG: Record<string, readonly MetricDefinition[]> = { YOUTUBE, INSTAGRAM, TIKTOK };
 
 export function metricsOf(platform: string): readonly MetricDefinition[] {
   return CATALOG[platform] ?? [];

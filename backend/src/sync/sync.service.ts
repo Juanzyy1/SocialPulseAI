@@ -18,7 +18,7 @@ import { MetricRow, SnapshotRow, SYNC_ADAPTERS, SyncAdapter, SyncDataError } fro
 
 const NOT_FOUND = 'Cuenta no encontrada';
 const RECONNECT_MESSAGE =
-  'El acceso a YouTube fue revocado o caducó; vuelve a conectar la cuenta';
+  'El acceso a esta cuenta fue revocado o caducó; vuelve a conectarla';
 const RUNNING_MESSAGE = 'Ya hay una sincronización en curso para esta cuenta';
 const COOLDOWN_MESSAGE = 'Espera un minuto antes de sincronizar de nuevo';
 
@@ -137,14 +137,16 @@ export class SyncService {
 
   private async execute(id: string, adapter: SyncAdapter): Promise<SyncRunResponseDto> {
     const today = pacificDate(new Date());
-    const latest = await this.prisma.accountDailyMetric.aggregate({
-      where: { socialAccountId: id },
-      _max: { metricDate: true },
-    });
-    const range = planSyncRange(
-      today,
-      latest._max.metricDate ? toIsoDay(latest._max.metricDate) : null,
-    );
+    const range = adapter.snapshotsOnly
+      ? { start: today, end: today, kind: 'incremental' as const }
+      : await this.prisma.accountDailyMetric
+          .aggregate({
+            where: { socialAccountId: id },
+            _max: { metricDate: true },
+          })
+          .then((latest) =>
+            planSyncRange(today, latest._max.metricDate ? toIsoDay(latest._max.metricDate) : null),
+          );
 
     const run = await this.prisma.syncRun.create({
       data: {

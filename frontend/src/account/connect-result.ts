@@ -1,6 +1,7 @@
 /** Ruta del backend que inicia la conexión de un canal. Se abre como enlace normal, no con fetch. */
 export const YOUTUBE_CONNECT_URL = '/api/v1/integrations/youtube/connect';
 export const INSTAGRAM_CONNECT_URL = '/api/v1/integrations/instagram/connect';
+export const TIKTOK_CONNECT_URL = '/api/v1/integrations/tiktok/connect';
 
 // Códigos que el backend puede enviar en ?reason=. Cualquier otro valor es un texto de la URL,
 // que puede escribir cualquiera, y nunca se muestra tal cual.
@@ -10,24 +11,27 @@ const KNOWN_REASONS = [
   'already_connected',
   'google_error',
   'instagram_error',
+  'tiktok_error',
   'unavailable',
   'error',
 ] as const;
 
 export type ConnectReason = (typeof KNOWN_REASONS)[number];
 
-export type ConnectPlatform = 'youtube' | 'instagram';
+export type ConnectPlatform = 'youtube' | 'instagram' | 'tiktok';
 export type ConnectOutcome =
   | { kind: 'connected'; platform: ConnectPlatform }
   | { kind: 'error'; platform: ConnectPlatform; reason: ConnectReason };
 
 /** Resultado de la conexión según los parámetros de la URL, o null si no hay ninguno. */
 export function parseConnectResult(params: URLSearchParams): ConnectOutcome | null {
-  const platform: ConnectPlatform | null = params.has('instagram')
-    ? 'instagram'
-    : params.has('youtube')
-      ? 'youtube'
-      : null;
+  const platform: ConnectPlatform | null = params.has('tiktok')
+    ? 'tiktok'
+    : params.has('instagram')
+      ? 'instagram'
+      : params.has('youtube')
+        ? 'youtube'
+        : null;
   if (!platform) return null;
   const status = params.get(platform);
   if (status === 'connected') return { kind: 'connected', platform };
@@ -47,6 +51,7 @@ export function withoutConnectResult(params: URLSearchParams): URLSearchParams {
   const next = new URLSearchParams(params);
   next.delete('youtube');
   next.delete('instagram');
+  next.delete('tiktok');
   next.delete('reason');
   return next;
 }
@@ -60,13 +65,15 @@ const REASON_MESSAGES: Record<ConnectReason, string> = {
   rejected:
     'No se completó la conexión. Puede que la hayas cancelado, que no hayas concedido los dos permisos solicitados o que la cuenta de Google no tenga un canal de YouTube. Vuelve a intentarlo y acepta los dos permisos.',
   unauthorized: 'Tu sesión caducó. Inicia sesión de nuevo e inténtalo otra vez.',
-  already_connected: 'Ese canal ya está conectado a otra cuenta de SocialPulse AI.',
+  already_connected: 'Esa cuenta social ya está conectada a otro usuario de SocialPulse AI.',
   google_error:
     'Hubo un problema al comunicarse con Google o con YouTube. Inténtalo de nuevo en unos minutos.',
   instagram_error:
     'Hubo un problema al comunicarse con Meta o Instagram. Inténtalo de nuevo en unos minutos.',
-  unavailable: 'La conexión con YouTube no está disponible en este momento.',
-  error: 'No se pudo conectar el canal. Inténtalo de nuevo.',
+  tiktok_error:
+    'Hubo un problema al comunicarse con TikTok. Inténtalo de nuevo en unos minutos.',
+  unavailable: 'La conexión con esta plataforma no está disponible en este momento.',
+  error: 'No se pudo conectar la cuenta. Inténtalo de nuevo.',
 };
 
 export function describeConnectResult(outcome: ConnectOutcome): Notice {
@@ -76,12 +83,16 @@ export function describeConnectResult(outcome: ConnectOutcome): Notice {
       text:
         outcome.platform === 'youtube'
           ? 'Canal conectado. Ahora sincroniza la cuenta para traer sus estadísticas.'
-          : 'Cuenta de Instagram conectada. Ahora sincroniza la cuenta para traer las estadísticas disponibles.',
+          : outcome.platform === 'instagram'
+            ? 'Cuenta de Instagram conectada. Ahora sincroniza la cuenta para traer las estadísticas disponibles.'
+            : 'Cuenta de TikTok conectada. Ahora sincroniza la cuenta para traer sus estadísticas.',
     };
   }
   const text =
     outcome.platform === 'instagram' && outcome.reason === 'rejected'
       ? 'No se completó la conexión. Comprueba que autorizaste la cuenta profesional de Instagram solicitada.'
-      : REASON_MESSAGES[outcome.reason];
+      : outcome.platform === 'tiktok' && outcome.reason === 'rejected'
+        ? 'No se completó la conexión. Comprueba que aceptaste los permisos solicitados por TikTok.'
+        : REASON_MESSAGES[outcome.reason];
   return { tone: 'error', text };
 }

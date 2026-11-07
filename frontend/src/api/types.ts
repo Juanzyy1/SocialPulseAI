@@ -188,8 +188,8 @@ export interface SyncRun {
 
 /** Respuesta de DELETE /social-accounts/:id. */
 export interface DisconnectResult {
-  /** false: Google no confirmó la revocación; la cuenta se desconectó igualmente. */
-  revokedAtGoogle: boolean;
+  /** false: el proveedor no confirmó la revocación; la cuenta se desconectó igualmente. */
+  revokedAtProvider: boolean;
 }
 
 /** Una métrica de una cuenta en el resumen global. */

@@ -21,6 +21,12 @@ import { PERMISSIVE_RATE_LIMITS } from './helpers/rate-limits';
 import { registerAndLogin } from './helpers/session';
 import { AnalyticsCheck } from '../src/integrations/youtube/youtube-oauth.client';
 import { RefreshedToken } from '../src/integrations/youtube/youtube-oauth.client';
+import {
+  TikTokOAuthClient,
+  TikTokProfile,
+  TikTokTokens,
+  TikTokVideo,
+} from '../src/integrations/tiktok/tiktok-oauth.client';
 
 // Dominio .invalid: reservado, nunca es un correo real.
 const TEST_DOMAIN = '@social-accounts-test.invalid';
@@ -52,8 +58,32 @@ class FakeYoutubeClient extends YoutubeOAuthClient {
   }
 }
 
+class FakeTikTokClient extends TikTokOAuthClient {
+  enabled = false;
+  revoked: string[] = [];
+  buildAuthUrl(): string {
+    return '';
+  }
+  async exchangeCode(): Promise<TikTokTokens> {
+    throw new Error('no se usa en estas pruebas');
+  }
+  async refreshToken(): Promise<TikTokTokens> {
+    throw new Error('no se usa en estas pruebas');
+  }
+  async fetchProfile(): Promise<TikTokProfile> {
+    throw new Error('no se usa en estas pruebas');
+  }
+  async fetchRecentVideos(): Promise<TikTokVideo[]> {
+    throw new Error('no se usa en estas pruebas');
+  }
+  async revokeToken(accessToken: string): Promise<void> {
+    this.revoked.push(accessToken);
+  }
+}
+
 describe('Cuentas sociales (e2e)', () => {
   const fake = new FakeYoutubeClient();
+  const fakeTikTok = new FakeTikTokClient();
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let cipher: TokenCipherService;
@@ -90,12 +120,15 @@ describe('Cuentas sociales (e2e)', () => {
   beforeEach(() => {
     fake.failRevoke = false;
     fake.revoked = [];
+    fakeTikTok.revoked = [];
   });
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(YoutubeOAuthClient)
       .useValue(fake)
+      .overrideProvider(TikTokOAuthClient)
+      .useValue(fakeTikTok)
       .overrideProvider(RATE_LIMIT_CONFIG)
       .useValue(PERMISSIVE_RATE_LIMITS)
       .compile();
@@ -202,7 +235,7 @@ describe('Cuentas sociales (e2e)', () => {
       .set('Cookie', user.cookie)
       .expect(200);
 
-    expect(res.body).toEqual({ revokedAtGoogle: true });
+    expect(res.body).toEqual({ revokedAtProvider: true });
     expect(fake.revoked).toEqual([account.refreshToken]);
     expect(await prisma.socialAccount.count({ where: { id: account.id } })).toBe(0);
     expect(await prisma.socialCredential.count({ where: { socialAccountId: account.id } })).toBe(0);
@@ -222,8 +255,40 @@ describe('Cuentas sociales (e2e)', () => {
       .set('Cookie', user.cookie)
       .expect(200);
 
-    expect(res.body).toEqual({ revokedAtGoogle: false });
+    expect(res.body).toEqual({ revokedAtProvider: false });
     expect(await prisma.socialAccount.count({ where: { id: account.id } })).toBe(0);
+  });
+
+  it('desconectar TikTok revoca el access token antes de borrar las credenciales', async () => {
+    const user = await login();
+    const id = randomUUID();
+    const accessToken = `tiktok-access-${randomUUID()}`;
+    await prisma.socialAccount.create({
+      data: {
+        id,
+        userId: user.id,
+        platform: 'TIKTOK',
+        platformAccountId: `open-${randomUUID()}`,
+        credential: {
+          create: {
+            accessTokenEnc: cipher.encrypt(accessToken, credentialAad(id, 'access')),
+            refreshTokenEnc: cipher.encrypt(`refresh-${randomUUID()}`, credentialAad(id, 'refresh')),
+            refreshExpiresAt: new Date(Date.now() + 60_000),
+            scopes: ['user.info.basic', 'user.info.stats', 'video.list'],
+            keyVersion: cipher.keyVersion,
+          },
+        },
+      },
+    });
+
+    const response = await api()
+      .delete(`/api/v1/social-accounts/${id}`)
+      .set('Cookie', user.cookie)
+      .expect(200);
+
+    expect(response.body).toEqual({ revokedAtProvider: true });
+    expect(fakeTikTok.revoked).toEqual([accessToken]);
+    expect(await prisma.socialAccount.count({ where: { id } })).toBe(0);
   });
 
   it('desconectar dos veces: la segunda responde 404', async () => {

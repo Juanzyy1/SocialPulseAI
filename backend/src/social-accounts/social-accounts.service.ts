@@ -11,6 +11,7 @@ import {
 } from '../common/crypto/token-cipher.service';
 import { YoutubeOAuthClient } from '../integrations/youtube/youtube-oauth.client';
 import { YoutubeTokenService } from '../integrations/youtube/youtube-token.service';
+import { TikTokOAuthClient } from '../integrations/tiktok/tiktok-oauth.client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConnectionCheckResponseDto } from './dto/connection-check-response.dto';
 import { DisconnectResponseDto } from './dto/disconnect-response.dto';
@@ -29,6 +30,7 @@ export class SocialAccountsService {
     private readonly cipher: TokenCipherService,
     private readonly youtube: YoutubeOAuthClient,
     private readonly youtubeTokens: YoutubeTokenService,
+    private readonly tiktok: TikTokOAuthClient,
   ) {}
 
   /** Todas las consultas filtran por `userId`, que sale siempre de la sesión. */
@@ -63,7 +65,7 @@ export class SocialAccountsService {
     });
     if (!account) throw new NotFoundException(NOT_FOUND);
 
-    const revokedAtGoogle = await this.revokeAtProvider(account);
+    const revokedAtProvider = await this.revokeAtProvider(account);
 
     // Borrar la cuenta elimina su credencial en cascada. Filtrar por userId otra vez
     // protege ante una condición de carrera.
@@ -72,7 +74,7 @@ export class SocialAccountsService {
     });
     if (count === 0) throw new NotFoundException(NOT_FOUND);
 
-    return { revokedAtGoogle };
+    return { revokedAtProvider };
   }
 
   /**
@@ -142,24 +144,31 @@ export class SocialAccountsService {
 
   /**
    * Intenta revocar el acceso en la plataforma. Nunca lanza: si falla, la cuenta se
-   * desconecta igual y se informa. Cuando haya más plataformas, cada una se añade aquí.
+   * desconecta igual y se informa.
    */
   private async revokeAtProvider(account: {
     id: string;
     platform: string;
     credential: { accessTokenEnc: string; refreshTokenEnc: string | null } | null;
   }): Promise<boolean> {
-    if (account.platform !== 'YOUTUBE' || !account.credential) return false;
+    if (!account.credential) return false;
     try {
       const { refreshTokenEnc, accessTokenEnc } = account.credential;
-      // El refresh token sostiene el acceso; revocarlo invalida también los access tokens.
-      const token = refreshTokenEnc
-        ? this.cipher.decrypt(refreshTokenEnc, credentialAad(account.id, 'refresh'))
-        : this.cipher.decrypt(accessTokenEnc, credentialAad(account.id, 'access'));
-      await this.youtube.revokeToken(token);
-      return true;
+      if (account.platform === 'YOUTUBE') {
+        const token = refreshTokenEnc
+          ? this.cipher.decrypt(refreshTokenEnc, credentialAad(account.id, 'refresh'))
+          : this.cipher.decrypt(accessTokenEnc, credentialAad(account.id, 'access'));
+        await this.youtube.revokeToken(token);
+        return true;
+      }
+      if (account.platform === 'TIKTOK') {
+        const token = this.cipher.decrypt(accessTokenEnc, credentialAad(account.id, 'access'));
+        await this.tiktok.revokeToken(token);
+        return true;
+      }
+      return false;
     } catch (error) {
-      this.logFailure('la revocación del acceso en Google', error);
+      this.logFailure(`la revocación del acceso en ${account.platform}`, error);
       return false;
     }
   }

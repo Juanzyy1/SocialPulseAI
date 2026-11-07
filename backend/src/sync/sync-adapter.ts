@@ -18,6 +18,7 @@ export interface SyncData {
 
 export interface SyncAdapter {
   readonly platform: string;
+  readonly snapshotsOnly?: boolean;
   fetch(accountId: string, range: SyncRange): Promise<SyncData>;
 }
 

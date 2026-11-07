@@ -64,7 +64,7 @@ describe('tarjeta de cuenta: desconectar', () => {
   it('confirmar llama a DELETE y avisa a la página con el resultado de la revocación', async () => {
     const user = userEvent.setup();
     const api = installFakeApi({
-      'DELETE /social-accounts/cuenta-1': () => jsonResponse({ revokedAtGoogle: true }),
+      'DELETE /social-accounts/cuenta-1': () => jsonResponse({ revokedAtProvider: true }),
     });
     const onDisconnected = show();
 
@@ -82,7 +82,7 @@ describe('tarjeta de cuenta: desconectar', () => {
   it('si Google no confirmó la revocación, el aviso lo dice y no afirma que se revocó', async () => {
     const user = userEvent.setup();
     installFakeApi({
-      'DELETE /social-accounts/cuenta-1': () => jsonResponse({ revokedAtGoogle: false }),
+      'DELETE /social-accounts/cuenta-1': () => jsonResponse({ revokedAtProvider: false }),
     });
     const onDisconnected = show();
 

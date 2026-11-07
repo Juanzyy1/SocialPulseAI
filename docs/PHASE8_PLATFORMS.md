@@ -9,12 +9,12 @@ Estado al 07/11/2026. Pedido explícito del usuario.
 | 8.1a | Verificación oficial vigente, configuración de Meta y permisos mínimos | COMPLETADA; conexión y sincronización validadas con la cuenta del usuario |
 | 8.1b | Renovación segura, sincronización y catálogo de Instagram | EN PROGRESO; sincronización real confirmada; renovación automática no implementada |
 | 8.2a | Verificación oficial, permisos y configuración de la app TikTok | DOCUMENTACIÓN VERIFICADA; falta que el usuario registre/configure la app |
-| 8.2b | Conexión de TikTok: autorización, renovación, sincronización, catálogo e interfaz | PENDIENTE |
+| 8.2b | Conexión de TikTok: autorización, renovación, sincronización, catálogo e interfaz | IMPLEMENTADA; falta probar con la app/cuenta real |
 | 8.3 | Textos legales por plataforma, nueva versión, pruebas de navegador y revisión de seguridad | PENDIENTE |
 
 Los adaptadores de sincronización comparten el mismo ciclo de persistencia. YouTube conserva su comportamiento;
-Instagram consulta Insights y almacena alcance diario. TikTok aún no tiene integración. No se simulan respuestas
-ni se convierten datos ausentes en ceros.
+Instagram consulta Insights y almacena alcance diario; TikTok almacena capturas de totales del perfil y de videos
+públicos recientes. No se simulan respuestas ni se convierten datos ausentes en ceros.
 
 ## Fuentes consultadas (documentación oficial salvo indicación; verificar de nuevo antes de implementar cada plataforma)
 - Meta, Instagram Platform overview: https://developers.facebook.com/documentation/instagram-platform/overview
@@ -107,21 +107,29 @@ renovación de Instagram Login, ya que el flujo utilizado es Unified Login.
 Verificado en documentación oficial de TikTok el 07/11/2026:
 - Login Kit Web entrega access token y refresh token; el token de acceso dura 2 horas y el de renovación 180 días.
   Los refresh tokens rotan: hay que reemplazar el token guardado después de cada renovación. La renovación debe
-  ocurrir en backend antes de que expire el access token.
+  ocurrir en backend cuando una sincronización detecta que el access token está por vencer o ya venció.
 - `user.info.stats` da acceso a `follower_count`, `following_count`, `likes_count` y `video_count`. Por tanto,
   TikTok expone el total actual de seguidores y likes sin el umbral de 100 seguidores documentado por Meta.
-- `video.list` solo devuelve videos públicos, paginados hasta 20 por página. Por video se pueden pedir
+- `video.list` solo devuelve videos públicos, paginados hasta 20 por página. La sincronización consulta una página
+  (los 20 más recientes) para mantener acotadas las solicitudes. Por video se pueden pedir
   `view_count`, `like_count`, `comment_count` y `share_count`; son contadores acumulados del video, no métricas
   diarias de cuenta. No se deben sumar como si fueran actividad diaria.
 - Permisos mínimos previstos: `user.info.basic`, `user.info.stats` y `video.list`; no se solicitarán permisos para
   publicar ni administrar contenido.
 - Para comenzar, el usuario debe crear una app en TikTok for Developers, añadir los productos Login Kit (Web) y
   Display API y habilitar esos permisos. Login Kit requiere una URI de retorno HTTPS exacta, estática y sin query
-  string ni fragmento. La app puede probarse en Sandbox; la disponibilidad en Production requiere enviar la
-  configuración a revisión. Las apps nuevas deben verificar también sus URLs de términos, privacidad y sitio web
+  string ni fragmento, incluso al probar en Sandbox. Para desarrollo local hace falta un túnel HTTPS. La app puede
+  probarse en Sandbox; la disponibilidad en Production requiere enviar la configuración a revisión. Las apps nuevas
+  deben verificar también sus URLs de términos, privacidad y sitio web
   antes de enviar a revisión.
-- URI de retorno que implementará el backend: `https://socialpulse-ai-xweo.onrender.com/api/v1/integrations/tiktok/callback`.
+- URI de retorno configurada en Render: `https://socialpulse-ai-xweo.onrender.com/api/v1/integrations/tiktok/callback`.
 - No se ha conectado una cuenta TikTok todavía; el estado de permisos y acceso deberá verificarse con la app real.
+- La integración de TikTok ya está cableada en el proyecto: variables `TIKTOK_CLIENT_KEY`,
+  `TIKTOK_CLIENT_SECRET` y `TIKTOK_REDIRECT_URI`; la URI de Render está definida en `render.yaml`.
+  Configura client key y secret como secretos en Render después de crear la app. La migración de base de datos
+  agrega la expiración del refresh token rotatorio.
+- El panel captura totales de perfil y sumas de contadores de hasta los 20 videos públicos más recientes.
+  TikTok Display API no ofrece series diarias en este flujo, así que las métricas se muestran como capturas puntuales.
 
 Fuentes oficiales:
 - TikTok, [Display API - Get Started](https://developers.tiktok.com/docs/en/display-api-get-started)
@@ -132,6 +140,7 @@ Fuentes oficiales:
 - TikTok, [Video List v2](https://developers.tiktok.com/docs/en/tiktok-api-v2-video-list)
 - TikTok, [Manage OAuth Access Tokens](https://developers.tiktok.com/docs/en/oauth-user-access-token-management)
 - TikTok, [Create an App](https://developers.tiktok.com/docs/en/getting-started-create-an-app)
+- TikTok, [Revoke a User Access Token](https://developers.tiktok.com/docs/en/oauth-revoke-a-user-access-token)
 
 ## Encaje en el modelo actual
 - Instagram: métricas diarias (`account_daily_metrics`) y totales puntuales (`account_total_snapshots`).

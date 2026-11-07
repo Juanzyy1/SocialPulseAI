@@ -139,14 +139,14 @@ describe('describeConnectResult', () => {
     expect(new Set(texts.map((notice) => notice.text)).size).toBe(reasons.length);
   });
 
-  it('el error por canal ya conectado nombra el problema y el de permisos explica qué hacer', () => {
+  it('el error por cuenta ya conectada nombra el problema y el de permisos explica qué hacer', () => {
     expect(
       describeConnectResult({
         kind: 'error',
         platform: 'youtube',
         reason: 'already_connected',
       }).text,
-    ).toContain('otra cuenta');
+    ).toContain('otro usuario');
     expect(
       describeConnectResult({ kind: 'error', platform: 'youtube', reason: 'rejected' }).text,
     ).toContain('dos permisos');

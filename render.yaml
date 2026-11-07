@@ -49,3 +49,10 @@ services:
         value: "1248684200916395"
       - key: INSTAGRAM_REDIRECT_URI
         value: https://socialpulse-ai-xweo.onrender.com/api/v1/integrations/instagram/callback
+      # TikTok Login Kit (Fase 8.2); agregar client key y secret desde el panel de Render.
+      - key: TIKTOK_CLIENT_KEY
+        sync: false
+      - key: TIKTOK_CLIENT_SECRET
+        sync: false
+      - key: TIKTOK_REDIRECT_URI
+        value: https://socialpulse-ai-xweo.onrender.com/api/v1/integrations/tiktok/callback

@@ -10,6 +10,9 @@ export interface Env {
   INSTAGRAM_CLIENT_SECRET?: string;
   INSTAGRAM_CONFIG_ID?: string;
   INSTAGRAM_REDIRECT_URI?: string;
+  TIKTOK_CLIENT_KEY?: string;
+  TIKTOK_CLIENT_SECRET?: string;
+  TIKTOK_REDIRECT_URI?: string;
   FRONTEND_URL?: string;
   /** Proxies de confianza delante de la app (0 = ninguno). undefined = sin indicar. */
   TRUST_PROXY_HOPS?: number;
@@ -55,6 +58,20 @@ function checkRedirectUri(value: string, isProduction: boolean): string | null {
   return isProduction
     ? 'GOOGLE_REDIRECT_URI debe usar https en producción'
     : 'GOOGLE_REDIRECT_URI debe ser https (o http solo en localhost)';
+}
+
+function checkTikTokRedirectUri(value: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return 'TIKTOK_REDIRECT_URI no es una URL válida';
+  }
+  if (url.protocol !== 'https:') return 'TIKTOK_REDIRECT_URI debe usar https';
+  if (url.search !== '' || url.hash !== '' || url.username !== '' || url.password !== '') {
+    return 'TIKTOK_REDIRECT_URI no debe incluir parámetros, fragmento ni credenciales';
+  }
+  return null;
 }
 
 /** Devuelve un mensaje de error si FRONTEND_URL no es solo un origen válido. */
@@ -141,6 +158,14 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     if (problem) errors.push(problem.replaceAll('GOOGLE_REDIRECT_URI', 'INSTAGRAM_REDIRECT_URI'));
   }
 
+  const tiktokClientKey = optionalString(raw.TIKTOK_CLIENT_KEY);
+  const tiktokClientSecret = optionalString(raw.TIKTOK_CLIENT_SECRET);
+  const tiktokRedirectUri = optionalString(raw.TIKTOK_REDIRECT_URI);
+  if (tiktokRedirectUri) {
+    const problem = checkTikTokRedirectUri(tiktokRedirectUri);
+    if (problem) errors.push(problem);
+  }
+
   // Frontend: opcional aquí. En producción la exige configureApp (ver production-checks).
   const frontendUrl = optionalString(raw.FRONTEND_URL);
   if (frontendUrl) {
@@ -190,6 +215,9 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     INSTAGRAM_CLIENT_SECRET: instagramClientSecret,
     INSTAGRAM_CONFIG_ID: instagramConfigId,
     INSTAGRAM_REDIRECT_URI: instagramRedirectUri,
+    TIKTOK_CLIENT_KEY: tiktokClientKey,
+    TIKTOK_CLIENT_SECRET: tiktokClientSecret,
+    TIKTOK_REDIRECT_URI: tiktokRedirectUri,
     FRONTEND_URL: frontendUrl,
     TRUST_PROXY_HOPS: trustProxyHops,
     FRONTEND_DIST_DIR: frontendDistDir,

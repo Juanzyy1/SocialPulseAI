@@ -88,14 +88,14 @@ describe('describeSyncError', () => {
 
 describe('describeDisconnectResult', () => {
   it('con la revocación confirmada lo dice', () => {
-    const notice = describeDisconnectResult({ revokedAtGoogle: true });
+    const notice = describeDisconnectResult({ revokedAtProvider: true });
 
     expect(notice.tone).toBe('success');
     expect(notice.text).toContain('revocamos el acceso en Google');
   });
 
   it('sin confirmación de Google explica qué hacer y no afirma la revocación', () => {
-    const notice = describeDisconnectResult({ revokedAtGoogle: false });
+    const notice = describeDisconnectResult({ revokedAtProvider: false });
 
     expect(notice.tone).toBe('info');
     expect(notice.text).toContain('No pudimos confirmar la revocación');
@@ -104,15 +104,20 @@ describe('describeDisconnectResult', () => {
   });
 
   it('ambos casos aclaran que los datos se borraron', () => {
-    expect(describeDisconnectResult({ revokedAtGoogle: true }).text).toContain('borraron');
-    expect(describeDisconnectResult({ revokedAtGoogle: false }).text).toContain('borrados');
+    expect(describeDisconnectResult({ revokedAtProvider: true }).text).toContain('borraron');
+    expect(describeDisconnectResult({ revokedAtProvider: false }).text).toContain('borrados');
   });
 
   it('desconectar Instagram no afirma revocar el token remotamente', () => {
-    const notice = describeDisconnectResult({ revokedAtGoogle: false }, 'INSTAGRAM');
+    const notice = describeDisconnectResult({ revokedAtProvider: false }, 'INSTAGRAM');
     expect(notice.text).toContain('borrados de SocialPulse AI');
     expect(notice.text).toContain('revocar también el acceso en Meta');
     expect(notice.text).not.toContain('Google');
+  });
+
+  it('desconectar TikTok informa si se confirmó la revocación en la plataforma', () => {
+    const notice = describeDisconnectResult({ revokedAtProvider: true }, 'TIKTOK');
+    expect(notice.text).toContain('revocamos el acceso en TikTok');
   });
 });
 

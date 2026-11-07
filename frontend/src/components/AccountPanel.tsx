@@ -84,7 +84,9 @@ export function AccountPanel({
         <div className="rounded-xl border border-panel-line bg-panel-card p-6">
           <p className="text-panel-muted">
             {data.current === null
-              ? 'Todavía no hay métricas guardadas para esta cuenta. Se mostrarán aquí después de sincronizarla.'
+              ? totals.length > 0
+                ? 'Esta plataforma no ofrece métricas diarias; los totales capturados aparecen abajo.'
+                : 'Todavía no hay métricas guardadas para esta cuenta. Se mostrarán aquí después de sincronizarla.'
               : `No hay datos guardados para ${formatDateRange(data.current.period.start, data.current.period.end)}. Prueba con otro periodo o sincroniza la cuenta.`}
           </p>
         </div>

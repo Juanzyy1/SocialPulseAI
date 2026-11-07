@@ -45,6 +45,16 @@ describe('página de cuentas: conectar plataformas', () => {
     expect(screen.getByText(/sincronizar el alcance diario que Meta tenga disponible/)).toBeTruthy();
   });
 
+  it('ofrece conectar TikTok y explica qué contadores se consultan', async () => {
+    installFakeApi({ 'GET /social-accounts': () => jsonResponse([]) });
+    renderApp(<Screen />, { route: '/cuentas' });
+
+    const link = await screen.findByRole('link', { name: 'Conectar TikTok' });
+    expect(link.getAttribute('href')).toBe('/api/v1/integrations/tiktok/connect');
+    expect(screen.getByText(/seguidores, seguidos, me gusta y cantidad de videos/)).toBeTruthy();
+    expect(screen.getByText(/hasta 20 videos públicos recientes/)).toBeTruthy();
+  });
+
   it('una conexión correcta muestra el aviso una sola vez y deja la dirección limpia', async () => {
     installFakeApi({ 'GET /social-accounts': () => jsonResponse([]) });
     renderApp(<Screen />, { route: '/cuentas?youtube=connected' });
@@ -53,7 +63,7 @@ describe('página de cuentas: conectar plataformas', () => {
     await waitFor(() => expect(screen.getByTestId('ruta').textContent).toBe('/cuentas'));
   });
 
-  it('una conexión de Instagram explica que la sincronización aún no está lista y limpia la URL', async () => {
+  it('una conexión de Instagram confirma que ya se puede sincronizar y limpia la URL', async () => {
     installFakeApi({ 'GET /social-accounts': () => jsonResponse([]) });
     renderApp(<Screen />, { route: '/cuentas?instagram=connected' });
 
@@ -61,11 +71,19 @@ describe('página de cuentas: conectar plataformas', () => {
     await waitFor(() => expect(screen.getByTestId('ruta').textContent).toBe('/cuentas'));
   });
 
+  it('una conexión de TikTok confirma que se puede sincronizar y limpia la URL', async () => {
+    installFakeApi({ 'GET /social-accounts': () => jsonResponse([]) });
+    renderApp(<Screen />, { route: '/cuentas?tiktok=connected' });
+
+    expect(await screen.findByText(/Cuenta de TikTok conectada/)).toBeTruthy();
+    await waitFor(() => expect(screen.getByTestId('ruta').textContent).toBe('/cuentas'));
+  });
+
   it('un error conocido muestra su mensaje en español', async () => {
     installFakeApi({ 'GET /social-accounts': () => jsonResponse([]) });
     renderApp(<Screen />, { route: '/cuentas?youtube=error&reason=already_connected' });
 
-    expect(await screen.findByText(/ya está conectado a otra cuenta/)).toBeTruthy();
+    expect(await screen.findByText(/ya está conectada a otro usuario/)).toBeTruthy();
   });
 
   it('un código desconocido o con HTML muestra el mensaje genérico y nunca pinta el texto de la dirección', async () => {
@@ -74,7 +92,7 @@ describe('página de cuentas: conectar plataformas', () => {
       route: `/cuentas?youtube=error&reason=${encodeURIComponent('<b>hola</b>')}`,
     });
 
-    expect(await screen.findByText('No se pudo conectar el canal. Inténtalo de nuevo.')).toBeTruthy();
+    expect(await screen.findByText('No se pudo conectar la cuenta. Inténtalo de nuevo.')).toBeTruthy();
     expect(screen.queryByText(/hola/)).toBeNull();
     expect(document.body.querySelector('b')).toBeNull();
   });

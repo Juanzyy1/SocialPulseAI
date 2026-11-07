@@ -8,6 +8,7 @@ import { FrontendModule } from './frontend/frontend.module';
 import { HealthModule } from './health/health.module';
 import { YoutubeModule } from './integrations/youtube/youtube.module';
 import { InstagramModule } from './integrations/instagram/instagram.module';
+import { TikTokModule } from './integrations/tiktok/tiktok.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SocialAccountsModule } from './social-accounts/social-accounts.module';
 import { SyncModule } from './sync/sync.module';
@@ -27,6 +28,7 @@ import { DiagnosticsModule } from './diagnostics/diagnostics.module';
     UsersModule,
     YoutubeModule,
     InstagramModule,
+    TikTokModule,
     SocialAccountsModule,
     SyncModule,
     AnalyticsModule,

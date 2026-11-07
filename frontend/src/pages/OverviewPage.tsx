@@ -42,11 +42,9 @@ function OverviewContent({
       <div className="space-y-1 text-sm">
         {response.period === null ? (
           <p className="text-panel-muted">
-            Todavía no hay datos de tus cuentas.{' '}
-            <Link to="/cuentas" className="underline">
-              Sincroniza una desde Cuentas
-            </Link>
-            .
+            {response.accounts.some((account) => account.totals.length > 0)
+              ? 'Todavía no hay series diarias para graficar. Los últimos totales capturados de cada cuenta aparecen abajo.'
+              : <>Todavía no hay datos de tus cuentas. <Link to="/cuentas" className="underline">Sincroniza una desde Cuentas</Link>.</>}
           </p>
         ) : (
           <>
@@ -144,8 +142,7 @@ function OverviewContent({
 
       <div className="space-y-1 text-xs text-panel-muted">
         <p>
-          Los totales del canal (suscriptores, vistas totales y videos) no se suman entre cuentas: cada cuenta
-          muestra los suyos.
+          Los totales puntuales de cada cuenta no se suman entre cuentas: cada cuenta muestra los suyos.
         </p>
         {response.crossPlatform.groups.length === 0 && (
           <p>

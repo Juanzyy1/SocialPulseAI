@@ -6,6 +6,7 @@ export type OAuthFailureCode =
   | 'already_connected'
   | 'google_error'
   | 'instagram_error'
+  | 'tiktok_error'
   | 'unavailable'
   | 'error';
 
@@ -13,7 +14,10 @@ export type OAuthFailureCode =
  * Código corto y fijo para decirle al frontend qué pasó, sin mensajes de Google ni datos de la
  * petición. El frontend traduce cada código a un texto para el usuario.
  */
-export function oauthFailureCode(error: unknown, provider: 'google' | 'instagram' = 'google'): OAuthFailureCode {
+export function oauthFailureCode(
+  error: unknown,
+  provider: 'google' | 'instagram' | 'tiktok' = 'google',
+): OAuthFailureCode {
   const status = error instanceof HttpException ? error.getStatus() : 500;
   switch (status) {
     case 400:
@@ -23,7 +27,11 @@ export function oauthFailureCode(error: unknown, provider: 'google' | 'instagram
     case 409:
       return 'already_connected';
     case 502:
-      return provider === 'instagram' ? 'instagram_error' : 'google_error';
+      return provider === 'instagram'
+        ? 'instagram_error'
+        : provider === 'tiktok'
+          ? 'tiktok_error'
+          : 'google_error';
     case 503:
       return 'unavailable';
     default:
