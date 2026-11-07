@@ -42,7 +42,7 @@ describe('página de cuentas: conectar plataformas', () => {
     const link = await screen.findByRole('link', { name: 'Conectar Instagram' });
     expect(link.getAttribute('href')).toBe('/api/v1/integrations/instagram/connect');
     expect(screen.getByText(/acceso de lectura al perfil y sus estadísticas/)).toBeTruthy();
-    expect(screen.getByText(/sincronización de estadísticas de Instagram aún está en desarrollo/)).toBeTruthy();
+    expect(screen.getByText(/sincronizar el alcance diario que Meta tenga disponible/)).toBeTruthy();
   });
 
   it('una conexión correcta muestra el aviso una sola vez y deja la dirección limpia', async () => {

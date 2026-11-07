@@ -76,7 +76,7 @@ export function describeConnectResult(outcome: ConnectOutcome): Notice {
       text:
         outcome.platform === 'youtube'
           ? 'Canal conectado. Ahora sincroniza la cuenta para traer sus estadísticas.'
-          : 'Cuenta de Instagram conectada. La sincronización de Instagram estará disponible próximamente.',
+          : 'Cuenta de Instagram conectada. Ahora sincroniza la cuenta para traer las estadísticas disponibles.',
     };
   }
   const text =

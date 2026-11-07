@@ -112,10 +112,10 @@ describe('describeConnectResult', () => {
     expect(notice.text).toContain('sincroniza');
   });
 
-  it('una conexión correcta de Instagram aclara que la sincronización sigue pendiente', () => {
+  it('una conexión correcta de Instagram indica que puede sincronizarse', () => {
     const notice = describeConnectResult({ kind: 'connected', platform: 'instagram' });
     expect(notice.tone).toBe('success');
-    expect(notice.text).toContain('sincronización de Instagram estará disponible próximamente');
+    expect(notice.text).toContain('sincroniza la cuenta');
   });
 
   it('cada código de error tiene su propio mensaje en español', () => {

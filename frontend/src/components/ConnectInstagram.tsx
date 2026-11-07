@@ -17,7 +17,8 @@ export function ConnectInstagram() {
         <li>No publicamos contenido, administramos mensajes ni creamos anuncios.</li>
       </ul>
       <p className="mb-4 text-sm text-panel-muted">
-        La sincronización de estadísticas de Instagram aún está en desarrollo.
+        Puedes sincronizar el alcance diario que Meta tenga disponible. Algunas métricas de audiencia,
+        como el total de seguidores, requieren al menos 100 seguidores.
       </p>
       <a
         href={INSTAGRAM_CONNECT_URL}

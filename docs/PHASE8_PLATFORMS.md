@@ -6,9 +6,10 @@ Estado al 07/11/2026. Pedido explícito del usuario.
 | Tarea | Alcance | Estado |
 |---|---|---|
 | 8.0 | Refactor sin cambiar comportamiento: contrato de adaptador por plataforma, con YouTube como primero | COMPLETADA; 388 unitarias, 182 e2e, build y lint en verde |
-| 8.1a | Verificación oficial vigente, configuración de Meta y permisos mínimos | IMPLEMENTADA; queda confirmar el flujo real de Meta con la cuenta del usuario |
-| 8.1b | Renovación segura, sincronización y catálogo de Instagram | EN PROGRESO; alcance diario sincronizable; falta validar en Meta y cerrar renovación segura |
-| 8.2a / 8.2b | Verificación y conexión de TikTok: autorización, sincronización, catálogo e interfaz | PENDIENTE |
+| 8.1a | Verificación oficial vigente, configuración de Meta y permisos mínimos | COMPLETADA; conexión y sincronización validadas con la cuenta del usuario |
+| 8.1b | Renovación segura, sincronización y catálogo de Instagram | EN PROGRESO; sincronización real confirmada; renovación automática no implementada |
+| 8.2a | Verificación oficial, permisos y configuración de la app TikTok | DOCUMENTACIÓN VERIFICADA; falta que el usuario registre/configure la app |
+| 8.2b | Conexión de TikTok: autorización, renovación, sincronización, catálogo e interfaz | PENDIENTE |
 | 8.3 | Textos legales por plataforma, nueva versión, pruebas de navegador y revisión de seguridad | PENDIENTE |
 
 Los adaptadores de sincronización comparten el mismo ciclo de persistencia. YouTube conserva su comportamiento;
@@ -52,11 +53,14 @@ Verificado en documentación oficial el 07/11/2026:
   dato de esa ejecución.
 - Si una métrica no está disponible, la API devuelve un conjunto vacío, no cero; algunas métricas requieren 100
   seguidores, `online_followers` solo tiene 30 días y los datos pueden retrasarse hasta 48 horas.
+- Meta especifica que `follower_count` y `online_followers` no están disponibles en cuentas con menos de 100
+  seguidores. La sincronización implementada consulta únicamente alcance diario; no obtiene likes ni compartidos.
 - El ejemplo oficial vigente muestra Graph API v27.0; confirmar la versión activa al crear/configurar la app.
 
-Pendiente: comprobar con la cuenta del usuario qué datos devuelve Meta, límites/cuotas, testers y requisitos de
-publicación para esta app. No asumir el comportamiento de renovación de tokens de Instagram Login: Unified Login
-entrega un token del sistema de usuario del negocio y todavía no se implementa una renovación automática.
+Verificado en la cuenta del usuario: conexión y sincronización de alcance completadas correctamente. Pendiente:
+decidir/documentar el tratamiento de caducidad de tokens Unified Login; el backend guarda la fecha que Meta entrega
+y pide volver a conectar una cuenta caducada, no implementa renovación automática. No asumir las reglas de
+renovación de Instagram Login, ya que el flujo utilizado es Unified Login.
 
 ### Configuración inicial acordada
 - Cuenta: Instagram Business.
@@ -99,16 +103,35 @@ entrega un token del sistema de usuario del negocio y todavía no se implementa 
 - No solicitar ni configurar webhooks todavía; el flujo de métricas inicial no depende de notificaciones push y no
   existe un endpoint de webhook implementado.
 
-## TikTok (Login Kit + Display API)
-Verificado:
-- Permisos: `user.info.basic` (identidad), `user.info.profile` (biografía, verificación), `user.info.stats`
-  (seguidores, seguidos, me gusta, videos) y `video.list` (videos públicos). Se pueden conceder parcialmente.
-- Aplicación nueva: borrador con acceso sandbox (solo usuarios objetivo añadidos). Para usuarios ajenos: revisión
-  (descripción, video de demostración, direcciones de términos y privacidad). Revisión por permiso (terceros).
-- La API de investigación es solo académica.
-- NO hay series diarias (vistas, alcance, impresiones): totales de cuenta y lista de videos.
-Por verificar: vistas/comentarios/compartidos por video; duración de tokens; direcciones de retorno en desarrollo;
-si términos y privacidad exigen dominio propio; límite de uso (cifra truncada en la fuente).
+## TikTok (Display API y Login Kit Web)
+Verificado en documentación oficial de TikTok el 07/11/2026:
+- Login Kit Web entrega access token y refresh token; el token de acceso dura 2 horas y el de renovación 180 días.
+  Los refresh tokens rotan: hay que reemplazar el token guardado después de cada renovación. La renovación debe
+  ocurrir en backend antes de que expire el access token.
+- `user.info.stats` da acceso a `follower_count`, `following_count`, `likes_count` y `video_count`. Por tanto,
+  TikTok expone el total actual de seguidores y likes sin el umbral de 100 seguidores documentado por Meta.
+- `video.list` solo devuelve videos públicos, paginados hasta 20 por página. Por video se pueden pedir
+  `view_count`, `like_count`, `comment_count` y `share_count`; son contadores acumulados del video, no métricas
+  diarias de cuenta. No se deben sumar como si fueran actividad diaria.
+- Permisos mínimos previstos: `user.info.basic`, `user.info.stats` y `video.list`; no se solicitarán permisos para
+  publicar ni administrar contenido.
+- Para comenzar, el usuario debe crear una app en TikTok for Developers, añadir los productos Login Kit (Web) y
+  Display API y habilitar esos permisos. Login Kit requiere una URI de retorno HTTPS exacta, estática y sin query
+  string ni fragmento. La app puede probarse en Sandbox; la disponibilidad en Production requiere enviar la
+  configuración a revisión. Las apps nuevas deben verificar también sus URLs de términos, privacidad y sitio web
+  antes de enviar a revisión.
+- URI de retorno que implementará el backend: `https://socialpulse-ai-xweo.onrender.com/api/v1/integrations/tiktok/callback`.
+- No se ha conectado una cuenta TikTok todavía; el estado de permisos y acceso deberá verificarse con la app real.
+
+Fuentes oficiales:
+- TikTok, [Display API - Get Started](https://developers.tiktok.com/docs/en/display-api-get-started)
+- TikTok, [Login Kit for Web](https://developers.tiktok.com/docs/en/login-kit-web)
+- TikTok, [scopes](https://developers.tiktok.com/docs/en/tiktok-api-scopes)
+- TikTok, [User Info v2](https://developers.tiktok.com/docs/en/tiktok-api-v2-get-user-info)
+- TikTok, [Video Object](https://developers.tiktok.com/docs/en/tiktok-api-v2-video-object)
+- TikTok, [Video List v2](https://developers.tiktok.com/docs/en/tiktok-api-v2-video-list)
+- TikTok, [Manage OAuth Access Tokens](https://developers.tiktok.com/docs/en/oauth-user-access-token-management)
+- TikTok, [Create an App](https://developers.tiktok.com/docs/en/getting-started-create-an-app)
 
 ## Encaje en el modelo actual
 - Instagram: métricas diarias (`account_daily_metrics`) y totales puntuales (`account_total_snapshots`).
