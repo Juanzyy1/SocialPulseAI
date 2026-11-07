@@ -53,6 +53,18 @@ function requireTokenResponse(value: unknown): TokenResponse {
   };
 }
 
+function describeMetaError(value: unknown): string | null {
+  if (!isRecord(value) || !isRecord(value.error)) return null;
+  const { message, code, error_subcode: subcode } = value.error;
+  const parts: string[] = [];
+  if (typeof message === 'string' && message.length > 0) parts.push(message.slice(0, 250));
+  if (typeof code === 'number' || typeof code === 'string') parts.push(`código ${code}`);
+  if (typeof subcode === 'number' || typeof subcode === 'string') {
+    parts.push(`subcódigo ${subcode}`);
+  }
+  return parts.length > 0 ? parts.join(', ') : null;
+}
+
 @Injectable()
 export class InstagramOAuthClientImpl extends InstagramOAuthClient {
   readonly enabled: boolean;
@@ -87,12 +99,19 @@ export class InstagramOAuthClientImpl extends InstagramOAuthClient {
     const query = new URLSearchParams({
       client_id: this.clientId,
       client_secret: this.clientSecret,
+      redirect_uri: this.redirectUri,
       code,
     });
     const response = await fetch(`${TOKEN_ENDPOINT}?${query.toString()}`, {
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
-    if (!response.ok) throw new Error(`Meta rechazó el código (${response.status})`);
+    if (!response.ok) {
+      const body: unknown = await response.json().catch(() => null);
+      const detail = describeMetaError(body);
+      throw new Error(
+        `Meta rechazó el código (${response.status})${detail ? `: ${detail}` : ''}`,
+      );
+    }
 
     const token = requireTokenResponse(await response.json());
     return {

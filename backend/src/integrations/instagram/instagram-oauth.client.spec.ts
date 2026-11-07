@@ -55,7 +55,28 @@ describe('InstagramOAuthClientImpl', () => {
     );
     expect(url.searchParams.get('client_id')).toBe(configValues.INSTAGRAM_CLIENT_ID);
     expect(url.searchParams.get('client_secret')).toBe(configValues.INSTAGRAM_CLIENT_SECRET);
+    expect(url.searchParams.get('redirect_uri')).toBe(configValues.INSTAGRAM_REDIRECT_URI);
     expect(url.searchParams.get('code')).toBe('authorization-code');
+  });
+
+  it('incluye el detalle de Meta cuando rechaza el canje del código', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: {
+            message: 'Error validating verification code: redirect_uri must match.',
+            type: 'OAuthException',
+            code: 100,
+            error_subcode: 36008,
+          },
+        }),
+        { status: 400 },
+      ),
+    );
+
+    await expect(client.exchangeCode('authorization-code')).rejects.toThrow(
+      'Meta rechazó el código (400): Error validating verification code: redirect_uri must match., código 100, subcódigo 36008',
+    );
   });
 
   it('rechaza respuestas de token sin caducidad válida', async () => {
