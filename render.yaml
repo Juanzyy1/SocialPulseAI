@@ -40,3 +40,12 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
+      # Instagram Login (Fase 8.1).
+      - key: INSTAGRAM_CLIENT_ID
+        sync: false
+      - key: INSTAGRAM_CLIENT_SECRET
+        sync: false
+      - key: INSTAGRAM_CONFIG_ID
+        value: "1248684200916395"
+      - key: INSTAGRAM_REDIRECT_URI
+        value: https://socialpulse-ai-xweo.onrender.com/api/v1/integrations/instagram/callback

@@ -10,6 +10,12 @@ const google = {
   GOOGLE_CLIENT_SECRET: 'secreto-de-prueba-123',
   GOOGLE_REDIRECT_URI: 'http://localhost:3000/api/v1/auth/google/callback',
 };
+const instagram = {
+  INSTAGRAM_CLIENT_ID: 'instagram-app-id',
+  INSTAGRAM_CLIENT_SECRET: 'instagram-app-secret',
+  INSTAGRAM_CONFIG_ID: 'instagram-config-id',
+  INSTAGRAM_REDIRECT_URI: 'http://localhost:3000/api/v1/integrations/instagram/callback',
+};
 
 /** Devuelve el mensaje del error lanzado, o '' si no lanzó nada. */
 function errorOf(raw: Record<string, unknown>): string {
@@ -51,6 +57,27 @@ describe('validateEnv', () => {
     const env = validateEnv({ ...base, ...google });
     expect(env.GOOGLE_CLIENT_ID).toBe(google.GOOGLE_CLIENT_ID);
     expect(env.GOOGLE_REDIRECT_URI).toBe(google.GOOGLE_REDIRECT_URI);
+  });
+
+  it('acepta Instagram OAuth configurado por completo', () => {
+    const env = validateEnv({ ...base, ...instagram });
+    expect(env.INSTAGRAM_CLIENT_ID).toBe(instagram.INSTAGRAM_CLIENT_ID);
+    expect(env.INSTAGRAM_CONFIG_ID).toBe(instagram.INSTAGRAM_CONFIG_ID);
+    expect(env.INSTAGRAM_REDIRECT_URI).toBe(instagram.INSTAGRAM_REDIRECT_URI);
+  });
+
+  it('rechaza Instagram OAuth incompleto o un callback inseguro', () => {
+    expect(errorOf({ ...base, INSTAGRAM_CLIENT_ID: instagram.INSTAGRAM_CLIENT_ID })).toContain(
+      'Instagram OAuth está incompleto',
+    );
+    expect(
+      errorOf({
+        ...base,
+        ...instagram,
+        NODE_ENV: 'production',
+        INSTAGRAM_REDIRECT_URI: 'http://socialpulse.example/callback',
+      }),
+    ).toContain('INSTAGRAM_REDIRECT_URI');
   });
 
   it('rechaza Google incompleto y nombra las variables', () => {

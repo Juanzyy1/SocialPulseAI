@@ -162,4 +162,38 @@ describe('tarjeta de cuenta: sincronizar y estado', () => {
     expect(screen.queryByRole('button', { name: 'Sincronizar' })).toBeNull();
     expect(screen.getByText(/no tiene acceso vigente/)).toBeTruthy();
   });
+
+  it('una cuenta activa de Instagram no ofrece sincronización antes de que esté implementada', () => {
+    installFakeApi({});
+    show(vi.fn(), { platform: 'INSTAGRAM', displayName: 'Mi Instagram' });
+
+    expect(
+      screen.getByText('La sincronización de Instagram estará disponible próximamente.'),
+    ).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Sincronizar' })).toBeNull();
+  });
+
+  it('reconectar una cuenta de Instagram usa el endpoint de Instagram', () => {
+    installFakeApi({});
+    show(vi.fn(), { platform: 'INSTAGRAM', status: 'REVOKED' });
+
+    expect(screen.getByRole('link', { name: 'Reconectar' }).getAttribute('href')).toBe(
+      '/api/v1/integrations/instagram/connect',
+    );
+    expect(screen.queryByRole('button', { name: 'Sincronizar' })).toBeNull();
+  });
+
+  it('al desconectar Instagram advierte que la revocación en Meta se hace por separado', async () => {
+    const user = userEvent.setup();
+    installFakeApi({});
+    show(vi.fn(), { platform: 'INSTAGRAM', displayName: 'Mi Instagram' });
+
+    await user.click(screen.getByRole('button', { name: 'Desconectar' }));
+
+    const group = screen.getByRole('group', {
+      name: 'Confirmar la desconexión de Mi Instagram',
+    });
+    expect(group.textContent).toContain('quita SocialPulse AI de las integraciones de tu negocio');
+    expect(group.textContent).not.toContain('revocar el acceso en Google');
+  });
 });

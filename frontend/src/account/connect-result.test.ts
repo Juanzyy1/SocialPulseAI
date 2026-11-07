@@ -15,27 +15,48 @@ describe('parseConnectResult', () => {
   });
 
   it('reconoce una conexión correcta', () => {
-    expect(parse('youtube=connected')).toEqual({ kind: 'connected' });
+    expect(parse('youtube=connected')).toEqual({ kind: 'connected', platform: 'youtube' });
+    expect(parse('instagram=connected')).toEqual({ kind: 'connected', platform: 'instagram' });
   });
 
-  it.each(['rejected', 'unauthorized', 'already_connected', 'google_error', 'unavailable', 'error'])(
+  it.each([
+    'rejected',
+    'unauthorized',
+    'already_connected',
+    'google_error',
+    'instagram_error',
+    'unavailable',
+    'error',
+  ])(
     'reconoce el código de error %s',
     (reason) => {
-      expect(parse(`youtube=error&reason=${reason}`)).toEqual({ kind: 'error', reason });
+      expect(parse(`youtube=error&reason=${reason}`)).toEqual({
+        kind: 'error',
+        platform: 'youtube',
+        reason,
+      });
     },
   );
 
   it('un error sin código o con un código desconocido usa el genérico', () => {
-    expect(parse('youtube=error')).toEqual({ kind: 'error', reason: 'error' });
-    expect(parse('youtube=error&reason=inventado')).toEqual({ kind: 'error', reason: 'error' });
-    expect(parse('youtube=error&reason=')).toEqual({ kind: 'error', reason: 'error' });
+    expect(parse('youtube=error')).toEqual({ kind: 'error', platform: 'youtube', reason: 'error' });
+    expect(parse('youtube=error&reason=inventado')).toEqual({
+      kind: 'error',
+      platform: 'youtube',
+      reason: 'error',
+    });
+    expect(parse('youtube=error&reason=')).toEqual({
+      kind: 'error',
+      platform: 'youtube',
+      reason: 'error',
+    });
   });
 
   it('un código con otra forma (mayúsculas, espacios, HTML) no se acepta como conocido', () => {
     for (const reason of ['REJECTED', ' rejected', 'rejected ', '<script>alert(1)</script>']) {
       const outcome = parseConnectResult(new URLSearchParams({ youtube: 'error', reason }));
 
-      expect(outcome).toEqual({ kind: 'error', reason: 'error' });
+      expect(outcome).toEqual({ kind: 'error', platform: 'youtube', reason: 'error' });
     }
   });
 
@@ -46,7 +67,20 @@ describe('parseConnectResult', () => {
   });
 
   it('con una conexión correcta se ignora el motivo', () => {
-    expect(parse('youtube=connected&reason=rejected')).toEqual({ kind: 'connected' });
+    expect(parse('youtube=connected&reason=rejected')).toEqual({
+      kind: 'connected',
+      platform: 'youtube',
+    });
+  });
+
+  it('reconoce y limpia el resultado de Instagram sin tocar otros parámetros', () => {
+    const params = new URLSearchParams('instagram=error&reason=instagram_error&period=30d');
+    expect(parseConnectResult(params)).toEqual({
+      kind: 'error',
+      platform: 'instagram',
+      reason: 'instagram_error',
+    });
+    expect(withoutConnectResult(params).toString()).toBe('period=30d');
   });
 });
 
@@ -72,10 +106,16 @@ describe('withoutConnectResult', () => {
 
 describe('describeConnectResult', () => {
   it('una conexión correcta es un éxito y pide sincronizar', () => {
-    const notice = describeConnectResult({ kind: 'connected' });
+    const notice = describeConnectResult({ kind: 'connected', platform: 'youtube' });
 
     expect(notice.tone).toBe('success');
     expect(notice.text).toContain('sincroniza');
+  });
+
+  it('una conexión correcta de Instagram aclara que la sincronización sigue pendiente', () => {
+    const notice = describeConnectResult({ kind: 'connected', platform: 'instagram' });
+    expect(notice.tone).toBe('success');
+    expect(notice.text).toContain('sincronización de Instagram estará disponible próximamente');
   });
 
   it('cada código de error tiene su propio mensaje en español', () => {
@@ -84,10 +124,13 @@ describe('describeConnectResult', () => {
       'unauthorized',
       'already_connected',
       'google_error',
+      'instagram_error',
       'unavailable',
       'error',
     ];
-    const texts = reasons.map((reason) => describeConnectResult({ kind: 'error', reason }));
+    const texts = reasons.map((reason) =>
+      describeConnectResult({ kind: 'error', platform: 'youtube', reason }),
+    );
 
     for (const notice of texts) {
       expect(notice.tone).toBe('error');
@@ -97,11 +140,18 @@ describe('describeConnectResult', () => {
   });
 
   it('el error por canal ya conectado nombra el problema y el de permisos explica qué hacer', () => {
-    expect(describeConnectResult({ kind: 'error', reason: 'already_connected' }).text).toContain(
-      'otra cuenta',
-    );
-    expect(describeConnectResult({ kind: 'error', reason: 'rejected' }).text).toContain(
-      'dos permisos',
-    );
+    expect(
+      describeConnectResult({
+        kind: 'error',
+        platform: 'youtube',
+        reason: 'already_connected',
+      }).text,
+    ).toContain('otra cuenta');
+    expect(
+      describeConnectResult({ kind: 'error', platform: 'youtube', reason: 'rejected' }).text,
+    ).toContain('dos permisos');
+    expect(
+      describeConnectResult({ kind: 'error', platform: 'instagram', reason: 'rejected' }).text,
+    ).toContain('cuenta profesional de Instagram');
   });
 });

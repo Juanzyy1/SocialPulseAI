@@ -21,7 +21,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('página de cuentas: conectar YouTube', () => {
+describe('página de cuentas: conectar plataformas', () => {
   it('ofrece conectar con un enlace normal al backend y explica los dos permisos de solo lectura', async () => {
     installFakeApi({ 'GET /social-accounts': () => jsonResponse([]) });
     renderApp(<Screen />, { route: '/cuentas' });
@@ -35,11 +35,29 @@ describe('página de cuentas: conectar YouTube', () => {
     expect(await screen.findByText(/Todavía no has conectado ninguna cuenta/)).toBeTruthy();
   });
 
+  it('ofrece conectar Instagram desde el backend y explica el estado de sincronización', async () => {
+    installFakeApi({ 'GET /social-accounts': () => jsonResponse([]) });
+    renderApp(<Screen />, { route: '/cuentas' });
+
+    const link = await screen.findByRole('link', { name: 'Conectar Instagram' });
+    expect(link.getAttribute('href')).toBe('/api/v1/integrations/instagram/connect');
+    expect(screen.getByText(/acceso de lectura al perfil y sus estadísticas/)).toBeTruthy();
+    expect(screen.getByText(/sincronización de estadísticas de Instagram aún está en desarrollo/)).toBeTruthy();
+  });
+
   it('una conexión correcta muestra el aviso una sola vez y deja la dirección limpia', async () => {
     installFakeApi({ 'GET /social-accounts': () => jsonResponse([]) });
     renderApp(<Screen />, { route: '/cuentas?youtube=connected' });
 
     expect(await screen.findByText(/Canal conectado/)).toBeTruthy();
+    await waitFor(() => expect(screen.getByTestId('ruta').textContent).toBe('/cuentas'));
+  });
+
+  it('una conexión de Instagram explica que la sincronización aún no está lista y limpia la URL', async () => {
+    installFakeApi({ 'GET /social-accounts': () => jsonResponse([]) });
+    renderApp(<Screen />, { route: '/cuentas?instagram=connected' });
+
+    expect(await screen.findByText(/Cuenta de Instagram conectada/)).toBeTruthy();
     await waitFor(() => expect(screen.getByTestId('ruta').textContent).toBe('/cuentas'));
   });
 

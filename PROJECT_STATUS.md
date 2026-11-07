@@ -1,6 +1,6 @@
 # SocialPulse AI — Estado del proyecto
 
-Última actualización: 22/10/2026
+Última actualización: 07/11/2026
 
 ## Descripción
 Plataforma para conectar varias cuentas de redes sociales de un usuario, consultar
@@ -78,7 +78,7 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | 9.5c Beta cerrada | POR VERIFICAR | Código de invitación para el registro, `noindex`, `docs/BETA.md` | Pruebas automáticas, código en Render y primera invitación real |
 | 9.6 Verificación de Google | APLAZADA | Requiere dominio propio verificado | |
 | 9.7 Pruebas con navegador real y revisión final | EN PROGRESO | Playwright contra Render: 11 de 19 pruebas pasaron (rutas, legales, cabeceras, `noindex`, `robots.txt`, 404, 401, 403 por origen ajeno); falló el registro con correo y contraseña (el panel no apareció en 15 s) y 7 no se ejecutaron | Prueba reescrita para diagnosticar; repetir contra Render |
-| Fase 8 Instagram y TikTok | EN PLANIFICACIÓN | Viabilidad verificada con fuentes oficiales (`docs/PHASE8_PLATFORMS.md`) | Confirmar con el usuario qué cuentas tiene; 8.0 refactor del adaptador de sincronización |
+| Fase 8 Instagram y TikTok | EN PROGRESO | OAuth y botón de Instagram integrados; sin sincronización aún; 395 unitarias, 185 e2e backend y 389 frontend aprobadas | Configurar permisos y credenciales Meta, desplegar y probar conexión real |
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.
@@ -136,10 +136,10 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 No está en las 9 fases originales; fase nueva después de la 5. Decisiones que esperan al frontend: tecnología, CORS y validación de `Origin` (CSRF), destino de las redirecciones tras Google y YouTube, cookies en producción, origen de los avatares y endpoint de catálogo de métricas. Los dos diseños de referencia del PDF llegaron solo como título; subir las imágenes al empezar.
 
 ## Última tarea realizada
-5.4c Resumen global y cierre del repaso de la Fase 5.
+Flujo OAuth unificado de Instagram y botón de conexión en el panel para preparar la prueba real.
 
 ## Próxima tarea concreta
-Ver en verde `fixed-dates.spec.ts` y cerrar la Fase 5. Después, con confirmación, empezar la fase de frontend con una tarea de decisiones (tecnología, estructura del repositorio y diseños de referencia).
+Fase 8.1a: ajustar la configuración de Meta a `instagram_basic` + `instagram_manage_insights`, guardar el callback en Render y probar una cuenta real.
 
 ## Comandos importantes (desde `backend/`)
 ```powershell

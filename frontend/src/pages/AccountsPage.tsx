@@ -7,6 +7,7 @@ import {
 } from '../account/connect-result';
 import type { Notice } from '../account/connect-result';
 import { AccountCard } from '../components/AccountCard';
+import { ConnectInstagram } from '../components/ConnectInstagram';
 import { ConnectYoutube } from '../components/ConnectYoutube';
 import { describeLoadError } from '../dashboard/errors';
 import { useAccounts } from '../dashboard/queries';
@@ -36,7 +37,7 @@ export function AccountsPage() {
   const [disconnectNotice, setDisconnectNotice] = useState<Notice | null>(null);
 
   useEffect(() => {
-    if (searchParams.has('youtube') || searchParams.has('reason')) {
+    if (searchParams.has('youtube') || searchParams.has('instagram') || searchParams.has('reason')) {
       setSearchParams(withoutConnectResult(searchParams), { replace: true });
     }
   }, [searchParams, setSearchParams]);
@@ -73,7 +74,7 @@ export function AccountsPage() {
         )}
         {accounts.data && accounts.data.length === 0 && (
           <p className="rounded-xl border border-panel-line bg-panel-card p-6 text-panel-muted">
-            Todavía no has conectado ninguna cuenta. Empieza conectando tu canal de YouTube.
+            Todavía no has conectado ninguna cuenta. Empieza conectando YouTube o Instagram.
           </p>
         )}
         {accounts.data && accounts.data.length > 0 && (
@@ -85,7 +86,10 @@ export function AccountsPage() {
         )}
       </section>
 
-      <ConnectYoutube />
+      <div className="space-y-5">
+        <ConnectYoutube />
+        <ConnectInstagram />
+      </div>
     </div>
   );
 }

@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Comprobar Playwright en Render y audit del frontend",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoLogo",
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$ErrorActionPreference = 'Continue'; $root = Get-Location; Write-Host '=== 1. Instalar/verificar Chromium de Playwright ==='; Set-Location (Join-Path $root 'e2e'); npx playwright install chromium; $installExit = $LASTEXITCODE; Write-Host \"Resultado instalación: exit $installExit\"; Write-Host ''; Write-Host '=== 2. Pruebas E2E contra Render ==='; $secure = Read-Host 'Código de invitación (no se mostrará; pulsa Enter si no aplica)' -AsSecureString; $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure); $invite = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr); $env:E2E_BASE_URL = 'https://socialpulse-ai-xweo.onrender.com'; if ($invite) { $env:E2E_INVITE_CODE = $invite } else { Remove-Item Env:E2E_INVITE_CODE -ErrorAction SilentlyContinue }; try { npx playwright test; $testExit = $LASTEXITCODE } finally { Remove-Item Env:E2E_BASE_URL -ErrorAction SilentlyContinue; Remove-Item Env:E2E_INVITE_CODE -ErrorAction SilentlyContinue; [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr); $secure.Dispose(); $invite = $null }; Write-Host \"Resultado pruebas: exit $testExit\"; Write-Host ''; Write-Host '=== 3. npm audit --omit=dev del frontend ==='; Set-Location (Join-Path $root 'frontend'); npm audit --omit=dev; $auditExit = $LASTEXITCODE; Write-Host \"Resultado auditoría: exit $auditExit\"; Write-Host ''; $keyAnswer = Read-Host '¿La clave de cifrado de producción es distinta a la de desarrollo? Responde sí/no/no sé (no pegues la clave)'; Write-Host \"Respuesta sobre clave registrada: $keyAnswer\"; Write-Host ''; Write-Host \"Códigos finales: Chromium=$installExit; Playwright=$testExit; audit=$auditExit\"; if ($installExit -ne 0 -or $testExit -ne 0 -or $auditExit -ne 0) { exit 1 }"
+			],
+			"isBackground": false
+		}
+	]
+}

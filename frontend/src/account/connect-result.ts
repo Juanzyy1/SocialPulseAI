@@ -1,5 +1,6 @@
 /** Ruta del backend que inicia la conexión de un canal. Se abre como enlace normal, no con fetch. */
 export const YOUTUBE_CONNECT_URL = '/api/v1/integrations/youtube/connect';
+export const INSTAGRAM_CONNECT_URL = '/api/v1/integrations/instagram/connect';
 
 // Códigos que el backend puede enviar en ?reason=. Cualquier otro valor es un texto de la URL,
 // que puede escribir cualquiera, y nunca se muestra tal cual.
@@ -8,21 +9,35 @@ const KNOWN_REASONS = [
   'unauthorized',
   'already_connected',
   'google_error',
+  'instagram_error',
   'unavailable',
   'error',
 ] as const;
 
 export type ConnectReason = (typeof KNOWN_REASONS)[number];
 
-export type ConnectOutcome = { kind: 'connected' } | { kind: 'error'; reason: ConnectReason };
+export type ConnectPlatform = 'youtube' | 'instagram';
+export type ConnectOutcome =
+  | { kind: 'connected'; platform: ConnectPlatform }
+  | { kind: 'error'; platform: ConnectPlatform; reason: ConnectReason };
 
 /** Resultado de la conexión según los parámetros de la URL, o null si no hay ninguno. */
 export function parseConnectResult(params: URLSearchParams): ConnectOutcome | null {
-  const status = params.get('youtube');
-  if (status === 'connected') return { kind: 'connected' };
+  const platform: ConnectPlatform | null = params.has('instagram')
+    ? 'instagram'
+    : params.has('youtube')
+      ? 'youtube'
+      : null;
+  if (!platform) return null;
+  const status = params.get(platform);
+  if (status === 'connected') return { kind: 'connected', platform };
   if (status === 'error') {
     const reason = params.get('reason');
-    return { kind: 'error', reason: KNOWN_REASONS.find((known) => known === reason) ?? 'error' };
+    return {
+      kind: 'error',
+      platform,
+      reason: KNOWN_REASONS.find((known) => known === reason) ?? 'error',
+    };
   }
   return null;
 }
@@ -31,6 +46,7 @@ export function parseConnectResult(params: URLSearchParams): ConnectOutcome | nu
 export function withoutConnectResult(params: URLSearchParams): URLSearchParams {
   const next = new URLSearchParams(params);
   next.delete('youtube');
+  next.delete('instagram');
   next.delete('reason');
   return next;
 }
@@ -47,6 +63,8 @@ const REASON_MESSAGES: Record<ConnectReason, string> = {
   already_connected: 'Ese canal ya está conectado a otra cuenta de SocialPulse AI.',
   google_error:
     'Hubo un problema al comunicarse con Google o con YouTube. Inténtalo de nuevo en unos minutos.',
+  instagram_error:
+    'Hubo un problema al comunicarse con Meta o Instagram. Inténtalo de nuevo en unos minutos.',
   unavailable: 'La conexión con YouTube no está disponible en este momento.',
   error: 'No se pudo conectar el canal. Inténtalo de nuevo.',
 };
@@ -55,8 +73,15 @@ export function describeConnectResult(outcome: ConnectOutcome): Notice {
   if (outcome.kind === 'connected') {
     return {
       tone: 'success',
-      text: 'Canal conectado. Ahora sincroniza la cuenta para traer sus estadísticas.',
+      text:
+        outcome.platform === 'youtube'
+          ? 'Canal conectado. Ahora sincroniza la cuenta para traer sus estadísticas.'
+          : 'Cuenta de Instagram conectada. La sincronización de Instagram estará disponible próximamente.',
     };
   }
-  return { tone: 'error', text: REASON_MESSAGES[outcome.reason] };
+  const text =
+    outcome.platform === 'instagram' && outcome.reason === 'rejected'
+      ? 'No se completó la conexión. Comprueba que autorizaste la cuenta profesional de Instagram solicitada.'
+      : REASON_MESSAGES[outcome.reason];
+  return { tone: 'error', text };
 }

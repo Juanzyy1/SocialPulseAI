@@ -6,24 +6,15 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Inject,
 } from '@nestjs/common';
-import { dailyMetricCodes } from '../analytics/metric-catalog';
-import { extractApiError, parseReportTable } from '../analytics/report-parser';
 import { pacificDate } from '../common/dates/pacific-date';
 import { redactSecrets, safeErrorMessage } from '../common/logging/redact';
-import { YoutubeAnalyticsClient } from '../integrations/youtube/youtube-analytics.client';
-import { YoutubeTokenService } from '../integrations/youtube/youtube-token.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SyncRunResponseDto } from './dto/sync-run-response.dto';
 import { SyncStatusResponseDto } from './dto/sync-status-response.dto';
-import { planSyncRange, SyncRange } from './sync-range';
-import {
-  MetricRow,
-  SnapshotRow,
-  statsToSnapshots,
-  SyncDataError,
-  tableToMetricRows,
-} from './youtube-sync.mapper';
+import { planSyncRange } from './sync-range';
+import { MetricRow, SnapshotRow, SYNC_ADAPTERS, SyncAdapter, SyncDataError } from './sync-adapter';
 
 const NOT_FOUND = 'Cuenta no encontrada';
 const RECONNECT_MESSAGE =
@@ -77,8 +68,7 @@ export class SyncService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly tokens: YoutubeTokenService,
-    private readonly analytics: YoutubeAnalyticsClient,
+    @Inject(SYNC_ADAPTERS) private readonly adapters: readonly SyncAdapter[],
   ) {}
 
   async sync(userId: string, id: string): Promise<SyncRunResponseDto> {
@@ -87,8 +77,8 @@ export class SyncService {
       select: { id: true, platform: true, status: true },
     });
     if (!account) throw new NotFoundException(NOT_FOUND);
-    // Cuando haya más plataformas, cada una tendrá su propia sincronización.
-    if (account.platform !== 'YOUTUBE') {
+    const adapter = this.adapters.find((candidate) => candidate.platform === account.platform);
+    if (!adapter) {
       throw new BadRequestException('Esta plataforma todavía no es compatible');
     }
     if (account.status === 'REVOKED') throw new ConflictException(RECONNECT_MESSAGE);
@@ -97,7 +87,7 @@ export class SyncService {
     this.inFlight.add(id);
     try {
       await this.assertCanStart(id);
-      return await this.execute(id);
+      return await this.execute(id, adapter);
     } finally {
       this.inFlight.delete(id);
     }
@@ -145,7 +135,7 @@ export class SyncService {
     }
   }
 
-  private async execute(id: string): Promise<SyncRunResponseDto> {
+  private async execute(id: string, adapter: SyncAdapter): Promise<SyncRunResponseDto> {
     const today = pacificDate(new Date());
     const latest = await this.prisma.accountDailyMetric.aggregate({
       where: { socialAccountId: id },
@@ -166,7 +156,8 @@ export class SyncService {
     });
 
     try {
-      await this.fetchAndStore(id, run.id, range, today);
+      const data = await adapter.fetch(id, range);
+      await this.persist(id, run.id, data.dailyMetrics, data.snapshots, today);
     } catch (error) {
       await this.prisma.syncRun.update({
         where: { id: run.id },
@@ -183,40 +174,6 @@ export class SyncService {
       select: RUN_SELECT,
     });
     return toDto(finished);
-  }
-
-  /** Primero se lee todo; solo si todo llegó bien se escribe, en una única transacción. */
-  private async fetchAndStore(
-    accountId: string,
-    runId: string,
-    range: SyncRange,
-    today: string,
-  ): Promise<void> {
-    const accessToken = await this.tokens.getAccessToken(accountId);
-    const metrics = dailyMetricCodes('YOUTUBE');
-
-    const report = await this.analytics.queryReport(accessToken, {
-      startDate: range.start,
-      endDate: range.end,
-      metrics,
-      dimensions: ['day'],
-      sort: 'day',
-    });
-    if (report.statusCode !== 200) {
-      throw new SyncDataError(
-        `YouTube Analytics respondió ${report.statusCode}: ${extractApiError(report.body)}`,
-      );
-    }
-    const table = parseReportTable(report.body);
-    if (!table) {
-      throw new SyncDataError('La respuesta de YouTube Analytics tiene un formato inesperado');
-    }
-    const rows = tableToMetricRows(table, metrics, range);
-
-    const stats = await this.analytics.fetchChannelStatistics(accessToken);
-    if (!stats) throw new SyncDataError('La cuenta de Google ya no tiene un canal de YouTube');
-
-    await this.persist(accountId, runId, rows, statsToSnapshots(stats), today);
   }
 
   private persist(

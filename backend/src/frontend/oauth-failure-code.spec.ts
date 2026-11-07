@@ -17,4 +17,10 @@ describe('oauthFailureCode', () => {
   it('un error que no es HttpException da "error" y no expone su mensaje', () => {
     expect(oauthFailureCode(new Error('contiene un secreto'))).toBe('error');
   });
+
+  it('un error de Instagram usa un código propio para el aviso del frontend', () => {
+    expect(oauthFailureCode(new HttpException('mensaje interno', 502), 'instagram')).toBe(
+      'instagram_error',
+    );
+  });
 });

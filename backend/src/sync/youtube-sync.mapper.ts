@@ -1,24 +1,8 @@
 import { ReportTable } from '../analytics/report-parser';
 import { ChannelStatistics } from '../integrations/youtube/youtube-analytics.client';
+import { MetricRow, SnapshotRow, SyncDataError } from './sync-adapter';
 
-/** La respuesta de la plataforma no tiene la forma esperada: se rechaza en lugar de guardar. */
-export class SyncDataError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'SyncDataError';
-  }
-}
-
-export interface MetricRow {
-  date: string;
-  metric: string;
-  value: number;
-}
-
-export interface SnapshotRow {
-  metric: string;
-  value: number;
-}
+export { SyncDataError } from './sync-adapter';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 

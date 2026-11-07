@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { YOUTUBE_CONNECT_URL } from '../account/connect-result';
+import { INSTAGRAM_CONNECT_URL, YOUTUBE_CONNECT_URL } from '../account/connect-result';
 import type { Notice } from '../account/connect-result';
 import {
   describeDisconnectError,
@@ -36,6 +36,12 @@ export function AccountCard({ account, onDisconnected }: AccountCardProps) {
   const cancelRef = useRef<HTMLButtonElement>(null);
   const name = accountLabel(account);
   const active = account.status === 'ACTIVE';
+  const connectUrl =
+    account.platform === 'INSTAGRAM'
+      ? INSTAGRAM_CONNECT_URL
+      : account.platform === 'YOUTUBE'
+        ? YOUTUBE_CONNECT_URL
+        : null;
   const syncNotice = sync.data ? describeSyncResult(sync.data) : null;
 
   // Al pedir la confirmación, el foco va a "Cancelar": la opción segura por defecto.
@@ -64,7 +70,7 @@ export function AccountCard({ account, onDisconnected }: AccountCardProps) {
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        {active ? (
+        {active && account.platform === 'YOUTUBE' ? (
           <button
             type="button"
             onClick={() => sync.mutate()}
@@ -74,11 +80,15 @@ export function AccountCard({ account, onDisconnected }: AccountCardProps) {
           >
             {sync.isPending ? 'Sincronizando…' : 'Sincronizar'}
           </button>
-        ) : (
-          <a href={YOUTUBE_CONNECT_URL} className={`${BUTTON} inline-block`}>
+        ) : !active && connectUrl ? (
+          <a href={connectUrl} className={`${BUTTON} inline-block`}>
             Reconectar
           </a>
-        )}
+        ) : account.platform === 'INSTAGRAM' ? (
+          <p role="status" className="text-sm text-panel-muted">
+            La sincronización de Instagram estará disponible próximamente.
+          </p>
+        ) : null}
         {!confirming && (
           <button type="button" onClick={() => setConfirming(true)} className={BUTTON}>
             Desconectar
@@ -105,8 +115,10 @@ export function AccountCard({ account, onDisconnected }: AccountCardProps) {
         >
           <p className="text-amber-100">
             ¿Desconectar «{name}»? Se borrarán sus credenciales y todas las estadísticas guardadas de esta
-            cuenta, y se intentará revocar el acceso en Google. Podrás volver a conectarla más adelante,
-            pero solo se recuperarán los últimos 90 días.
+            cuenta. Podrás volver a conectarla más adelante.
+            {account.platform === 'INSTAGRAM'
+              ? ' Para revocar el acceso en Meta, quita SocialPulse AI de las integraciones de tu negocio.'
+              : ' Intentaremos revocar el acceso en Google; al reconectar solo se recuperarán los últimos 90 días.'}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
@@ -115,7 +127,8 @@ export function AccountCard({ account, onDisconnected }: AccountCardProps) {
               aria-busy={disconnect.isPending || undefined}
               onClick={() =>
                 disconnect.mutate(undefined, {
-                  onSuccess: (result) => onDisconnected(describeDisconnectResult(result)),
+                  onSuccess: (result) =>
+                    onDisconnected(describeDisconnectResult(result, account.platform)),
                 })
               }
               className={`${BUTTON} border-red-400/50 text-red-200`}

@@ -107,6 +107,13 @@ describe('describeDisconnectResult', () => {
     expect(describeDisconnectResult({ revokedAtGoogle: true }).text).toContain('borraron');
     expect(describeDisconnectResult({ revokedAtGoogle: false }).text).toContain('borrados');
   });
+
+  it('desconectar Instagram no afirma revocar el token remotamente', () => {
+    const notice = describeDisconnectResult({ revokedAtGoogle: false }, 'INSTAGRAM');
+    expect(notice.text).toContain('borrados de SocialPulse AI');
+    expect(notice.text).toContain('revocar también el acceso en Meta');
+    expect(notice.text).not.toContain('Google');
+  });
 });
 
 describe('describeDisconnectError', () => {

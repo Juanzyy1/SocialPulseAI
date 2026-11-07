@@ -6,6 +6,10 @@ export interface Env {
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   GOOGLE_REDIRECT_URI?: string;
+  INSTAGRAM_CLIENT_ID?: string;
+  INSTAGRAM_CLIENT_SECRET?: string;
+  INSTAGRAM_CONFIG_ID?: string;
+  INSTAGRAM_REDIRECT_URI?: string;
   FRONTEND_URL?: string;
   /** Proxies de confianza delante de la app (0 = ninguno). undefined = sin indicar. */
   TRUST_PROXY_HOPS?: number;
@@ -22,6 +26,12 @@ const GOOGLE_KEYS = [
   'GOOGLE_CLIENT_ID',
   'GOOGLE_CLIENT_SECRET',
   'GOOGLE_REDIRECT_URI',
+] as const;
+const INSTAGRAM_KEYS = [
+  'INSTAGRAM_CLIENT_ID',
+  'INSTAGRAM_CLIENT_SECRET',
+  'INSTAGRAM_CONFIG_ID',
+  'INSTAGRAM_REDIRECT_URI',
 ] as const;
 const LOCAL_HOSTS = ['localhost', '127.0.0.1'];
 const MAX_PROXY_HOPS = 10;
@@ -126,6 +136,28 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     if (problem) errors.push(problem);
   }
 
+  // Instagram OAuth: las tres variables juntas o ninguna.
+  const instagramClientId = optionalString(raw.INSTAGRAM_CLIENT_ID);
+  const instagramClientSecret = optionalString(raw.INSTAGRAM_CLIENT_SECRET);
+  const instagramConfigId = optionalString(raw.INSTAGRAM_CONFIG_ID);
+  const instagramRedirectUri = optionalString(raw.INSTAGRAM_REDIRECT_URI);
+  const instagramValues = [
+    instagramClientId,
+    instagramClientSecret,
+    instagramConfigId,
+    instagramRedirectUri,
+  ];
+  const instagramSet = instagramValues.filter((v) => v !== undefined).length;
+  if (instagramSet > 0 && instagramSet < INSTAGRAM_KEYS.length) {
+    errors.push(
+      `Instagram OAuth está incompleto: define las tres variables (${INSTAGRAM_KEYS.join(', ')}) o ninguna`,
+    );
+  }
+  if (instagramRedirectUri) {
+    const problem = checkRedirectUri(instagramRedirectUri, nodeEnv === 'production');
+    if (problem) errors.push(problem.replaceAll('GOOGLE_REDIRECT_URI', 'INSTAGRAM_REDIRECT_URI'));
+  }
+
   // Frontend: opcional aquí. En producción la exige configureApp (ver production-checks).
   const frontendUrl = optionalString(raw.FRONTEND_URL);
   if (frontendUrl) {
@@ -171,6 +203,10 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     GOOGLE_CLIENT_ID: clientId,
     GOOGLE_CLIENT_SECRET: clientSecret,
     GOOGLE_REDIRECT_URI: redirectUri,
+    INSTAGRAM_CLIENT_ID: instagramClientId,
+    INSTAGRAM_CLIENT_SECRET: instagramClientSecret,
+    INSTAGRAM_CONFIG_ID: instagramConfigId,
+    INSTAGRAM_REDIRECT_URI: instagramRedirectUri,
     FRONTEND_URL: frontendUrl,
     TRUST_PROXY_HOPS: trustProxyHops,
     FRONTEND_DIST_DIR: frontendDistDir,

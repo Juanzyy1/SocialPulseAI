@@ -7,6 +7,7 @@ import { validateEnv } from './config/env.validation';
 import { FrontendModule } from './frontend/frontend.module';
 import { HealthModule } from './health/health.module';
 import { YoutubeModule } from './integrations/youtube/youtube.module';
+import { InstagramModule } from './integrations/instagram/instagram.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SocialAccountsModule } from './social-accounts/social-accounts.module';
 import { SyncModule } from './sync/sync.module';
@@ -25,6 +26,7 @@ import { DiagnosticsModule } from './diagnostics/diagnostics.module';
     AuthModule,
     UsersModule,
     YoutubeModule,
+    InstagramModule,
     SocialAccountsModule,
     SyncModule,
     AnalyticsModule,

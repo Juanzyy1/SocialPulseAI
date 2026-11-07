@@ -1,5 +1,5 @@
 import { ApiError } from '../api/client';
-import type { DisconnectResult, SyncRun } from '../api/types';
+import type { DisconnectResult, SocialAccount, SyncRun } from '../api/types';
 import { formatDateRange, plural } from '../dashboard/format';
 import type { Notice } from './connect-result';
 
@@ -46,7 +46,16 @@ export function describeSyncError(error: unknown): string {
   }
 }
 
-export function describeDisconnectResult(result: DisconnectResult): Notice {
+export function describeDisconnectResult(
+  result: DisconnectResult,
+  platform: SocialAccount['platform'] = 'YOUTUBE',
+): Notice {
+  if (platform === 'INSTAGRAM') {
+    return {
+      tone: 'info',
+      text: 'Cuenta desconectada y datos borrados de SocialPulse AI. Para revocar también el acceso en Meta, quita SocialPulse AI de las integraciones de tu negocio.',
+    };
+  }
   return result.revokedAtGoogle
     ? {
         tone: 'success',
