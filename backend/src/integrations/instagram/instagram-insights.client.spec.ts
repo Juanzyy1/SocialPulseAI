@@ -48,6 +48,33 @@ describe('InstagramInsightsClientImpl', () => {
     ).rejects.toThrow('403');
   });
 
+  it('incluye el detalle de Meta en errores HTTP sin exponer secretos', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          error: {
+            message: 'Invalid parameter: access_token=secret-token-value',
+            type: 'OAuthException',
+            code: 100,
+            error_subcode: 33,
+          },
+        }),
+        { status: 400 },
+      ),
+    );
+    const client = new InstagramInsightsClientImpl();
+
+    await expect(
+      client.fetchDailyReach('private-access-token', 'instagram-id', {
+        start: '2026-01-01',
+        end: '2026-01-01',
+        kind: 'initial',
+      }),
+    ).rejects.toThrow(
+      'Meta rechazó la consulta de Insights (400): Invalid parameter: access_token=[redactado], código 100, subcódigo 33',
+    );
+  });
+
   it('ajusta los límites al cambio de horario del Pacífico', async () => {
     const fetch = jest
       .spyOn(global, 'fetch')

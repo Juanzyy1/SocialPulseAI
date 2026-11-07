@@ -1,10 +1,29 @@
 import { Injectable } from '@nestjs/common';
+import { redactSecrets } from '../../common/logging/redact';
 import { SyncRange } from '../../sync/sync-range';
 import { addDays } from '../../common/dates/pacific-date';
 import { INSTAGRAM_GRAPH_API_VERSION } from './instagram-oauth.client';
 
 const GRAPH_API = `https://graph.facebook.com/${INSTAGRAM_GRAPH_API_VERSION}`;
 const REQUEST_TIMEOUT_MS = 10_000;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function describeMetaError(value: unknown): string | null {
+  if (!isRecord(value) || !isRecord(value.error)) return null;
+  const { message, code, error_subcode: subcode } = value.error;
+  const parts: string[] = [];
+  if (typeof message === 'string' && message.length > 0) {
+    parts.push(redactSecrets(message.replace(/\s+/g, ' ')));
+  }
+  if (typeof code === 'number' || typeof code === 'string') parts.push(`código ${code}`);
+  if (typeof subcode === 'number' || typeof subcode === 'string') {
+    parts.push(`subcódigo ${subcode}`);
+  }
+  return parts.length > 0 ? parts.join(', ') : null;
+}
 
 export abstract class InstagramInsightsClient {
   abstract fetchDailyReach(
@@ -34,7 +53,16 @@ export class InstagramInsightsClientImpl extends InstagramInsightsClient {
       { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) },
     );
     if (!response.ok) {
-      throw new Error(`Meta rechazó la consulta de Insights (${response.status})`);
+      let payload: unknown = null;
+      try {
+        payload = await response.json();
+      } catch {
+        // Graph API can return an empty or non-JSON body for an HTTP error.
+      }
+      const detail = describeMetaError(payload);
+      throw new Error(
+        `Meta rechazó la consulta de Insights (${response.status})${detail ? `: ${detail}` : ''}`,
+      );
     }
     return response.json();
   }
