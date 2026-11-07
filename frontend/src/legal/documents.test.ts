@@ -75,8 +75,18 @@ describe('documentos legales', () => {
   it('la política de privacidad nombra las cookies que usa la aplicación', () => {
     const text = JSON.stringify(PRIVACY_DOCUMENT);
 
-    for (const cookie of ['sp_session', 'sp_oauth', 'sp_yt_oauth']) {
+    for (const cookie of ['sp_session', 'sp_oauth', 'sp_yt_oauth', 'sp_ig_oauth', 'sp_tt_oauth']) {
       expect(text).toContain(cookie);
     }
+  });
+
+  it('la política distingue los datos consultados en Instagram y TikTok', () => {
+    const text = JSON.stringify(PRIVACY_DOCUMENT);
+
+    expect(text).toContain('alcance diario');
+    expect(text).toContain('No consultamos seguidores, me gusta ni compartidos de Instagram');
+    expect(text).toContain('hasta los 20 videos públicos más recientes');
+    expect(text).toContain('Meta e Instagram');
+    expect(text).toContain('TikTok');
   });
 });

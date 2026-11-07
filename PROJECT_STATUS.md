@@ -74,11 +74,11 @@ publicarlos. Monolito modular. Primera integración real: YouTube.
 | 9.3 Empaquetado para Render | COMPLETADA | Backend: 40 suites y 374 pruebas unitarias, 182 e2e, lint, tsc y audit en verde; el redactor ya oculta contraseñas en URLs (visto en la salida); prueba local de producción confirmada por el usuario el 01/11/2026 |
 | 9.4 Despliegue en Render | COMPLETADA | Prueba de caja negra del límite por IP superada (A: 401 ×5 y 429 ×2 con la cabecera falsificada; B: el teléfono entró durante el bloqueo); cabeceras, 404 de diagnósticos y migraciones comprobados el 02/11/2026 |
 | 9.5a Google en producción | COMPLETADA | Inicio de sesión con Google, conexión de YouTube y sincronización funcionan en la instancia real (confirmado por el usuario) |
-| 9.5b Textos legales | COMPLETADA (borrador) | Versión 2026-11-02; 34 archivos y 373 pruebas del frontend, 40 suites y 374 del backend en verde; redespliegue sin problemas (confirmado por el usuario) | Marcadores pendientes de revisión legal |
+| 9.5b Textos legales | COMPLETADA (borrador) | Versión 2026-11-07; términos y privacidad actualizados para YouTube, Instagram y TikTok; marcadores pendientes de revisión legal |
 | 9.5c Beta cerrada | POR VERIFICAR | Código de invitación para el registro, `noindex`, `docs/BETA.md` | Pruebas automáticas, código en Render y primera invitación real |
 | 9.6 Verificación de Google | APLAZADA | Requiere dominio propio verificado | |
 | 9.7 Pruebas con navegador real y revisión final | EN PROGRESO | Playwright contra Render: 11 de 19 pruebas pasaron (rutas, legales, cabeceras, `noindex`, `robots.txt`, 404, 401, 403 por origen ajeno); falló el registro con correo y contraseña (el panel no apareció en 15 s) y 7 no se ejecutaron | Prueba reescrita para diagnosticar; repetir contra Render |
-| Fase 8 Instagram y TikTok | EN PROGRESO | OAuth y botón de Instagram integrados; sin sincronización aún; 395 unitarias, 185 e2e backend y 389 frontend aprobadas | Configurar permisos y credenciales Meta, desplegar y probar conexión real |
+| Fase 8 Instagram y TikTok | EN PROGRESO | Sincronización real de Instagram y TikTok confirmada; textos legales versión 2026-11-07 actualizados; prueba Playwright local de las páginas legales aprobada; falta revisión legal profesional |
 
 ## Errores, riesgos y bloqueos
 - Sin bloqueos.

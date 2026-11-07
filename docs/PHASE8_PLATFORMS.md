@@ -7,10 +7,10 @@ Estado al 07/11/2026. Pedido explícito del usuario.
 |---|---|---|
 | 8.0 | Refactor sin cambiar comportamiento: contrato de adaptador por plataforma, con YouTube como primero | COMPLETADA; 388 unitarias, 182 e2e, build y lint en verde |
 | 8.1a | Verificación oficial vigente, configuración de Meta y permisos mínimos | COMPLETADA; conexión y sincronización validadas con la cuenta del usuario |
-| 8.1b | Renovación segura, sincronización y catálogo de Instagram | EN PROGRESO; sincronización real confirmada; renovación automática no implementada |
-| 8.2a | Verificación oficial, permisos y configuración de la app TikTok | DOCUMENTACIÓN VERIFICADA; falta que el usuario registre/configure la app |
-| 8.2b | Conexión de TikTok: autorización, renovación, sincronización, catálogo e interfaz | IMPLEMENTADA; falta probar con la app/cuenta real |
-| 8.3 | Textos legales por plataforma, nueva versión, pruebas de navegador y revisión de seguridad | PENDIENTE |
+| 8.1b | Sincronización, catálogo y manejo del acceso de Instagram | COMPLETADA; sincronización real confirmada; se solicita reconexión si Meta invalida el acceso, según decisión del usuario |
+| 8.2a | Verificación oficial, permisos y configuración de la app TikTok | COMPLETADA; Sandbox configurado y permisos confirmados por sincronización real |
+| 8.2b | Conexión de TikTok: autorización, renovación, sincronización, catálogo e interfaz | COMPLETADA; conexión y métricas reales confirmadas por el usuario |
+| 8.3 | Textos legales por plataforma, nueva versión, pruebas de navegador y revisión de seguridad | IMPLEMENTADA (BORRADOR); pruebas de navegador y revisión de seguridad completadas; pendiente revisión legal profesional |
 
 Los adaptadores de sincronización comparten el mismo ciclo de persistencia. YouTube conserva su comportamiento;
 Instagram consulta Insights y almacena alcance diario; TikTok almacena capturas de totales del perfil y de videos
@@ -57,10 +57,11 @@ Verificado en documentación oficial el 07/11/2026:
   seguidores. La sincronización implementada consulta únicamente alcance diario; no obtiene likes ni compartidos.
 - El ejemplo oficial vigente muestra Graph API v27.0; confirmar la versión activa al crear/configurar la app.
 
-Verificado en la cuenta del usuario: conexión y sincronización de alcance completadas correctamente. Pendiente:
-decidir/documentar el tratamiento de caducidad de tokens Unified Login; el backend guarda la fecha que Meta entrega
-y pide volver a conectar una cuenta caducada, no implementa renovación automática. No asumir las reglas de
-renovación de Instagram Login, ya que el flujo utilizado es Unified Login.
+Verificado en la cuenta del usuario: conexión y sincronización de alcance completadas correctamente. La
+configuración actual mantiene los permisos mínimos `instagram_basic` e `instagram_manage_insights`. El backend
+guarda el vencimiento cuando Meta lo entrega y, si el token vence o Meta invalida el acceso, la cuenta debe
+reconectarse. No se implementa renovación automática porque `business_management` no está disponible en la
+configuración actual de la app.
 
 ### Configuración inicial acordada
 - Cuenta: Instagram Business.
@@ -74,9 +75,9 @@ renovación de Instagram Login, ya que el flujo utilizado es Unified Login.
   Advanced Access, App Review y modo Live.
 - En Development, agregar la cuenta de prueba como Instagram Tester y aceptar la invitación desde Instagram
   (**Settings → Website permissions → Apps and websites → Tester Invites**) antes de probar el acceso.
-- La configuración debe pedir solo los activos/permisos necesarios: cuenta de Instagram, `instagram_basic` y
-  `instagram_manage_insights`. No solicitar cuenta publicitaria, mensajes, comentarios, publicación ni anuncios para
-  el alcance actual.
+- La configuración pide la cuenta de Instagram y solo los permisos `instagram_basic` e
+  `instagram_manage_insights`. No solicitar cuenta publicitaria, mensajes, comentarios, publicación ni anuncios
+  para el alcance actual.
 - No pegar secretos de la app en el chat ni subirlos al repositorio. El `INSTAGRAM_CLIENT_SECRET` se configura solo
   en el entorno local y Render.
 
@@ -94,8 +95,7 @@ renovación de Instagram Login, ya que el flujo utilizado es Unified Login.
   en `backend/.env`.
 - Para `socialpulse-ai-xweo.onrender.com`, el URI exacto de retorno es
   `https://socialpulse-ai-xweo.onrender.com/api/v1/integrations/instagram/callback`.
-- El token Unified Login puede ser de duración variable según la configuración de Meta. El backend guarda `expires_in`
-  cuando Meta lo entrega y rechaza el uso de tokens vencidos; la renovación silenciosa no está implementada.
+- Si Meta invalida el acceso o el token caduca, la sincronización solicita reconectar Instagram desde **Cuentas**.
 - La pantalla **Cuentas** ya ofrece **Conectar Instagram**, lista las cuentas conectadas y redirige cuentas revocadas
   al flujo de reconexión; cuentas activas también pueden volver a autorizarse. El botón **Sincronizar** ejecuta
   Insights. La serie se valida y persiste dentro de la transacción común del adaptador, con ceros explícitos

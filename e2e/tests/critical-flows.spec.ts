@@ -40,10 +40,16 @@ test.describe('sin sesión', () => {
   test('los textos legales son públicos y se muestran como borrador', async ({ page }) => {
     await page.goto('/privacidad');
     await expect(page.getByRole('heading', { name: 'Política de privacidad' })).toBeVisible();
+    await expect(page.getByText('Versión 2026-11-07')).toBeVisible();
     await expect(page.getByRole('note')).toContainText('Borrador');
+    await expect(page.getByText(/alcance diario/, { exact: false })).toBeVisible();
+    await expect(page.getByText(/hasta los 20 videos públicos más recientes/, { exact: false })).toBeVisible();
+    await expect(page.getByText(/sp_ig_oauth y sp_tt_oauth/, { exact: false })).toBeVisible();
 
     await page.goto('/terminos');
     await expect(page.getByRole('heading', { name: 'Términos de uso' })).toBeVisible();
+    await expect(page.getByText('Versión 2026-11-07')).toBeVisible();
+    await expect(page.getByText(/YouTube, Instagram y TikTok/, { exact: false })).toBeVisible();
   });
 
   test('un código de invitación incorrecto se rechaza y no crea la cuenta', async ({ page }) => {
