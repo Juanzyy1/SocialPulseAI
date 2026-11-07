@@ -14,7 +14,7 @@ describe('catálogo de métricas', () => {
     const codes = youtube.map((m) => m.code);
     expect(new Set(codes).size).toBe(codes.length);
     for (const metric of youtube) {
-      expect(['additive', 'weighted_average', 'snapshot']).toContain(metric.kind);
+      expect(['additive', 'weighted_average', 'daily_average', 'snapshot']).toContain(metric.kind);
       expect(['count', 'minutes', 'seconds']).toContain(metric.unit);
     }
   });
@@ -52,7 +52,17 @@ describe('catálogo de métricas', () => {
   it('una plataforma o una métrica desconocida no tiene definición', () => {
     expect(getMetricDefinition('YOUTUBE', 'noExiste')).toBeUndefined();
     expect(getMetricDefinition('INSTAGRAM', 'views')).toBeUndefined();
-    expect(metricsOf('INSTAGRAM')).toEqual([]);
+    expect(metricsOf('TIKTOK')).toEqual([]);
+  });
+
+  it('el alcance diario de Instagram no se suma entre días ni plataformas', () => {
+    const instagram = metricsOf('INSTAGRAM');
+    expect(dailyMetricCodes('INSTAGRAM')).toEqual(['reach']);
+    expect(instagram[0]).toMatchObject({
+      code: 'reach',
+      kind: 'daily_average',
+      compatibleGroup: null,
+    });
   });
 
   it('estimatedMinutesWatched advierte que son minutos enteros por día', () => {
@@ -86,12 +96,13 @@ describe('describeCatalog', () => {
   it('lista las plataformas con catálogo y todas sus métricas, en orden', () => {
     const catalog = describeCatalog();
 
-    expect(catalog.map((p) => p.platform)).toEqual(['YOUTUBE']);
+    expect(catalog.map((p) => p.platform)).toEqual(['YOUTUBE', 'INSTAGRAM']);
     expect(catalog[0].metrics.map((m) => m.code)).toEqual(metricsOf('YOUTUBE').map((m) => m.code));
+    expect(catalog[1].metrics.map((m) => m.code)).toEqual(['reach']);
   });
 
   it('entrega solo los campos públicos, sin datos internos de agregación', () => {
-    for (const metric of describeCatalog()[0].metrics) {
+    for (const metric of describeCatalog().flatMap((platform) => platform.metrics)) {
       expect(Object.keys(metric).sort()).toEqual(['code', 'kind', 'label', 'note', 'polarity', 'unit']);
     }
     const views = describeCatalog()[0].metrics.find((m) => m.code === 'views');

@@ -13,7 +13,7 @@ export class MetricComparisonDto {
   @ApiProperty({ example: 'views' })
   metric: string;
 
-  @ApiProperty({ enum: ['additive', 'weighted_average'] })
+  @ApiProperty({ enum: ['additive', 'weighted_average', 'daily_average'] })
   kind: string;
 
   @ApiProperty({ enum: ['count', 'minutes', 'seconds'] })

@@ -6,14 +6,14 @@ Estado al 07/11/2026. Pedido explícito del usuario.
 | Tarea | Alcance | Estado |
 |---|---|---|
 | 8.0 | Refactor sin cambiar comportamiento: contrato de adaptador por plataforma, con YouTube como primero | COMPLETADA; 388 unitarias, 182 e2e, build y lint en verde |
-| 8.1a | Verificación oficial vigente, configuración de Meta y permisos mínimos | EN PROGRESO; OAuth y botón implementados, falta guardar la URL, configurar Meta y probar la cuenta real |
-| 8.1b | Renovación segura, sincronización y catálogo de Instagram | PENDIENTE; el panel ya ofrece el botón de conexión, lista y reconexión |
+| 8.1a | Verificación oficial vigente, configuración de Meta y permisos mínimos | IMPLEMENTADA; queda confirmar el flujo real de Meta con la cuenta del usuario |
+| 8.1b | Renovación segura, sincronización y catálogo de Instagram | EN PROGRESO; alcance diario sincronizable; falta validar en Meta y cerrar renovación segura |
 | 8.2a / 8.2b | Verificación y conexión de TikTok: autorización, sincronización, catálogo e interfaz | PENDIENTE |
 | 8.3 | Textos legales por plataforma, nueva versión, pruebas de navegador y revisión de seguridad | PENDIENTE |
 
-El primer adaptador de sincronización está conectado únicamente a YouTube. Instagram ya tiene el flujo OAuth
-inicial y el enlace del panel, pero no sincronización ni datos simulados; TikTok aún no tiene integración.
-No se ha cambiado el esquema ni el contrato público de sincronización.
+Los adaptadores de sincronización comparten el mismo ciclo de persistencia. YouTube conserva su comportamiento;
+Instagram consulta Insights y almacena alcance diario. TikTok aún no tiene integración. No se simulan respuestas
+ni se convierten datos ausentes en ceros.
 
 ## Fuentes consultadas (documentación oficial salvo indicación; verificar de nuevo antes de implementar cada plataforma)
 - Meta, Instagram Platform overview: https://developers.facebook.com/documentation/instagram-platform/overview
@@ -35,26 +35,25 @@ No se ha cambiado el esquema ni el contrato público de sincronización.
 - TikTok, referencia de permisos: https://developers.tiktok.com/doc/tiktok-api-scopes/
 - Terceros (a confirmar): guías de Frontegg, Phyllo y Unified sobre revisión de aplicaciones en TikTok.
 
-## Instagram (API con inicio de sesión de Instagram)
+## Instagram (API con Unified Login)
 Verificado en documentación oficial el 07/11/2026:
 - Solo cuentas profesionales (empresa o creador). Una cuenta personal no sirve.
 - No exige página de Facebook vinculada.
 - La app de Meta debe ser de tipo Business. Standard Access sirve para cuentas propias/administradas y personas
   con un rol en la app; cuentas de usuarios externos requieren Advanced Access, App Review y verificación de empresa.
-- Permisos de Insights en el flujo Instagram Login: `instagram_business_basic` y
-  `instagram_business_manage_insights`. No copiar los scopes antiguos de tutoriales sin validar.
-- Business Login entrega un token corto (1 hora); se cambia por uno largo de 60 días, que puede renovarse mientras
-  siga válido. Los tokens del panel de Meta también son largos (60 días), pero no sustituyen el OAuth de producto.
-- La referencia de Insights permite periodos `day` para métricas compatibles. `views` se documenta como
-  `total_value` con breakdowns; `impressions` está deprecado en v22 y posteriores. No asumir que todas las métricas
-  producen series diarias.
+- La referencia de Insights confirma explícitamente compatibilidad con Unified Login, host `graph.facebook.com`,
+  token del sistema de usuario del negocio y permisos `instagram_basic` + `instagram_manage_insights`.
+- La primera sincronización consulta `reach` con `period=day` y `metric_type=time_series`, única métrica consultada
+  que documenta una serie temporal en la referencia actual. Se expone como promedio diario: sumar alcances diarios
+  contaría repetidamente a las mismas personas. `views` es `total_value`, no se trata como serie diaria; `impressions`
+  está deprecado en v22 y posteriores.
 - Si una métrica no está disponible, la API devuelve un conjunto vacío, no cero; algunas métricas requieren 100
   seguidores, `online_followers` solo tiene 30 días y los datos pueden retrasarse hasta 48 horas.
 - El ejemplo oficial vigente muestra Graph API v27.0; confirmar la versión activa al crear/configurar la app.
 
-Pendiente antes de cerrar 8.1a: comprobar los datos reales que devuelve la cuenta y verificar límites/cuotas,
-testers y requisitos de publicación para el caso concreto de la app. La lista de métricas y su granularidad se fijará
-desde la referencia vigente, no a partir de métricas de otras versiones.
+Pendiente: comprobar con la cuenta del usuario qué datos devuelve Meta, límites/cuotas, testers y requisitos de
+publicación para esta app. No asumir el comportamiento de renovación de tokens de Instagram Login: Unified Login
+entrega un token del sistema de usuario del negocio y todavía no se implementa una renovación automática.
 
 ### Configuración inicial acordada
 - Cuenta: Instagram Business.
@@ -88,10 +87,12 @@ desde la referencia vigente, no a partir de métricas de otras versiones.
   en `backend/.env`.
 - Para `socialpulse-ai-xweo.onrender.com`, el URI exacto de retorno es
   `https://socialpulse-ai-xweo.onrender.com/api/v1/integrations/instagram/callback`.
-- El token Unified Login puede ser de duración variable según la configuración de Meta. La renovación y sincronización
-  todavía pertenecen a 8.1b.
+- El token Unified Login puede ser de duración variable según la configuración de Meta. El backend guarda `expires_in`
+  cuando Meta lo entrega y rechaza el uso de tokens vencidos; la renovación silenciosa no está implementada.
 - La pantalla **Cuentas** ya ofrece **Conectar Instagram**, lista las cuentas conectadas y redirige cuentas revocadas
-  al flujo de reconexión. Aún no muestra una acción de sincronizar hasta completar 8.1b.
+  al flujo de reconexión; cuentas activas también pueden volver a autorizarse. El botón **Sincronizar** ejecuta
+  Insights. La serie se valida y persiste dentro de la transacción común del adaptador, con ceros explícitos
+  conservados y datos ausentes omitidos.
 - No solicitar ni configurar webhooks todavía; el flujo de métricas inicial no depende de notificaciones push y no
   existe un endpoint de webhook implementado.
 

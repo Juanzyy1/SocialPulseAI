@@ -46,12 +46,15 @@ describe('Catálogo de métricas (e2e)', () => {
     await api().get('/api/v1/analytics/metrics').expect(401);
   });
 
-  it('devuelve el catálogo de YouTube completo y en orden, con etiquetas, polaridad y advertencias', async () => {
+  it('devuelve los catálogos de YouTube e Instagram con etiquetas, polaridad y advertencias', async () => {
     const user = await registerAndLogin(app, TEST_DOMAIN);
 
     const res = await api().get('/api/v1/analytics/metrics').set('Cookie', user.cookie).expect(200);
 
-    expect(res.body.platforms.map((p: { platform: string }) => p.platform)).toEqual(['YOUTUBE']);
+    expect(res.body.platforms.map((p: { platform: string }) => p.platform)).toEqual([
+      'YOUTUBE',
+      'INSTAGRAM',
+    ]);
     const metrics: CatalogMetric[] = res.body.platforms[0].metrics;
     expect(metrics.map((m) => m.code)).toEqual(metricsOf('YOUTUBE').map((m) => m.code));
 
@@ -66,6 +69,13 @@ describe('Catálogo de métricas (e2e)', () => {
       polarity: 'lower_is_better',
     });
     expect(byCode('estimatedMinutesWatched').note).toContain('enteros');
+    expect(res.body.platforms[1].metrics).toEqual([
+      expect.objectContaining({
+        code: 'reach',
+        label: 'Alcance diario promedio',
+        kind: 'daily_average',
+      }),
+    ]);
   });
 
   it('no expone datos internos de agregación', async () => {
@@ -73,7 +83,7 @@ describe('Catálogo de métricas (e2e)', () => {
 
     const res = await api().get('/api/v1/analytics/metrics').set('Cookie', user.cookie).expect(200);
 
-    for (const metric of res.body.platforms[0].metrics) {
+    for (const metric of res.body.platforms.flatMap((platform: { metrics: CatalogMetric[] }) => platform.metrics)) {
       expect(Object.keys(metric).sort()).toEqual(['code', 'kind', 'label', 'note', 'polarity', 'unit']);
     }
     expect(JSON.stringify(res.body)).not.toContain('compatibleGroup');

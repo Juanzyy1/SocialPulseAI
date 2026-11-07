@@ -8,9 +8,9 @@ export class CatalogMetricDto {
   label: string;
 
   @ApiProperty({
-    enum: ['additive', 'weighted_average', 'snapshot'],
+    enum: ['additive', 'weighted_average', 'daily_average', 'snapshot'],
     description:
-      'additive: se suma entre días. weighted_average: media ponderada por otra métrica. snapshot: total puntual, no se agrega',
+      'additive: se suma entre días. weighted_average: media ponderada por otra métrica. daily_average: promedio entre días. snapshot: total puntual, no se agrega',
   })
   kind: string;
 

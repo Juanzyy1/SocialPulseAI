@@ -2,7 +2,7 @@ import { compareMetrics, MetricSummary, previousPeriod } from './comparison';
 
 const m = (
   metric: string,
-  kind: 'additive' | 'weighted_average',
+  kind: 'additive' | 'weighted_average' | 'daily_average',
   value: number | null,
   daysWithData: number,
 ): MetricSummary => ({ metric, kind, unit: 'count', value, daysWithData, note: null });
@@ -81,6 +81,24 @@ describe('compareMetrics', () => {
       [m('averageViewDuration', 'weighted_average', 10, 7)],
     );
     expect(result).toMatchObject({ comparable: false, reasonCode: 'MISSING_DATA', change: null });
+  });
+
+  it('compara promedios diarios solo con la misma cobertura', () => {
+    const [sameCoverage] = compareMetrics(
+      [m('reach', 'daily_average', 12, 6)],
+      [m('reach', 'daily_average', 8, 6)],
+    );
+    expect(sameCoverage).toMatchObject({ comparable: true, change: 4 });
+
+    const [differentCoverage] = compareMetrics(
+      [m('reach', 'daily_average', 12, 6)],
+      [m('reach', 'daily_average', 8, 4)],
+    );
+    expect(differentCoverage).toMatchObject({
+      comparable: false,
+      reasonCode: 'DIFFERENT_COVERAGE',
+      change: null,
+    });
   });
 
   it('conserva el orden: primero las métricas del periodo actual', () => {

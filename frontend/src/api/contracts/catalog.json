@@ -12,6 +12,19 @@
           "note": null
         }
       ]
+    },
+    {
+      "platform": "INSTAGRAM",
+      "metrics": [
+        {
+          "code": "reach",
+          "label": "Alcance diario promedio",
+          "kind": "daily_average",
+          "unit": "count",
+          "polarity": "higher_is_better",
+          "note": "Promedio de cuentas únicas alcanzadas por día con dato; una misma cuenta puede aparecer en varios días."
+        }
+      ]
     }
   ]
 }

@@ -52,8 +52,9 @@ export class MetricValueDto {
   metric: string;
 
   @ApiProperty({
-    enum: ['additive', 'weighted_average'],
-    description: 'additive: suma de los días con dato. weighted_average: media ponderada por vistas',
+    enum: ['additive', 'weighted_average', 'daily_average'],
+    description:
+      'additive: suma de los días con dato. weighted_average: media ponderada por vistas. daily_average: promedio de los días con dato',
   })
   kind: string;
 

@@ -163,14 +163,22 @@ describe('tarjeta de cuenta: sincronizar y estado', () => {
     expect(screen.getByText(/no tiene acceso vigente/)).toBeTruthy();
   });
 
-  it('una cuenta activa de Instagram no ofrece sincronización antes de que esté implementada', () => {
-    installFakeApi({});
+  it('una cuenta activa de Instagram sincroniza y conserva la opción de volver a autorizar', async () => {
+    const user = userEvent.setup();
+    const api = installFakeApi({
+      'POST /social-accounts/cuenta-1/sync': () => jsonResponse(run),
+    });
     show(vi.fn(), { platform: 'INSTAGRAM', displayName: 'Mi Instagram' });
 
-    expect(
-      screen.getByText('La sincronización de Instagram estará disponible próximamente.'),
-    ).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Sincronizar' })).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Sincronizar' }));
+
+    expect(await screen.findByText(/Sincronización completada: 699 filas guardadas/)).toBeTruthy();
+    expect(api.calls.map((call) => `${call.method} ${call.path}`)).toContain(
+      'POST /social-accounts/cuenta-1/sync',
+    );
+    expect(screen.getByRole('link', { name: 'Volver a conectar' }).getAttribute('href')).toBe(
+      '/api/v1/integrations/instagram/connect',
+    );
   });
 
   it('reconectar una cuenta de Instagram usa el endpoint de Instagram', () => {

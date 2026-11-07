@@ -17,6 +17,7 @@ export interface CombinedMetric {
  * Combina las métricas de varias cuentas de UNA misma plataforma:
  * - sumables: suma de los valores de las cuentas;
  * - media ponderada: Σ(media × peso) ÷ Σ(peso), con el peso de cada cuenta (sus propias vistas);
+ * - promedio diario: promedio de los promedios diarios disponibles por cuenta.
  * - totales puntuales y métricas desconocidas: nunca se combinan.
  */
 export function combineSamePlatform(
@@ -45,7 +46,7 @@ export function combineSamePlatform(
         value = (value ?? 0) + found;
         included += 1;
       }
-    } else {
+    } else if (definition.kind === 'weighted_average') {
       let weighted = 0;
       let totalWeight = 0;
       for (const account of accounts) {
@@ -59,6 +60,15 @@ export function combineSamePlatform(
         included += 1;
       }
       value = totalWeight > 0 ? weighted / totalWeight : null;
+    } else {
+      let total = 0;
+      for (const account of accounts) {
+        const average = account.metrics.find((m) => m.metric === code)?.value;
+        if (average === undefined || average === null) continue;
+        total += average;
+        included += 1;
+      }
+      value = included > 0 ? total / included : null;
     }
 
     return [

@@ -16,6 +16,9 @@ import {
   YoutubeAnalyticsClient,
 } from '../src/integrations/youtube/youtube-analytics.client';
 import { YOUTUBE_SCOPES } from '../src/integrations/youtube/youtube-oauth.client';
+import { InstagramInsightsClient } from '../src/integrations/instagram/instagram-insights.client';
+import { INSTAGRAM_SCOPES } from '../src/integrations/instagram/instagram-oauth.client';
+import { SyncRange } from '../src/sync/sync-range';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { PERMISSIVE_RATE_LIMITS } from './helpers/rate-limits';
 import { registerAndLogin } from './helpers/session';
@@ -65,8 +68,19 @@ class FakeAnalyticsClient extends YoutubeAnalyticsClient {
   }
 }
 
+class FakeInstagramInsightsClient extends InstagramInsightsClient {
+  calls: Array<{ accessToken: string; accountId: string; range: SyncRange }> = [];
+  response: unknown = { data: [] };
+
+  async fetchDailyReach(accessToken: string, accountId: string, range: SyncRange): Promise<unknown> {
+    this.calls.push({ accessToken, accountId, range });
+    return this.response;
+  }
+}
+
 describe('Sincronización (e2e)', () => {
   const fake = new FakeAnalyticsClient();
+  const instagramFake = new FakeInstagramInsightsClient();
   const today = pacificDate(new Date());
   let app: INestApplication<App>;
   let prisma: PrismaService;
@@ -91,7 +105,7 @@ describe('Sincronización (e2e)', () => {
         userId,
         platform,
         status,
-        platformAccountId: `canal-${randomUUID()}`,
+        platformAccountId: `${platform === 'INSTAGRAM' ? 'instagram' : 'canal'}-${randomUUID()}`,
         ...(credential
           ? {
               credential: {
@@ -99,7 +113,7 @@ describe('Sincronización (e2e)', () => {
                   accessTokenEnc: cipher.encrypt(`acceso-${randomUUID()}`, credentialAad(id, 'access')),
                   refreshTokenEnc: cipher.encrypt(`refresco-${randomUUID()}`, credentialAad(id, 'refresh')),
                   expiresAt: new Date(Date.now() + 3_600_000),
-                  scopes: [...YOUTUBE_SCOPES],
+                  scopes: [...(platform === 'INSTAGRAM' ? INSTAGRAM_SCOPES : YOUTUBE_SCOPES)],
                   keyVersion: cipher.keyVersion,
                 },
               },
@@ -125,12 +139,16 @@ describe('Sincronización (e2e)', () => {
     fake.report = (query) => dailyTable(query);
     fake.statistics = DEFAULT_STATS;
     fake.failStatistics = false;
+    instagramFake.calls = [];
+    instagramFake.response = { data: [] };
   });
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(YoutubeAnalyticsClient)
       .useValue(fake)
+      .overrideProvider(InstagramInsightsClient)
+      .useValue(instagramFake)
       .overrideProvider(RATE_LIMIT_CONFIG)
       .useValue(PERMISSIVE_RATE_LIMITS)
       .compile();
@@ -360,11 +378,68 @@ describe('Sincronización (e2e)', () => {
     expect(after.body.lastRun.rangeEnd).toBe(today);
   });
 
-  it('una plataforma sin sincronización responde 400', async () => {
+  it('Instagram conserva el alcance diario, incluidos ceros, sin inventar snapshots', async () => {
     const user = await login();
     const id = await seedAccount(user.id, { platform: 'INSTAGRAM', credential: false });
 
-    await sync(user.cookie, id).expect(400);
-    expect(fake.calls).toHaveLength(0);
+    await prisma.socialCredential.create({
+      data: {
+        socialAccountId: id,
+        accessTokenEnc: cipher.encrypt('instagram-access-token', credentialAad(id, 'access')),
+        expiresAt: new Date(Date.now() + 3_600_000),
+        scopes: [...INSTAGRAM_SCOPES],
+        keyVersion: cipher.keyVersion,
+      },
+    });
+    const firstDate = addDays(today, -3);
+    const secondDate = addDays(today, -2);
+    instagramFake.response = {
+      data: [
+        {
+          name: 'reach',
+          period: 'day',
+          values: [
+            { value: 0, end_time: `${firstDate}T12:00:00Z` },
+            { value: 14, end_time: `${secondDate}T12:00:00Z` },
+            { value: null, end_time: `${addDays(today, -1)}T12:00:00Z` },
+          ],
+        },
+      ],
+    };
+
+    const response = await sync(user.cookie, id).expect(200);
+
+    expect(response.body.status).toBe('SUCCEEDED');
+    expect(response.body.rowsWritten).toBe(2);
+    expect(instagramFake.calls).toHaveLength(1);
+    expect(instagramFake.calls[0]).toMatchObject({
+      accessToken: 'instagram-access-token',
+      range: { start: addDays(today, -89), end: today, kind: 'initial' },
+    });
+    expect(instagramFake.calls[0].accountId).toMatch(/^instagram-/);
+    expect(
+      await prisma.accountDailyMetric.findMany({
+        where: { socialAccountId: id },
+        orderBy: { metricDate: 'asc' },
+        select: { metric: true, value: true },
+      }),
+    ).toEqual([
+      { metric: 'reach', value: 0 },
+      { metric: 'reach', value: 14 },
+    ]);
+    expect(await prisma.accountTotalSnapshot.count({ where: { socialAccountId: id } })).toBe(0);
+  });
+
+  it('Instagram no guarda métricas si Meta devuelve una serie inválida', async () => {
+    const user = await login();
+    const id = await seedAccount(user.id, { platform: 'INSTAGRAM' });
+    instagramFake.response = { data: [{ name: 'reach', period: 'day', values: [{ value: -1 }] }] };
+
+    const response = await sync(user.cookie, id).expect(200);
+
+    expect(response.body.status).toBe('FAILED');
+    expect(response.body.errorMessage).toContain('inválido');
+    expect(await metricCount(id)).toBe(0);
+    expect((await prisma.socialAccount.findUniqueOrThrow({ where: { id } })).lastSyncedAt).toBeNull();
   });
 });

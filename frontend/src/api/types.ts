@@ -48,7 +48,7 @@ export interface TermsAcceptanceInput {
 }
 
 export type MetricUnit = 'count' | 'minutes' | 'seconds';
-export type MetricKind = 'additive' | 'weighted_average' | 'snapshot';
+export type MetricKind = 'additive' | 'weighted_average' | 'daily_average' | 'snapshot';
 export type MetricPolarity = 'higher_is_better' | 'lower_is_better' | 'neutral';
 export type AccountStatus = 'ACTIVE' | 'REVOKED' | 'ERROR';
 

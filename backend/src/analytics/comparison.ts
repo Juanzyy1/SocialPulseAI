@@ -76,7 +76,7 @@ function findProblem(
 
 /**
  * Compara las métricas de dos periodos. Nunca compara en silencio:
- * - sumables: solo si ambos periodos tienen el mismo número de días con dato;
+ * - sumables y promedios diarios: solo si ambos periodos tienen el mismo número de días con dato;
  * - media ponderada: solo si ambos periodos tienen un valor;
  * - un lado sin dato: no comparable.
  * Orden: primero las métricas del periodo actual y luego las que solo estaban en el anterior.

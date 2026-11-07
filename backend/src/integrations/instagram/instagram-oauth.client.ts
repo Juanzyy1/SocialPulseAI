@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 export const INSTAGRAM_SCOPES = ['instagram_basic', 'instagram_manage_insights'] as const;
+export const INSTAGRAM_GRAPH_API_VERSION = 'v27.0';
 
 export interface InstagramTokens {
   accessToken: string;
@@ -21,8 +22,8 @@ export abstract class InstagramOAuthClient {
 }
 
 const AUTH_ENDPOINT = 'https://www.facebook.com/dialog/oauth';
-const TOKEN_ENDPOINT = 'https://graph.facebook.com/v27.0/oauth/access_token';
-const ACCOUNTS_ENDPOINT = 'https://graph.facebook.com/v27.0/me/assigned_instagram_accounts';
+const TOKEN_ENDPOINT = `https://graph.facebook.com/${INSTAGRAM_GRAPH_API_VERSION}/oauth/access_token`;
+const ACCOUNTS_ENDPOINT = `https://graph.facebook.com/${INSTAGRAM_GRAPH_API_VERSION}/me/assigned_instagram_accounts`;
 const REQUEST_TIMEOUT_MS = 10_000;
 
 interface TokenResponse {

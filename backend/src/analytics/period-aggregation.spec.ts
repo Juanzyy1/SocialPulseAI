@@ -71,6 +71,18 @@ describe('aggregatePeriod', () => {
     });
   });
 
+  it('promedia alcance diario sin sumarlo como personas únicas del periodo', () => {
+    const result = aggregatePeriod('INSTAGRAM', [
+      d('2026-10-18', 'reach', 12),
+      d('2026-10-19', 'reach', 18),
+    ]);
+    expect(find(result, 'reach')).toEqual({
+      metric: 'reach',
+      value: 15,
+      daysWithData: 2,
+    });
+  });
+
   it('no agrega los totales puntuales', () => {
     expect(aggregatePeriod('YOUTUBE', [d('2026-10-18', 'subscriberCount', 5)])).toEqual([]);
   });

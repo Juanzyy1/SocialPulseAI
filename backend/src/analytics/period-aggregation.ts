@@ -19,6 +19,7 @@ export interface PeriodMetric {
  * Agrega los valores diarios de un periodo según el tipo de cada métrica:
  * - additive: suma de los días con dato.
  * - weighted_average: Σ(valor × peso) ÷ Σ(peso), solo en días con valor y peso.
+ * - daily_average: promedio simple de días con dato, para métricas diarias no sumables.
  * - snapshot: no se agrega (se ignora).
  * Solo devuelve métricas que tienen filas: nunca inventa ceros. Las métricas que el
  * catálogo no conoce (o de otra plataforma) se ignoran en lugar de adivinar su tipo.
@@ -44,6 +45,12 @@ export function aggregatePeriod(
       result.push({
         metric,
         value: rows.reduce((sum, row) => sum + row.value, 0),
+        daysWithData: rows.length,
+      });
+    } else if (definition.kind === 'daily_average') {
+      result.push({
+        metric,
+        value: rows.reduce((sum, row) => sum + row.value, 0) / rows.length,
         daysWithData: rows.length,
       });
     } else if (definition.kind === 'weighted_average') {

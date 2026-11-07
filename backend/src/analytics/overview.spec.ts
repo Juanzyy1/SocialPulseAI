@@ -35,6 +35,7 @@ describe('combineSamePlatform', () => {
     'YT|views': def('views', 'additive'),
     'YT|avg': def('avg', 'weighted_average', { unit: 'seconds', weightedBy: 'views', note: 'ponderada' }),
     'YT|subs': def('subs', 'snapshot'),
+    'IG|reach': def('reach', 'daily_average'),
   };
   const lookup: DefinitionLookup = (platform, code) => defs[`${platform}|${code}`];
   const find = (result: CombinedMetric[], code: string) => result.find((r) => r.metric === code);
@@ -87,6 +88,22 @@ describe('combineSamePlatform', () => {
       lookup,
     );
     expect(find(result, 'avg')).toMatchObject({ value: 25, accountsIncluded: 1 });
+  });
+
+  it('promedia el alcance de varias cuentas sin sumar personas entre ellas', () => {
+    const result = combineSamePlatform(
+      'IG',
+      [
+        { metrics: [metric('reach', 'daily_average', 10)] },
+        { metrics: [metric('reach', 'daily_average', 20)] },
+      ],
+      lookup,
+    );
+    expect(find(result, 'reach')).toMatchObject({
+      value: 15,
+      accountsIncluded: 2,
+      kind: 'daily_average',
+    });
   });
 
   it('no combina los totales puntuales ni las métricas desconocidas', () => {

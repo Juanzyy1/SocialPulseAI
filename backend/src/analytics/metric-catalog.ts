@@ -8,6 +8,8 @@ export type MetricKind =
   | 'additive'
   /** No se suma: se promedia ponderando por otra métrica diaria. */
   | 'weighted_average'
+  /** Métricas diarias no sumables: se promedian entre los días con dato. */
+  | 'daily_average'
   /** Total puntual en una fecha. No se agrega entre días. */
   | 'snapshot';
 
@@ -135,7 +137,19 @@ const YOUTUBE: readonly MetricDefinition[] = [
   },
 ];
 
-const CATALOG: Record<string, readonly MetricDefinition[]> = { YOUTUBE };
+const INSTAGRAM: readonly MetricDefinition[] = [
+  {
+    code: 'reach',
+    label: 'Alcance diario promedio',
+    kind: 'daily_average',
+    unit: 'count',
+    polarity: 'higher_is_better',
+    compatibleGroup: null,
+    note: 'Promedio de cuentas únicas alcanzadas por día con dato; una misma cuenta puede aparecer en varios días. Meta estima esta métrica y puede tardar hasta 48 horas en actualizarla.',
+  },
+];
+
+const CATALOG: Record<string, readonly MetricDefinition[]> = { YOUTUBE, INSTAGRAM };
 
 export function metricsOf(platform: string): readonly MetricDefinition[] {
   return CATALOG[platform] ?? [];
@@ -148,7 +162,7 @@ export function getMetricDefinition(
   return metricsOf(platform).find((m) => m.code === code);
 }
 
-/** Métricas que se piden a la API por día (sumables y medias ponderadas). */
+/** Métricas diarias, incluidas las que se agregan de forma no sumable. */
 export function dailyMetricCodes(platform: string): string[] {
   return metricsOf(platform)
     .filter((m) => m.kind !== 'snapshot')

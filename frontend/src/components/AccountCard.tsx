@@ -70,7 +70,7 @@ export function AccountCard({ account, onDisconnected }: AccountCardProps) {
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        {active && account.platform === 'YOUTUBE' ? (
+        {active && (account.platform === 'YOUTUBE' || account.platform === 'INSTAGRAM') ? (
           <button
             type="button"
             onClick={() => sync.mutate()}
@@ -84,11 +84,12 @@ export function AccountCard({ account, onDisconnected }: AccountCardProps) {
           <a href={connectUrl} className={`${BUTTON} inline-block`}>
             Reconectar
           </a>
-        ) : account.platform === 'INSTAGRAM' ? (
-          <p role="status" className="text-sm text-panel-muted">
-            La sincronización de Instagram estará disponible próximamente.
-          </p>
         ) : null}
+        {active && account.platform === 'INSTAGRAM' && connectUrl && (
+          <a href={connectUrl} className={`${BUTTON} inline-block`}>
+            Volver a conectar
+          </a>
+        )}
         {!confirming && (
           <button type="button" onClick={() => setConfirming(true)} className={BUTTON}>
             Desconectar
