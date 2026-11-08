@@ -47,7 +47,11 @@ function analytics(platform: 'INSTAGRAM' | 'TIKTOK'): AccountAnalytics {
     daysBehind: 0,
     lastSyncedAt: '2026-11-07T12:00:00.000Z',
     coverage: { daysWithData: 1, missingDays: 29, missingRanges: [] },
-    totals: [],
+    totals: platform === 'TIKTOK'
+      ? [
+          { metric: 'followers', unit: 'count', value: 1234, capturedOn: '2026-11-07', note: null },
+        ]
+      : [],
     daily: [
       { date: '2026-11-06', values: { reach: 9 } },
       { date: '2026-11-07', values: { reach: 12 } },
@@ -102,7 +106,7 @@ describe('gráfico por métrica de plataforma', () => {
     expect(screen.getByTestId('metric-sparkline')).toBeTruthy();
   });
 
-  it('no muestra un gráfico vacío si la plataforma solo ofrece totales puntuales', async () => {
+  it('adapta TikTok a un resumen de perfil sin periodo ni gráfico diario', async () => {
     const catalog: CatalogResponse = {
       platforms: [
         {
@@ -135,8 +139,9 @@ describe('gráfico por métrica de plataforma', () => {
       />,
     );
 
-    await screen.findByRole('heading', { name: 'Métricas del periodo' });
+    expect(await screen.findByRole('heading', { name: 'Resumen del perfil' })).toBeTruthy();
+    expect(screen.getByLabelText('1.234')).toBeTruthy();
     expect(screen.queryByRole('heading', { name: /por día/ })).toBeNull();
-    expect(screen.queryByTestId('metric-sparkline')).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Métricas del periodo' })).toBeNull();
   });
 });

@@ -30,7 +30,13 @@ export function DashboardPage() {
           {accounts.data && account && (
             <AccountSelect accounts={accounts.data} selectedId={account.id} onChange={selectAccount} />
           )}
-          <PeriodSelector selection={selection} today={today} onChange={setSelection} />
+          {account?.platform === 'TIKTOK' ? (
+            <p className="max-w-xs rounded-xl border border-panel-line bg-panel-card px-4 py-3 text-sm text-panel-muted">
+              TikTok muestra totales acumulados del perfil, no métricas diarias por periodo.
+            </p>
+          ) : (
+            <PeriodSelector selection={selection} today={today} onChange={setSelection} />
+          )}
         </div>
       </div>
 

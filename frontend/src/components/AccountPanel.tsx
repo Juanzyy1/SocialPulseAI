@@ -48,6 +48,7 @@ export function AccountPanel({
   const totals = analytics.data ? buildTotals(definitions, analytics.data.totals) : [];
   const notice = accountStatusNotice(account.status);
   const hasData = data.current !== null && data.current.coverage.daysWithData > 0;
+  const snapshotOnly = definitions.length > 0 && definitions.every((definition) => definition.kind === 'snapshot');
 
   const chartMetric = definitions.find((definition) => definition.kind !== 'snapshot');
   const series = chartMetric && analytics.data?.period
@@ -68,25 +69,81 @@ export function AccountPanel({
         </div>
       )}
 
-      <FreshnessNotice
-        dataThrough={data.dataThrough}
-        daysBehind={data.daysBehind}
-        coverage={data.current?.coverage ?? null}
-        lastSyncedAt={account.lastSyncedAt}
-      />
-
-      {data.current === null || !hasData ? (
-        <div className="rounded-xl border border-panel-line bg-panel-card p-6">
-          <p className="text-panel-muted">
-            {data.current === null
-              ? totals.length > 0
-                ? 'Esta plataforma no ofrece métricas diarias; los totales capturados aparecen abajo.'
-                : 'Todavía no hay métricas guardadas para esta cuenta. Se mostrarán aquí después de sincronizarla.'
-              : `No hay datos guardados para ${formatDateRange(data.current.period.start, data.current.period.end)}. Prueba con otro periodo o sincroniza la cuenta.`}
-          </p>
-        </div>
+      {snapshotOnly ? (
+        <section aria-labelledby="perfil-title">
+          <div className="mb-4">
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-chart-1">Métricas acumuladas</p>
+            <h2 id="perfil-title" className="mt-1 text-lg font-semibold">Resumen del perfil</h2>
+            <p className="mt-1 text-sm text-panel-muted">
+              Totales capturados al sincronizar; no representan actividad diaria ni cambian con el periodo seleccionado.
+            </p>
+          </div>
+          {analytics.isPending && (
+            <p aria-busy="true" className="text-panel-muted">Cargando totales del perfil…</p>
+          )}
+          {analytics.isError && (
+            <LoadError error={analytics.error} onRetry={() => void analytics.refetch()} />
+          )}
+          {totals.length > 0 && (
+            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-panel-line bg-panel-line sm:grid-cols-2 xl:grid-cols-3">
+              {totals.map((total, index) => (
+                <article key={total.code} className="bg-panel-card px-4 py-5 sm:px-5 sm:py-6">
+                  <div className="flex items-center gap-2">
+                    <span
+                      aria-hidden="true"
+                      className="h-2 w-2 rounded-full"
+                      style={{
+                        backgroundColor: [
+                          'var(--color-chart-1)',
+                          'var(--color-chart-2)',
+                          'var(--color-chart-3)',
+                          'var(--color-chart-4)',
+                          'var(--color-chart-5)',
+                        ][index % 5],
+                      }}
+                    />
+                    <h3 className="text-xs font-medium uppercase tracking-[0.1em] text-panel-muted">{total.label}</h3>
+                  </div>
+                  <p className="mt-3 text-3xl font-semibold tracking-tight">
+                    <AnimatedMetricValue
+                      value={total.value}
+                      unit={definitions.find((definition) => definition.code === total.code)?.unit ?? 'count'}
+                      finalText={total.valueText}
+                    />
+                  </p>
+                  <p className="mt-2 text-xs text-panel-muted">Capturado el {total.capturedOn}</p>
+                  {total.note && <p className="mt-2 text-xs leading-relaxed text-panel-muted">{total.note}</p>}
+                </article>
+              ))}
+            </div>
+          )}
+          {!analytics.isPending && !analytics.isError && totals.length === 0 && (
+            <div className="rounded-2xl border border-panel-line bg-panel-card p-5 text-sm text-panel-muted">
+              Aún no hay totales guardados. Sincroniza la cuenta desde Cuentas para capturar las métricas del perfil.
+            </div>
+          )}
+        </section>
       ) : (
         <>
+          <FreshnessNotice
+            dataThrough={data.dataThrough}
+            daysBehind={data.daysBehind}
+            coverage={data.current?.coverage ?? null}
+            lastSyncedAt={account.lastSyncedAt}
+          />
+
+          {data.current === null || !hasData ? (
+            <div className="rounded-xl border border-panel-line bg-panel-card p-6">
+              <p className="text-panel-muted">
+                {data.current === null
+                  ? totals.length > 0
+                    ? 'Esta plataforma no ofrece métricas diarias; los totales capturados aparecen abajo.'
+                    : 'Todavía no hay métricas guardadas para esta cuenta. Se mostrarán aquí después de sincronizarla.'
+                  : `No hay datos guardados para ${formatDateRange(data.current.period.start, data.current.period.end)}. Prueba con otro periodo o sincroniza la cuenta.`}
+              </p>
+            </div>
+          ) : (
+            <>
           <section aria-labelledby="metricas-title">
             <h2 id="metricas-title" className="mb-1 text-lg font-semibold">
               Métricas del periodo
@@ -147,10 +204,9 @@ export function AccountPanel({
               )}
             </section>
           )}
-        </>
-      )}
-
-      {totals.length > 0 && (
+            </>
+          )}
+        {totals.length > 0 && (
         <section aria-labelledby="totales-title">
           <h2 id="totales-title" className="mb-1 text-lg font-semibold">
             Totales del canal
@@ -178,6 +234,8 @@ export function AccountPanel({
             ))}
           </div>
         </section>
+      )}
+        </>
       )}
     </div>
   );

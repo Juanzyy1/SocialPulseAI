@@ -72,6 +72,21 @@ describe('buildPlatformSections', () => {
             note: null,
           },
         ],
+        snapshots: [
+          {
+            id: 'cuenta-1',
+            name: 'Canal',
+            totals: [
+              {
+                code: 'subscriberCount',
+                label: 'Suscriptores',
+                valueText: '1.234',
+                capturedOn: '22 oct 2026',
+                note: null,
+              },
+            ],
+          },
+        ],
       },
     ]);
   });
@@ -101,7 +116,10 @@ describe('buildPlatformSections', () => {
 
   it('si ninguna cuenta tiene datos lo dice y no hay tarjetas', () => {
     const [section] = buildPlatformSections(
-      response({ platforms: [platform({ accountsWithData: 0, complete: false, metrics: [] })] }),
+      response({
+        platforms: [platform({ accountsWithData: 0, complete: false, metrics: [] })],
+        accounts: [account({ totals: [] })],
+      }),
       catalog,
     );
 
@@ -149,6 +167,70 @@ describe('buildPlatformSections', () => {
 
   it('sin plataformas no hay secciones', () => {
     expect(buildPlatformSections(response({ platforms: [] }), catalog)).toEqual([]);
+  });
+
+  it('muestra los snapshots de TikTok por perfil sin sumarlos en una tarjeta global', () => {
+    const tiktokCatalog: CatalogResponse = {
+      platforms: [
+        {
+          platform: 'TIKTOK',
+          metrics: [
+            { code: 'followers', label: 'Seguidores', kind: 'snapshot', unit: 'count', polarity: 'neutral', note: null },
+            { code: 'recentVideoViews', label: 'Vistas de videos recientes', kind: 'snapshot', unit: 'count', polarity: 'neutral', note: 'Hasta 20 videos.' },
+          ],
+        },
+      ],
+    };
+    const accounts = [
+      account({
+        id: 'tt-1',
+        platform: 'TIKTOK',
+        displayName: 'Perfil Uno',
+        metrics: [],
+        totals: [
+          { metric: 'followers', unit: 'count', value: 1234, capturedOn: '2026-10-22', note: null },
+          { metric: 'recentVideoViews', unit: 'count', value: 5600, capturedOn: '2026-10-22', note: 'Hasta 20 videos.' },
+        ],
+      }),
+      account({
+        id: 'tt-2',
+        platform: 'TIKTOK',
+        displayName: 'Perfil Dos',
+        metrics: [],
+        totals: [{ metric: 'followers', unit: 'count', value: 5, capturedOn: '2026-10-22', note: null }],
+      }),
+    ];
+    const [section] = buildPlatformSections(
+      response({
+        accounts,
+        platforms: [
+          platform({ platform: 'TIKTOK', accountCount: 2, accountsWithData: 0, complete: false, metrics: [] }),
+        ],
+      }),
+      tiktokCatalog,
+    );
+
+    expect(section).toMatchObject({
+      platform: 'TIKTOK',
+      accountsText: '2 cuentas · totales capturados por perfil',
+      notice: null,
+      cards: [],
+      snapshots: [
+        {
+          id: 'tt-1',
+          name: 'Perfil Uno',
+          totals: [
+            { label: 'Seguidores', valueText: '1.234' },
+            { label: 'Vistas de videos recientes', valueText: '5.600' },
+          ],
+        },
+        {
+          id: 'tt-2',
+          name: 'Perfil Dos',
+          totals: [{ label: 'Seguidores', valueText: '5' }],
+        },
+      ],
+    });
   });
 });
 

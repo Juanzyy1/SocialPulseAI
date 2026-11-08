@@ -31,6 +31,19 @@ export interface PlatformSectionModel {
   /** Aviso cuando los totales son parciales o no hay datos; null si todo está completo. */
   notice: string | null;
   cards: PlatformCardModel[];
+  snapshots: AccountSnapshotModel[];
+}
+
+export interface AccountSnapshotModel {
+  id: string;
+  name: string;
+  totals: Array<{
+    code: string;
+    label: string;
+    valueText: string;
+    capturedOn: string;
+    note: string | null;
+  }>;
 }
 
 /** Una sección por plataforma, con las métricas combinadas de sus cuentas. Nada se suma entre plataformas. */
@@ -40,14 +53,42 @@ export function buildPlatformSections(
 ): PlatformSectionModel[] {
   return response.platforms.map((platform) => {
     const withoutData = platform.accountCount - platform.accountsWithData;
+    const accountDetails = response.accounts.filter((account) => account.platform === platform.platform);
+    const snapshots = accountDetails.flatMap((account): AccountSnapshotModel[] => {
+      const totals = account.totals.map((total) => ({
+        code: total.metric,
+        label: labelOf(catalog, account.platform, total.metric),
+        valueText: formatMetricValue(total.value, total.unit),
+        capturedOn: formatDate(total.capturedOn),
+        note: total.note,
+      }));
+      if (totals.length === 0) return [];
+      return [{
+        id: account.id,
+        name: account.displayName?.trim() || 'Cuenta sin nombre',
+        totals,
+      }];
+    });
+    const hasDailyMetrics = platform.metrics.length > 0;
+    const snapshotOnly = !hasDailyMetrics && snapshots.length > 0;
     return {
       platform: platform.platform,
       title: platformLabel(platform.platform),
       accountsText:
         plural(platform.accountCount, 'cuenta', 'cuentas') +
-        (withoutData > 0 ? ` · ${platform.accountsWithData} con datos` : ''),
+        (snapshotOnly
+          ? ' · totales capturados por perfil'
+          : withoutData > 0
+            ? ` · ${platform.accountsWithData} con datos`
+            : ''),
       notice:
-        platform.accountsWithData === 0 ? NO_DATA_NOTE : platform.complete ? null : PARTIAL_NOTE,
+        platform.accountsWithData === 0
+          ? snapshotOnly
+            ? null
+            : NO_DATA_NOTE
+          : platform.complete
+            ? null
+            : PARTIAL_NOTE,
       cards: platform.metrics.map((metric) => {
         const hasValue = metric.value !== null && metric.accountsIncluded > 0;
         return {
@@ -62,6 +103,7 @@ export function buildPlatformSections(
           note: metric.note,
         };
       }),
+      snapshots,
     };
   });
 }

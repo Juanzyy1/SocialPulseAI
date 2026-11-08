@@ -43,7 +43,7 @@ function OverviewContent({
         {response.period === null ? (
           <p className="text-panel-muted">
             {response.accounts.some((account) => account.totals.length > 0)
-              ? 'Todavía no hay series diarias para graficar. Los últimos totales capturados de cada cuenta aparecen abajo.'
+              ? 'No hay series diarias para este periodo. Los totales disponibles aparecen agrupados por perfil.'
               : <>Todavía no hay datos de tus cuentas. <Link to="/cuentas" className="underline">Sincroniza una desde Cuentas</Link>.</>}
           </p>
         ) : (
@@ -92,6 +92,54 @@ function OverviewContent({
                   {card.note && <p className="mt-2 text-xs text-panel-muted">{card.note}</p>}
                 </article>
               ))}
+            </div>
+          )}
+          {section.snapshots.length > 0 && (
+            <div className="mt-4">
+              <p className="mb-3 text-xs text-panel-muted">
+                Totales capturados por perfil; no se suman entre cuentas ni dependen del periodo.
+              </p>
+              <ul className="grid gap-3 xl:grid-cols-2">
+                {section.snapshots.map((snapshot) => (
+                  <li
+                    key={snapshot.id}
+                    className="rounded-2xl border border-panel-line bg-panel-card p-4 sm:p-5"
+                  >
+                    <h3 className="mb-4 truncate text-sm font-semibold">{snapshot.name}</h3>
+                    <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {snapshot.totals.map((total, index) => (
+                        <div
+                          key={total.code}
+                          className="min-w-0 border-l-2 pl-3"
+                          style={{
+                            borderColor: [
+                              'var(--color-chart-1)',
+                              'var(--color-chart-2)',
+                              'var(--color-chart-3)',
+                              'var(--color-chart-4)',
+                              'var(--color-chart-5)',
+                            ][index % 5],
+                          }}
+                        >
+                          <dt className="truncate text-xs text-panel-muted">{total.label}</dt>
+                          <dd className="mt-1 truncate text-xl font-semibold tracking-tight">
+                            {total.valueText}
+                          </dd>
+                          <dd className="mt-1 text-[11px] text-panel-muted">al {total.capturedOn}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                    {snapshot.totals.some((total) => total.note) && (
+                      <p className="mt-3 text-xs leading-relaxed text-panel-muted">
+                        {snapshot.totals
+                          .filter((total) => total.note)
+                          .map((total) => total.note)
+                          .join(' ')}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </section>
