@@ -2,6 +2,7 @@ import type { SocialAccount } from '../api/types';
 import { accountLabel, platformLabel } from '../dashboard/account-params';
 import { describeLastSync } from '../dashboard/account-status';
 import { StatusBadge } from './StatusBadge';
+import { PlatformIcon } from './PlatformIcon';
 
 interface AccountsOverviewProps {
   accounts: readonly SocialAccount[];
@@ -28,10 +29,13 @@ export function AccountsOverview({ accounts, selectedId, onSelect }: AccountsOve
                   selected ? 'bg-panel-line/60' : ''
                 }`}
               >
-                <span>
-                  <span className="block font-medium">{accountLabel(account)}</span>
-                  <span className="block text-xs text-panel-muted">
-                    {platformLabel(account.platform)} · {describeLastSync(account.lastSyncedAt)}
+                <span className="flex min-w-0 items-center gap-3">
+                  <PlatformIcon platform={account.platform} size="sm" />
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium">{accountLabel(account)}</span>
+                    <span className="block text-xs text-panel-muted">
+                      {platformLabel(account.platform)} · {describeLastSync(account.lastSyncedAt)}
+                    </span>
                   </span>
                 </span>
                 <StatusBadge status={account.status} />

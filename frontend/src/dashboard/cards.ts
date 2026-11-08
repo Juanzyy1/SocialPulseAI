@@ -28,6 +28,7 @@ export interface MetricCardModel {
   label: string;
   unit: MetricUnit;
   note: string | null;
+  value: number | null;
   valueText: string;
   hasValue: boolean;
   daysWithData: number;
@@ -37,6 +38,7 @@ export interface MetricCardModel {
 export interface TotalCardModel {
   code: string;
   label: string;
+  value: number;
   valueText: string;
   capturedOn: string;
   note: string | null;
@@ -128,6 +130,7 @@ export function buildMetricCards(
         label: definition.label,
         unit: definition.unit,
         note: definition.note,
+        value: hasValue ? value : null,
         valueText: hasValue ? formatMetricValue(value, definition.unit) : NO_DATA_TEXT,
         hasValue,
         daysWithData,
@@ -150,6 +153,7 @@ export function buildTotals(
         {
           code: definition.code,
           label: definition.label,
+          value: total.value,
           valueText: formatMetricValue(total.value, definition.unit),
           capturedOn: formatDate(total.capturedOn),
           note: definition.note,

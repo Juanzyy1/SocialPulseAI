@@ -1,14 +1,16 @@
 import { TIKTOK_CONNECT_URL } from '../account/connect-result';
+import { PlatformIcon } from './PlatformIcon';
 
 export function ConnectTikTok() {
   return (
     <section
       aria-labelledby="conectar-tiktok-title"
-      className="rounded-xl border border-panel-line bg-panel-card p-6"
+      className="rounded-2xl border border-panel-line bg-panel-card p-5"
     >
-      <h2 id="conectar-tiktok-title" className="mb-2 text-lg font-semibold">
-        Conectar una cuenta de TikTok
-      </h2>
+      <div className="mb-3 flex items-center gap-3">
+        <PlatformIcon platform="TIKTOK" />
+        <h2 id="conectar-tiktok-title" className="text-lg font-semibold">TikTok</h2>
+      </div>
       <p className="mb-3 text-sm text-panel-muted">
         Autoriza a SocialPulse AI para consultar los datos públicos de tu perfil y tus videos.
       </p>

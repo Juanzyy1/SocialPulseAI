@@ -10,6 +10,8 @@ import { AccountCard } from '../components/AccountCard';
 import { ConnectInstagram } from '../components/ConnectInstagram';
 import { ConnectTikTok } from '../components/ConnectTikTok';
 import { ConnectYoutube } from '../components/ConnectYoutube';
+import { PlatformIcon } from '../components/PlatformIcon';
+import type { SocialAccount } from '../api/types';
 import { describeLoadError } from '../dashboard/errors';
 import { useAccounts } from '../dashboard/queries';
 
@@ -18,6 +20,12 @@ const TONE_BOX: Record<Notice['tone'], string> = {
   error: 'border-red-400/30 bg-red-500/10 text-red-200',
   info: 'border-panel-line bg-panel-card text-panel-text',
 };
+
+const PLATFORM_GROUPS: readonly { platform: SocialAccount['platform']; label: string }[] = [
+  { platform: 'YOUTUBE', label: 'YouTube' },
+  { platform: 'INSTAGRAM', label: 'Instagram' },
+  { platform: 'TIKTOK', label: 'TikTok' },
+];
 
 function NoticeBox({ notice }: { notice: Notice }) {
   return (
@@ -52,7 +60,11 @@ export function AccountsPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-semibold">Cuentas</h1>
+      <div className="mb-8">
+        <p className="text-xs font-medium uppercase tracking-[0.16em] text-chart-1">Conexiones</p>
+        <h1 className="mt-1 text-2xl font-semibold">Cuentas</h1>
+        <p className="mt-1 text-sm text-panel-muted">Administra tus perfiles y sincroniza sus métricas.</p>
+      </div>
 
       {connectNotice && <NoticeBox notice={connectNotice} />}
       {disconnectNotice && <NoticeBox notice={disconnectNotice} />}
@@ -84,19 +96,40 @@ export function AccountsPage() {
           </p>
         )}
         {accounts.data && accounts.data.length > 0 && (
-          <ul className="space-y-4">
-            {accounts.data.map((account) => (
-              <AccountCard key={account.id} account={account} onDisconnected={setDisconnectNotice} />
-            ))}
-          </ul>
+          <div className="space-y-6">
+            {PLATFORM_GROUPS.map(({ platform, label }) => {
+              const platformAccounts = accounts.data.filter((account) => account.platform === platform);
+              if (platformAccounts.length === 0) return null;
+              return (
+                <section key={platform} aria-labelledby={`accounts-${platform}`}>
+                  <h3 id={`accounts-${platform}`} className="mb-3 flex items-center gap-3 text-sm font-medium text-panel-muted">
+                    <PlatformIcon platform={platform} size="sm" />
+                    <span>{label}</span>
+                    <span className="text-xs text-panel-muted/70">{platformAccounts.length}</span>
+                  </h3>
+                  <ul className="space-y-3">
+                    {platformAccounts.map((account) => (
+                      <AccountCard key={account.id} account={account} onDisconnected={setDisconnectNotice} />
+                    ))}
+                  </ul>
+                </section>
+              );
+            })}
+          </div>
         )}
       </section>
 
-      <div className="space-y-5">
-        <ConnectYoutube />
-        <ConnectInstagram />
-        <ConnectTikTok />
-      </div>
+      <section aria-labelledby="conectar-plataformas-title" className="mt-12">
+        <div className="mb-4">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-chart-1">Añadir perfil</p>
+          <h2 id="conectar-plataformas-title" className="mt-1 text-lg font-semibold">Conectar una plataforma</h2>
+        </div>
+        <div className="grid gap-4 xl:grid-cols-3">
+          <ConnectYoutube />
+          <ConnectInstagram />
+          <ConnectTikTok />
+        </div>
+      </section>
     </div>
   );
 }

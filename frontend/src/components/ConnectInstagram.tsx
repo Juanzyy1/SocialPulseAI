@@ -1,14 +1,17 @@
 import { INSTAGRAM_CONNECT_URL } from '../account/connect-result';
+import { PlatformIcon } from './PlatformIcon';
 
 export function ConnectInstagram() {
   return (
     <section
       aria-labelledby="conectar-instagram-title"
-      className="rounded-xl border border-panel-line bg-panel-card p-6"
+      className="rounded-2xl border border-panel-line bg-panel-card p-5"
     >
-      <h2 id="conectar-instagram-title" className="mb-2 text-lg font-semibold">
-        Conectar una cuenta profesional de Instagram
-      </h2>
+      <div className="mb-3 flex items-center gap-3">
+        <PlatformIcon platform="INSTAGRAM" />
+        <h2 id="conectar-instagram-title" className="text-lg font-semibold">Instagram</h2>
+      </div>
+      <p className="mb-3 text-xs text-panel-muted">Cuenta profesional</p>
       <p className="mb-3 text-sm text-panel-muted">
         Te llevaremos a Meta para elegir qué cuenta profesional compartir con SocialPulse AI.
       </p>

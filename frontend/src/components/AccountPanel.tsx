@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import type { SocialAccount } from '../api/types';
-import { accountLabel, accountStatusNotice, platformLabel } from '../dashboard/account-params';
+import { accountStatusNotice } from '../dashboard/account-params';
 import { buildMetricCards, buildTotals } from '../dashboard/cards';
 import { buildDaySeries } from '../dashboard/chart';
 import { formatDateRange } from '../dashboard/format';
@@ -10,6 +10,7 @@ import { FreshnessNotice } from './FreshnessNotice';
 import { LoadError } from './LoadError';
 import { MetricCard } from './MetricCard';
 import { ViewsChart } from './ViewsChart';
+import { AnimatedMetricValue } from './AnimatedMetricValue';
 
 export function AccountPanel({
   account,
@@ -48,19 +49,13 @@ export function AccountPanel({
   const notice = accountStatusNotice(account.status);
   const hasData = data.current !== null && data.current.coverage.daysWithData > 0;
 
-  const views = definitions.find((definition) => definition.code === 'views');
-  const viewsLabel = views?.label ?? 'Vistas';
-  const series = analytics.data?.period
-    ? buildDaySeries(analytics.data.period, analytics.data.daily ?? [], 'views')
+  const chartMetric = definitions.find((definition) => definition.kind !== 'snapshot');
+  const series = chartMetric && analytics.data?.period
+    ? buildDaySeries(analytics.data.period, analytics.data.daily ?? [], chartMetric.code)
     : [];
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-panel-muted">
-        Cuenta: <strong className="text-panel-text">{accountLabel(account)}</strong> ·{' '}
-        {platformLabel(account.platform)}
-      </p>
-
       {notice && (
         <div
           role="status"
@@ -101,32 +96,57 @@ export function AccountPanel({
               {data.previous &&
                 ` · comparado con ${formatDateRange(data.previous.period.start, data.previous.period.end)}`}
             </p>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {cards.map((card) => (
-                <MetricCard key={card.code} card={card} />
-              ))}
+            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-panel-line bg-panel-line sm:grid-cols-2 xl:grid-cols-4">
+              {cards.map((card, index) => {
+                const metric = definitions.find((definition) => definition.code === card.code);
+                const sparkline = metric && metric.kind !== 'snapshot' && analytics.data?.period
+                  ? buildDaySeries(
+                      analytics.data.period,
+                      analytics.data.daily ?? [],
+                      metric.code,
+                    )
+                  : [];
+                return (
+                  <MetricCard
+                    key={card.code}
+                    card={card}
+                    series={sparkline}
+                    accentIndex={index}
+                  />
+                );
+              })}
             </div>
           </section>
 
-          <section
-            aria-labelledby="grafico-title"
-            className="rounded-xl border border-panel-line bg-panel-card p-5"
-          >
-            <h2 id="grafico-title" className="mb-4 text-lg font-semibold">
-              {viewsLabel} por día
-            </h2>
-            {analytics.isPending && (
-              <p aria-busy="true" className="text-panel-muted">
-                Cargando gráfico…
-              </p>
-            )}
-            {analytics.isError && (
-              <LoadError error={analytics.error} onRetry={() => void analytics.refetch()} />
-            )}
-            {analytics.data && series.length > 0 && (
-              <ViewsChart days={series} label={viewsLabel} unit={views?.unit ?? 'count'} />
-            )}
-          </section>
+          {chartMetric && (
+            <section
+              aria-labelledby="grafico-title"
+              className="rounded-2xl border border-panel-line bg-panel-card p-5 sm:p-6"
+            >
+              <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-[0.14em] text-chart-1">Actividad</p>
+                  <h2 id="grafico-title" className="mt-1 text-lg font-semibold">
+                    {chartMetric.label} por día
+                  </h2>
+                </div>
+                <p className="text-xs text-panel-muted">
+                  {formatDateRange(data.current.period.start, data.current.period.end)}
+                </p>
+              </div>
+              {analytics.isPending && (
+                <p aria-busy="true" className="text-panel-muted">
+                  Cargando gráfico…
+                </p>
+              )}
+              {analytics.isError && (
+                <LoadError error={analytics.error} onRetry={() => void analytics.refetch()} />
+              )}
+              {analytics.data && series.length > 0 && (
+                <ViewsChart days={series} label={chartMetric.label} unit={chartMetric.unit} />
+              )}
+            </section>
+          )}
         </>
       )}
 
@@ -138,14 +158,20 @@ export function AccountPanel({
           <p className="mb-4 text-sm text-panel-muted">
             Valores más recientes capturados; no dependen del periodo elegido.
           </p>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-panel-line bg-panel-line sm:grid-cols-3">
             {totals.map((total) => (
               <article
                 key={total.code}
-                className="rounded-xl border border-panel-line bg-panel-card p-5"
+                className="bg-panel-card px-4 py-5 sm:px-5 sm:py-6"
               >
                 <h3 className="text-sm text-panel-muted">{total.label}</h3>
-                <p className="mt-2 text-2xl font-semibold">{total.valueText}</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight">
+                  <AnimatedMetricValue
+                    value={total.value}
+                    unit={definitions.find((definition) => definition.code === total.code)?.unit ?? 'count'}
+                    finalText={total.valueText}
+                  />
+                </p>
                 <p className="mt-2 text-xs text-panel-muted">al {total.capturedOn}</p>
                 {total.note && <p className="mt-1 text-xs text-panel-muted">{total.note}</p>}
               </article>

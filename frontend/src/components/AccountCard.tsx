@@ -15,8 +15,8 @@ import { useDisconnectAccount, useSyncAccount } from '../account/mutations';
 import type { SocialAccount } from '../api/types';
 import { accountLabel, platformLabel } from '../dashboard/account-params';
 import { describeLastSync } from '../dashboard/account-status';
-import { formatTimestampDate } from '../dashboard/format';
 import { StatusBadge } from './StatusBadge';
+import { PlatformIcon } from './PlatformIcon';
 
 const BUTTON =
   'rounded-lg border border-panel-line px-3 py-1.5 text-sm transition-colors hover:bg-panel-line disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600';
@@ -56,55 +56,60 @@ export function AccountCard({ account, onDisconnected }: AccountCardProps) {
   }, [confirming]);
 
   return (
-    <li className="rounded-xl border border-panel-line bg-panel-card p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h3 className="text-base font-semibold">{name}</h3>
-          <p className="mt-1 text-xs text-panel-muted">
-            {platformLabel(account.platform)} · {describeLastSync(account.lastSyncedAt)} · Conectada el{' '}
-            {formatTimestampDate(account.connectedAt)}
-          </p>
+    <li className="rounded-2xl border border-panel-line bg-panel-card p-4 transition-colors hover:border-white/15 sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <PlatformIcon platform={account.platform} size="lg" />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="truncate text-base font-semibold">{name}</h3>
+              <StatusBadge status={account.status} />
+            </div>
+            <p className="mt-1 truncate text-sm text-panel-muted">
+              {account.handle && account.handle !== name ? account.handle : platformLabel(account.platform)}
+              <span className="mx-2 text-panel-line">·</span>
+              {describeLastSync(account.lastSyncedAt)}
+            </p>
+          </div>
         </div>
-        <StatusBadge status={account.status} />
+
+        <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+          {active &&
+          (account.platform === 'YOUTUBE' ||
+            account.platform === 'INSTAGRAM' ||
+            account.platform === 'TIKTOK') ? (
+            <button
+              type="button"
+              onClick={() => sync.mutate()}
+              disabled={sync.isPending}
+              aria-busy={sync.isPending || undefined}
+              className={BUTTON}
+            >
+              {sync.isPending ? 'Sincronizando…' : 'Sincronizar'}
+            </button>
+          ) : !active && connectUrl ? (
+            <a href={connectUrl} className={`${BUTTON} inline-block`}>
+              Reconectar
+            </a>
+          ) : null}
+          {active && account.platform !== 'YOUTUBE' && connectUrl && (
+            <a href={connectUrl} className={`${BUTTON} inline-block`}>
+              Volver a conectar
+            </a>
+          )}
+          {!confirming && (
+            <button type="button" onClick={() => setConfirming(true)} className={BUTTON}>
+              Desconectar
+            </button>
+          )}
+        </div>
       </div>
 
       {!active && (
-        <p role="status" className="mt-3 text-sm text-amber-300">
-          Esta cuenta no tiene acceso vigente: no se pueden traer datos nuevos hasta reconectarla. Sus datos
-          guardados se conservan.
+        <p role="status" className="mt-3 rounded-xl border border-amber-400/20 bg-amber-400/[0.06] px-3 py-2 text-sm text-amber-200">
+          Esta cuenta no tiene acceso vigente. Reconecta para traer datos nuevos; los datos guardados se conservan.
         </p>
       )}
-
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {active &&
-        (account.platform === 'YOUTUBE' ||
-          account.platform === 'INSTAGRAM' ||
-          account.platform === 'TIKTOK') ? (
-          <button
-            type="button"
-            onClick={() => sync.mutate()}
-            disabled={sync.isPending}
-            aria-busy={sync.isPending || undefined}
-            className={BUTTON}
-          >
-            {sync.isPending ? 'Sincronizando…' : 'Sincronizar'}
-          </button>
-        ) : !active && connectUrl ? (
-          <a href={connectUrl} className={`${BUTTON} inline-block`}>
-            Reconectar
-          </a>
-        ) : null}
-        {active && account.platform !== 'YOUTUBE' && connectUrl && (
-          <a href={connectUrl} className={`${BUTTON} inline-block`}>
-            Volver a conectar
-          </a>
-        )}
-        {!confirming && (
-          <button type="button" onClick={() => setConfirming(true)} className={BUTTON}>
-            Desconectar
-          </button>
-        )}
-      </div>
 
       {syncNotice && (
         <p role="status" className={`mt-3 text-sm ${TONE_TEXT[syncNotice.tone]}`}>

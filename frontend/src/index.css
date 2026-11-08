@@ -11,15 +11,49 @@
   --color-muted: #5b6577;
   --color-danger: #b42318;
 
-  --color-panel: #070d24;
-  --color-panel-card: #0e1736;
-  --color-panel-line: #1b2750;
-  --color-panel-text: #e6ebff;
-  --color-panel-muted: #9aa6cf;
+  --color-panel: #050607;
+  --color-panel-card: #0c1116;
+  --color-panel-line: #1c272c;
+  --color-panel-text: #f0f7f6;
+  --color-panel-muted: #98a9a7;
   /* Para las series de los gráficos (F.4d). */
-  --color-chart-1: #5b8def;
-  --color-chart-2: #22d3ee;
-  --color-chart-3: #c084fc;
+  --color-chart-1: #00e5c4;
+  --color-chart-2: #ff2d87;
+  --color-chart-3: #925cff;
+  --color-chart-4: #ffd43b;
+  --color-chart-5: #46a6ff;
+}
+
+.dashboard-surface {
+  background-image:
+    radial-gradient(ellipse at 82% 0%, rgb(0 229 196 / 0.075), transparent 38rem),
+    radial-gradient(ellipse at 12% 32%, rgb(146 92 255 / 0.055), transparent 34rem);
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-enter 360ms cubic-bezier(0.2, 0.75, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @layer base {

@@ -9,7 +9,7 @@ import {
 import type { ChartDay } from '../dashboard/chart';
 import { formatDate, formatMetricValue } from '../dashboard/format';
 
-const GEOMETRY = { width: 720, height: 240, left: 48, right: 12, top: 12, bottom: 28 } as const;
+const GEOMETRY = { width: 900, height: 300, left: 56, right: 16, top: 20, bottom: 34 } as const;
 
 interface ViewsChartProps {
   days: readonly ChartDay[];
@@ -39,6 +39,12 @@ export function ViewsChart({ days, label, unit }: ViewsChartProps) {
         aria-label={summary}
         className="w-full"
       >
+        <defs>
+          <linearGradient id="views-bars" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="var(--color-chart-1)" />
+            <stop offset="100%" stopColor="var(--color-chart-1)" stopOpacity="0.35" />
+          </linearGradient>
+        </defs>
         {scale.ticks.map((tick) => {
           const y = plotBottom - (tick / scale.max) * plotHeight;
           return (
@@ -49,6 +55,7 @@ export function ViewsChart({ days, label, unit }: ViewsChartProps) {
                 y1={y}
                 y2={y}
                 stroke="var(--color-panel-line)"
+                strokeDasharray="3 7"
               />
               <text
                 x={GEOMETRY.left - 8}
@@ -73,8 +80,9 @@ export function ViewsChart({ days, label, unit }: ViewsChartProps) {
                 y={bar.y}
                 width={bar.width}
                 height={bar.height}
+                rx="3"
                 fill="none"
-                stroke="var(--color-panel-muted)"
+                stroke="var(--color-chart-2)"
                 strokeDasharray="2 2"
               />
             ) : (
@@ -83,7 +91,8 @@ export function ViewsChart({ days, label, unit }: ViewsChartProps) {
                 y={bar.y}
                 width={bar.width}
                 height={bar.height}
-                fill={bar.kind === 'zero' ? 'var(--color-panel-muted)' : 'var(--color-chart-1)'}
+                rx="3"
+                fill={bar.kind === 'zero' ? 'var(--color-panel-muted)' : 'url(#views-bars)'}
               />
             )}
           </g>
@@ -122,7 +131,7 @@ export function ViewsChart({ days, label, unit }: ViewsChartProps) {
         <li>
           <span
             aria-hidden="true"
-            className="mr-1.5 inline-block h-2.5 w-2.5 border border-dashed border-panel-muted"
+            className="mr-1.5 inline-block h-2.5 w-2.5 border border-dashed border-chart-2"
           />
           Día sin dato
         </li>

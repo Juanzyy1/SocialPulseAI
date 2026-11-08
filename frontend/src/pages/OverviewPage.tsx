@@ -73,15 +73,18 @@ function OverviewContent({
             </p>
           )}
           {section.cards.length > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-panel-line bg-panel-line sm:grid-cols-2 xl:grid-cols-4">
               {section.cards.map((card) => (
                 <article
                   key={card.code}
-                  className="rounded-xl border border-panel-line bg-panel-card p-5"
+                  className="bg-panel-card px-4 py-5 sm:px-5 sm:py-6"
                 >
-                  <h3 className="text-sm text-panel-muted">{card.label}</h3>
+                  <div className="flex items-center gap-2">
+                    <span aria-hidden="true" className="h-2 w-2 rounded-full bg-chart-1" />
+                    <h3 className="text-xs font-medium uppercase tracking-[0.12em] text-panel-muted">{card.label}</h3>
+                  </div>
                   <p
-                    className={`mt-2 text-3xl font-semibold ${card.hasValue ? '' : 'text-panel-muted'}`}
+                    className={`mt-3 text-3xl font-semibold tracking-tight ${card.hasValue ? '' : 'text-panel-muted'}`}
                   >
                     {card.valueText}
                   </p>
@@ -100,10 +103,10 @@ function OverviewContent({
         </h2>
         <ul className="space-y-4">
           {rows.map((row) => (
-            <li key={row.id} className="rounded-xl border border-panel-line bg-panel-card p-5">
+            <li key={row.id} className="rounded-2xl border border-panel-line bg-panel-card p-4 sm:p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h3 className="font-semibold">{row.name}</h3>
+                  <h3 className="truncate font-semibold">{row.name}</h3>
                   <p className="mt-1 text-xs text-panel-muted">
                     {row.platformText} · {row.lastSyncText}
                   </p>

@@ -110,6 +110,7 @@ describe('buildMetricCards', () => {
     const card = onlyCard([metricComparison('views', 9, 6)]);
 
     expect(card).toMatchObject({ valueText: '9', hasValue: true, daysWithData: 7 });
+    expect(card.value).toBe(9);
     expect(card.delta).toEqual({
       kind: 'up',
       tone: 'good',
@@ -249,11 +250,12 @@ describe('buildTotals', () => {
       {
         code: 'subscriberCount',
         label: 'Suscriptores',
+        value: 1234,
         valueText: '1.234',
         capturedOn: '22 oct 2026',
         note: 'redondeado',
       },
-      { code: 'videoCount', label: 'Videos', valueText: '1', capturedOn: '22 oct 2026', note: null },
+      { code: 'videoCount', label: 'Videos', value: 1, valueText: '1', capturedOn: '22 oct 2026', note: null },
     ]);
   });
 
