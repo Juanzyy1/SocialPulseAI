@@ -30,6 +30,20 @@
     radial-gradient(ellipse at 12% 32%, rgb(146 92 255 / 0.055), transparent 34rem);
 }
 
+.auth-background {
+  background-color: #11171b;
+  background-image:
+    radial-gradient(ellipse at 10% 12%, rgb(0 229 196 / 0.11), transparent 35rem),
+    radial-gradient(ellipse at 92% 88%, rgb(146 92 255 / 0.10), transparent 38rem),
+    linear-gradient(135deg, #11171b 0%, #171c22 52%, #12191d 100%);
+}
+
+.auth-card {
+  border-color: #2a363b;
+  background-color: rgb(17 24 29 / 0.94);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 0.28);
+}
+
 @keyframes page-enter {
   from {
     opacity: 0;

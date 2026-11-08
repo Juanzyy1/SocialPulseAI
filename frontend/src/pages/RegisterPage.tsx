@@ -49,14 +49,18 @@ export function RegisterPage() {
   }
 
   return (
-    <AuthLayout title="Crea tu cuenta">
-      {failure && <FormAlert>{failure}</FormAlert>}
+    <AuthLayout
+      variant="dark"
+      title="Crea tu cuenta"
+    >
+      {failure && <FormAlert variant="dark">{failure}</FormAlert>}
       <form onSubmit={(event) => void onSubmit(event)} noValidate>
         <TextField
           label="Nombre"
           name="displayName"
           autoComplete="name"
           placeholder="Escribe tu nombre"
+          variant="dark"
           value={form.displayName}
           onChange={(event) => setForm({ ...form, displayName: event.target.value })}
           error={errors.displayName}
@@ -67,6 +71,7 @@ export function RegisterPage() {
           name="email"
           autoComplete="email"
           placeholder="Escribe tu correo"
+          variant="dark"
           value={form.email}
           onChange={(event) => setForm({ ...form, email: event.target.value })}
           error={errors.email}
@@ -76,6 +81,7 @@ export function RegisterPage() {
           name="password"
           autoComplete="new-password"
           placeholder="Crea una contraseña"
+          variant="dark"
           hint={`Entre ${PASSWORD_MIN} y ${PASSWORD_MAX} caracteres.`}
           value={form.password}
           onChange={(event) => setForm({ ...form, password: event.target.value })}
@@ -88,9 +94,10 @@ export function RegisterPage() {
           value={form.inviteCode ?? ''}
           onChange={(event) => setForm({ ...form, inviteCode: event.target.value })}
           error={errors.inviteCode}
+          variant="dark"
         />
         <div className="mb-6">
-          <label className="flex items-start gap-2.5 text-sm">
+          <label className="flex items-start gap-2.5 text-sm text-panel-muted">
             <input
               type="checkbox"
               name="acceptTerms"
@@ -98,34 +105,34 @@ export function RegisterPage() {
               onChange={(event) => setForm({ ...form, acceptTerms: event.target.checked })}
               aria-invalid={errors.acceptTerms ? true : undefined}
               aria-describedby={errors.acceptTerms ? 'terms-error' : undefined}
-              className="mt-0.5 h-4 w-4 accent-brand-600"
+              className="mt-0.5 h-4 w-4 accent-chart-1"
             />
             <span>
               Acepto los{' '}
-              <a href="/terminos" target="_blank" rel="noopener" className="underline">
+              <a href="/terminos" target="_blank" rel="noopener" className="text-panel-text underline decoration-chart-1/60 underline-offset-2 hover:text-chart-1">
                 términos de uso
               </a>{' '}
               y la{' '}
-              <a href="/privacidad" target="_blank" rel="noopener" className="underline">
+              <a href="/privacidad" target="_blank" rel="noopener" className="text-panel-text underline decoration-chart-1/60 underline-offset-2 hover:text-chart-1">
                 política de privacidad
               </a>
             </span>
           </label>
           {errors.acceptTerms && (
-            <p id="terms-error" className="mt-1.5 text-sm text-danger">
+            <p id="terms-error" className="mt-1.5 text-sm text-rose-300">
               {errors.acceptTerms}
             </p>
           )}
         </div>
-        <Button type="submit" loading={submitting} className="w-full">
+        <Button type="submit" loading={submitting} variant="accent" className="w-full">
           Crear cuenta
         </Button>
       </form>
-      <Divider />
-      <GoogleLink />
-      <p className="mt-8 text-center text-sm text-muted">
+      <Divider variant="dark" />
+      <GoogleLink variant="dark" />
+      <p className="mt-8 text-center text-sm text-panel-muted">
         ¿Ya tienes cuenta?{' '}
-        <Link to="/login" className="font-medium text-brand-600 hover:text-brand-700">
+        <Link to="/login" className="font-medium text-chart-1 hover:text-white">
           Inicia sesión
         </Link>
       </p>

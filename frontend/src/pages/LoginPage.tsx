@@ -51,8 +51,11 @@ export function LoginPage() {
   }
 
   return (
-    <AuthLayout title="Inicia sesión">
-      {alert && <FormAlert>{alert}</FormAlert>}
+    <AuthLayout
+      variant="dark"
+      title="Inicia sesión"
+    >
+      {alert && <FormAlert variant="dark">{alert}</FormAlert>}
       <form onSubmit={(event) => void onSubmit(event)} noValidate>
         <TextField
           label="Correo electrónico"
@@ -60,6 +63,7 @@ export function LoginPage() {
           name="email"
           autoComplete="email"
           placeholder="Escribe tu correo"
+          variant="dark"
           value={form.email}
           onChange={(event) => setForm({ ...form, email: event.target.value })}
           error={errors.email}
@@ -69,19 +73,20 @@ export function LoginPage() {
           name="password"
           autoComplete="current-password"
           placeholder="Escribe tu contraseña"
+          variant="dark"
           value={form.password}
           onChange={(event) => setForm({ ...form, password: event.target.value })}
           error={errors.password}
         />
-        <Button type="submit" loading={submitting} className="w-full">
+        <Button type="submit" loading={submitting} variant="accent" className="w-full">
           Entrar
         </Button>
       </form>
-      <Divider />
-      <GoogleLink />
-      <p className="mt-8 text-center text-sm text-muted">
+      <Divider variant="dark" />
+      <GoogleLink variant="dark" />
+      <p className="mt-8 text-center text-sm text-panel-muted">
         ¿No tienes cuenta?{' '}
-        <Link to="/registro" className="font-medium text-brand-600 hover:text-brand-700">
+        <Link to="/registro" className="font-medium text-chart-1 hover:text-white">
           Crear cuenta
         </Link>
       </p>
