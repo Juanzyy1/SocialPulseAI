@@ -76,6 +76,7 @@ describe('buildPlatformSections', () => {
           {
             id: 'cuenta-1',
             name: 'Canal',
+            capturedOn: '22 oct 2026',
             totals: [
               {
                 code: 'subscriberCount',
@@ -212,13 +213,14 @@ describe('buildPlatformSections', () => {
 
     expect(section).toMatchObject({
       platform: 'TIKTOK',
-      accountsText: '2 cuentas · totales capturados por perfil',
+      accountsText: '2 cuentas',
       notice: null,
       cards: [],
       snapshots: [
         {
           id: 'tt-1',
           name: 'Perfil Uno',
+          capturedOn: '22 oct 2026',
           totals: [
             { label: 'Seguidores', valueText: '1.234' },
             { label: 'Vistas de videos recientes', valueText: '5.600' },
@@ -227,6 +229,7 @@ describe('buildPlatformSections', () => {
         {
           id: 'tt-2',
           name: 'Perfil Dos',
+          capturedOn: '22 oct 2026',
           totals: [{ label: 'Seguidores', valueText: '5' }],
         },
       ],

@@ -96,47 +96,49 @@ function OverviewContent({
           )}
           {section.snapshots.length > 0 && (
             <div className="mt-4">
-              <p className="mb-3 text-xs text-panel-muted">
-                Totales capturados por perfil; no se suman entre cuentas ni dependen del periodo.
+              <p className="mb-3 text-sm text-panel-muted">
+                {section.platform === 'TIKTOK'
+                  ? 'Totales acumulados al sincronizar; las métricas de videos cubren hasta 20 videos públicos recientes.'
+                  : 'Totales capturados por cuenta; no se suman entre perfiles.'}
               </p>
-              <ul className="grid gap-3 xl:grid-cols-2">
+              <ul className="space-y-4">
                 {section.snapshots.map((snapshot) => (
                   <li
                     key={snapshot.id}
-                    className="rounded-2xl border border-panel-line bg-panel-card p-4 sm:p-5"
+                    className="rounded-2xl border border-panel-line bg-panel-card p-4 sm:p-5 lg:p-6"
                   >
-                    <h3 className="mb-4 truncate text-sm font-semibold">{snapshot.name}</h3>
-                    <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                      <h3 className="truncate text-base font-semibold">{snapshot.name}</h3>
+                      {snapshot.capturedOn && (
+                        <p className="text-xs text-panel-muted">Actualizado el {snapshot.capturedOn}</p>
+                      )}
+                    </div>
+                    <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
                       {snapshot.totals.map((total, index) => (
                         <div
                           key={total.code}
-                          className="min-w-0 border-l-2 pl-3"
+                          className="min-w-0 rounded-xl border border-panel-line bg-panel px-3 py-4 sm:px-4"
                           style={{
-                            borderColor: [
+                            borderTopColor: [
                               'var(--color-chart-1)',
                               'var(--color-chart-2)',
                               'var(--color-chart-3)',
                               'var(--color-chart-4)',
                               'var(--color-chart-5)',
                             ][index % 5],
+                            borderTopWidth: '2px',
                           }}
                         >
-                          <dt className="truncate text-xs text-panel-muted">{total.label}</dt>
-                          <dd className="mt-1 truncate text-xl font-semibold tracking-tight">
+                          <dt className="min-h-8 text-xs leading-4 text-panel-muted">{total.label}</dt>
+                          <dd className="mt-2 truncate text-2xl font-semibold tracking-tight sm:text-3xl">
                             {total.valueText}
                           </dd>
-                          <dd className="mt-1 text-[11px] text-panel-muted">al {total.capturedOn}</dd>
+                          {!snapshot.capturedOn && (
+                            <dd className="mt-2 text-[11px] text-panel-muted">al {total.capturedOn}</dd>
+                          )}
                         </div>
                       ))}
                     </dl>
-                    {snapshot.totals.some((total) => total.note) && (
-                      <p className="mt-3 text-xs leading-relaxed text-panel-muted">
-                        {snapshot.totals
-                          .filter((total) => total.note)
-                          .map((total) => total.note)
-                          .join(' ')}
-                      </p>
-                    )}
                   </li>
                 ))}
               </ul>

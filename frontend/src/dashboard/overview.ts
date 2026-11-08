@@ -37,6 +37,7 @@ export interface PlatformSectionModel {
 export interface AccountSnapshotModel {
   id: string;
   name: string;
+  capturedOn: string | null;
   totals: Array<{
     code: string;
     label: string;
@@ -63,11 +64,15 @@ export function buildPlatformSections(
         note: total.note,
       }));
       if (totals.length === 0) return [];
-      return [{
-        id: account.id,
-        name: account.displayName?.trim() || 'Cuenta sin nombre',
-        totals,
-      }];
+      const captureDates = new Set(totals.map((total) => total.capturedOn));
+      return [
+        {
+          id: account.id,
+          name: account.displayName?.trim() || 'Cuenta sin nombre',
+          capturedOn: captureDates.size === 1 ? totals[0]?.capturedOn ?? null : null,
+          totals,
+        },
+      ];
     });
     const hasDailyMetrics = platform.metrics.length > 0;
     const snapshotOnly = !hasDailyMetrics && snapshots.length > 0;
@@ -76,11 +81,7 @@ export function buildPlatformSections(
       title: platformLabel(platform.platform),
       accountsText:
         plural(platform.accountCount, 'cuenta', 'cuentas') +
-        (snapshotOnly
-          ? ' · totales capturados por perfil'
-          : withoutData > 0
-            ? ` · ${platform.accountsWithData} con datos`
-            : ''),
+        (withoutData > 0 && !snapshotOnly ? ` · ${platform.accountsWithData} con datos` : ''),
       notice:
         platform.accountsWithData === 0
           ? snapshotOnly
